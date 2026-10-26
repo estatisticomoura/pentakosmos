@@ -1,0 +1,207 @@
+{
+  "params": {
+    "buy_ratio": 0.7945,
+    "demand_base": 1.2753,
+    "demand_pts": 0.3935,
+    "demand_res": 1.7575,
+    "engine_w": 0.8653,
+    "goal_effort_off": 3.2086,
+    "goal_pts_off": 0.45,
+    "goal_reserved": 1.0137,
+    "gold_gain": 2.0,
+    "hoard": 0.0728,
+    "noble_rest": 0.6421,
+    "noise": 0.01,
+    "plan_base_engine": 0.99,
+    "plan_color_w": 2.4641,
+    "plan_demand_w": 0.9698,
+    "plan_every": 2,
+    "plan_goal_bonus": 1.091,
+    "plan_noble_other": 1.0,
+    "plan_noble_w": 0.812,
+    "plan_reserve_turns": 2,
+    "plan_switch": 1.4563,
+    "scarcity_pen": 4.0,
+    "tok_w2": 0.6296,
+    "tok_w3": 0.4379
+  },
+  "vantagem_sobre_normal_pp": 6.54,
+  "geracoes": 30,
+  "modo": "classico",
+  "comparacao_com_geral": null,
+  "generalizacao": {
+    "2 jogadores": {
+      "pp": 5.35,
+      "ic": 3.07,
+      "partidas": 1000
+    },
+    "3 jogadores": {
+      "pp": 7.72,
+      "ic": 3.05,
+      "partidas": 1000
+    },
+    "4 jogadores": {
+      "pp": 6.7,
+      "ic": 2.88,
+      "partidas": 1000
+    },
+    "5 jogadores": {
+      "pp": 6.4,
+      "ic": 2.73,
+      "partidas": 1000
+    }
+  },
+  "historico": [
+    {
+      "geracao": 1,
+      "melhor": 2.06666666666667,
+      "media": -1.118749999999998
+    },
+    {
+      "geracao": 2,
+      "melhor": 2.766666666666677,
+      "media": 0.4750000000000047
+    },
+    {
+      "geracao": 3,
+      "melhor": 4.016666666666659,
+      "media": 1.0385416666666696
+    },
+    {
+      "geracao": 4,
+      "melhor": 3.1166666666666925,
+      "media": -0.8114583333333227
+    },
+    {
+      "geracao": 5,
+      "melhor": 3.3666666666666667,
+      "media": 0.0760416666666735
+    },
+    {
+      "geracao": 6,
+      "melhor": 4.2666666666666675,
+      "media": 1.8947916666666773
+    },
+    {
+      "geracao": 7,
+      "melhor": 4.316666666666653,
+      "media": 1.5510416666666667
+    },
+    {
+      "geracao": 8,
+      "melhor": 3.8166666666666855,
+      "media": 1.0250000000000077
+    },
+    {
+      "geracao": 9,
+      "melhor": 3.8166666666666655,
+      "media": 0.9791666666666716
+    },
+    {
+      "geracao": 10,
+      "melhor": 2.9666666666666233,
+      "media": 0.3916666666666738
+    },
+    {
+      "geracao": 11,
+      "melhor": 5.116666666666612,
+      "media": 2.3364583333333364
+    },
+    {
+      "geracao": 12,
+      "melhor": 3.5166666666666884,
+      "media": 0.5666666666666742
+    },
+    {
+      "geracao": 13,
+      "melhor": 4.666666666666631,
+      "media": 1.5406250000000066
+    },
+    {
+      "geracao": 14,
+      "melhor": 5.966666666666604,
+      "media": 2.2416666666666654
+    },
+    {
+      "geracao": 15,
+      "melhor": 6.266666666666651,
+      "media": 4.163541666666652
+    },
+    {
+      "geracao": 16,
+      "melhor": 5.2166666666666375,
+      "media": 2.2395833333333393
+    },
+    {
+      "geracao": 17,
+      "melhor": 4.966666666666647,
+      "media": 2.8854166666666656
+    },
+    {
+      "geracao": 18,
+      "melhor": 5.766666666666603,
+      "media": 3.116666666666665
+    },
+    {
+      "geracao": 19,
+      "melhor": 5.61666666666662,
+      "media": 2.7197916666666635
+    },
+    {
+      "geracao": 20,
+      "melhor": 4.766666666666635,
+      "media": 3.1291666666666638
+    },
+    {
+      "geracao": 21,
+      "melhor": 6.216666666666633,
+      "media": 3.8885416666666504
+    },
+    {
+      "geracao": 22,
+      "melhor": 8.316666666666645,
+      "media": 4.481249999999978
+    },
+    {
+      "geracao": 23,
+      "melhor": 6.316666666666596,
+      "media": 4.151041666666657
+    },
+    {
+      "geracao": 24,
+      "melhor": 7.666666666666614,
+      "media": 4.10104166666666
+    },
+    {
+      "geracao": 25,
+      "melhor": 6.266666666666625,
+      "media": 3.2906249999999946
+    },
+    {
+      "geracao": 26,
+      "melhor": 4.916666666666605,
+      "media": 2.3385416666666736
+    },
+    {
+      "geracao": 27,
+      "melhor": 4.766666666666651,
+      "media": 2.5916666666666797
+    },
+    {
+      "geracao": 28,
+      "melhor": 5.766666666666626,
+      "media": 4.004166666666647
+    },
+    {
+      "geracao": 29,
+      "melhor": 5.91666666666663,
+      "media": 3.532291666666673
+    },
+    {
+      "geracao": 30,
+      "melhor": 6.016666666666596,
+      "media": 3.0093750000000017
+    }
+  ],
+  "data": "2026-10-25 19:36"
+}

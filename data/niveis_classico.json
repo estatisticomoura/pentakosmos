@@ -1,0 +1,91 @@
+{
+  "muito_dificil": "mista",
+  "dificil": "tatica",
+  "intermediaria": "evoluida",
+  "torneio": {
+    "partidas_por_formato": 2000,
+    "resultado": {
+      "duelos": {
+        "evoluida_x_tatica": {
+          "vitorias": 0.3884730538922156,
+          "ic": 0.03696060257030926
+        },
+        "evoluida_x_mista": {
+          "vitorias": 0.3656156156156156,
+          "ic": 0.03645604439722562
+        },
+        "tatica_x_evoluida": {
+          "vitorias": 0.6115269461077845,
+          "ic": 0.03696060257030927
+        },
+        "tatica_x_mista": {
+          "vitorias": 0.5075075075075075,
+          "ic": 0.037941375298333524
+        },
+        "mista_x_evoluida": {
+          "vitorias": 0.6343843843843844,
+          "ic": 0.03645604439722562
+        },
+        "mista_x_tatica": {
+          "vitorias": 0.4924924924924925,
+          "ic": 0.037941375298333524
+        },
+        "evoluida": {
+          "acima_do_esperado": -0.12293853073463268,
+          "ic": 0.02595539583039663
+        },
+        "tatica": {
+          "acima_do_esperado": 0.0595952023988006,
+          "ic": 0.02662000103815898
+        },
+        "mista": {
+          "acima_do_esperado": 0.06343843843843844,
+          "ic": 0.02657358101146201
+        }
+      },
+      "trio": {
+        "evoluida": {
+          "acima_do_esperado": -0.0738333333333333,
+          "ic": 0.019154187250954354
+        },
+        "tatica": {
+          "acima_do_esperado": 0.031416666666666704,
+          "ic": 0.021027682413043813
+        },
+        "mista": {
+          "acima_do_esperado": 0.04241666666666671,
+          "ic": 0.0211349997316496
+        }
+      },
+      "quarteto": {
+        "evoluida": {
+          "acima_do_esperado": -0.07725,
+          "ic": 0.016506724142632313
+        },
+        "tatica": {
+          "acima_do_esperado": 0.083,
+          "ic": 0.020601990918717235
+        },
+        "mista": {
+          "acima_do_esperado": 0.1055,
+          "ic": 0.020914844755952237
+        }
+      },
+      "calibracao": {
+        "evoluida": {
+          "vantagem_sobre_normal": 0.059131736526946116,
+          "ic": 0.03605206698428009
+        },
+        "tatica": {
+          "vantagem_sobre_normal": 0.21696696696696696,
+          "ic": 0.03753175198025432
+        },
+        "mista": {
+          "vantagem_sobre_normal": 0.21546546546546547,
+          "ic": 0.03767773320326698
+        }
+      }
+    },
+    "data": "2026-10-25 19:53"
+  }
+}

@@ -1,0 +1,15 @@
+[font_size=26][color=#f0c96a][b]Opponents[/b][/color][/font_size]
+The computer opponents are named after characters from Plato's dialogues. From the gentlest to the strongest:
+
+[b]Lysis[/b] — plays for the immediate gain: each turn it takes what gives the best value for the effort.
+
+[b]Crito[/b] — a strategist: it chooses a path (level 2 and 3 cards plus a philosopher), reserves early and revises its plan along the way.
+
+[b]Phaedrus, Theaetetus and Timaeus[/b] — the three strongest. They were not ranked by hand: three candidates played a tournament of thousands of games against each other, and the result decided who is who.
+• The [b]evolved[/b] opponent is the strategist with its 24 parameters tuned by a genetic algorithm: 16 variants per generation, 1,000 games each, over 30 generations, followed by a final and a validation on games it had never seen.
+• The [b]tactical[/b] opponent adds surgical denial (it reserves or takes what you need most when you are close to a card or a philosopher) and, near the end, simulates the rest of the game for each candidate move, drawing the hidden cards at random — it never peeks.
+• The [b]mixed[/b] opponent is the tactical one using the evolved parameters.
+
+In the current tournaments, Timaeus is the mixed opponent, Theaetetus the tactical one and Phaedrus the evolved one. There are separate trainings for the Pentakosmos rules, the Legacy rules and any other combination; the files are in the data folder, and anyone can train them again with the tools described in the project documentation.
+
+They are strong against other programs, but people find new paths — if you discover a way to beat Timaeus every time, please tell us!

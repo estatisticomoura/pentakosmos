@@ -1,0 +1,12 @@
+# Godot
+.godot/
+*.translation
+export_credentials.cfg
+android/build/
+
+# builds and temporary files
+build/
+tests/capturas/*.png
+tools/__pycache__/
+tools/evolucao_estado*.json
+*.tmp
