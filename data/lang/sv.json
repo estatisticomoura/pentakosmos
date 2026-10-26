@@ -180,5 +180,12 @@
  "AI": "AI",
  "{n}/{lim} tokens": "{n}/{lim} marker",
  "Opponents": "Motståndare",
- "Back": "Tillbaka"
+ "Back": "Tillbaka",
+ "Playlist": "Spellista",
+ "Calm": "Lugn",
+ "Lively": "Livlig",
+ "All (shuffled)": "Alla (slumpvis)",
+ "Every track was synthesized for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and the GeneralUser GS sound bank (by S. Christian Collins). No commercial recording was used.": "Alla spår har syntetiserats för Pentakosmos från verk i public domain, med fritt licensierade noter från Mutopia Project och ljudbanken GeneralUser GS (av S. Christian Collins). Ingen kommersiell inspelning har använts.",
+ "score": "noter",
+ "recording": "inspelning"
 }

@@ -180,5 +180,12 @@
  "AI": "IA",
  "{n}/{lim} tokens": "{n}/{lim} gettoni",
  "Opponents": "Avversari",
- "Back": "Indietro"
+ "Back": "Indietro",
+ "Playlist": "Playlist",
+ "Calm": "Calma",
+ "Lively": "Vivace",
+ "All (shuffled)": "Tutte (casuale)",
+ "Every track was synthesized for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and the GeneralUser GS sound bank (by S. Christian Collins). No commercial recording was used.": "Tutti i brani sono stati sintetizzati per Pentakosmos da composizioni di pubblico dominio, con partiture a licenza libera del Mutopia Project e la banca suoni GeneralUser GS (di S. Christian Collins). Non è stata usata alcuna registrazione commerciale.",
+ "score": "partitura",
+ "recording": "registrazione"
 }

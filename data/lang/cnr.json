@@ -180,5 +180,12 @@
  "AI": "VI",
  "{n}/{lim} tokens": "{n}/{lim} žetona",
  "Opponents": "Protivnici",
- "Back": "Nazad"
+ "Back": "Nazad",
+ "Playlist": "Lista pjesama",
+ "Calm": "Mirno",
+ "Lively": "Živahno",
+ "All (shuffled)": "Sve (nasumično)",
+ "Every track was synthesized for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and the GeneralUser GS sound bank (by S. Christian Collins). No commercial recording was used.": "Sve kompozicije sintetizovane su za Pentakosmos iz djela u javnom vlasništvu, uz note pod slobodnom licencom iz projekta Mutopia i zvučnu banku GeneralUser GS (S. Christian Collins). Nije korišćen nijedan komercijalni snimak.",
+ "score": "note",
+ "recording": "snimak"
 }

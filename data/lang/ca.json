@@ -180,5 +180,12 @@
  "AI": "IA",
  "{n}/{lim} tokens": "{n}/{lim} fitxes",
  "Opponents": "Rivals",
- "Back": "Enrere"
+ "Back": "Enrere",
+ "Playlist": "Llista",
+ "Calm": "Tranquil·la",
+ "Lively": "Animada",
+ "All (shuffled)": "Totes (aleatori)",
+ "Every track was synthesized for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and the GeneralUser GS sound bank (by S. Christian Collins). No commercial recording was used.": "Totes les peces s'han sintetitzat per a Pentakosmos a partir d'obres de domini públic, amb partitures de llicència lliure del Mutopia Project i el banc de sons GeneralUser GS (de S. Christian Collins). No s'ha fet servir cap enregistrament comercial.",
+ "score": "partitura",
+ "recording": "enregistrament"
 }

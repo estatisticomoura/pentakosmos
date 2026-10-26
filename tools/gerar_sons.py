@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Gera os efeitos sonoros e a musica ambiente PROVISORIOS do jogo.
+"""Gera os efeitos sonoros do jogo (a musica e gerada por tools/musica/gerar_musica.py).
 
 Uso: python3 tools/gerar_sons.py   (precisa de numpy)
-Saida: assets/sfx/*.wav e assets/music/ambiente_provisorio.wav
+Saida: assets/sfx/*.wav
 
 Para usar sons proprios, basta colocar arquivos .ogg com o mesmo nome em
 assets/sfx/ (ex.: buy.ogg) - eles tem prioridade sobre os .wav provisorios.
@@ -106,54 +106,6 @@ def sfx():
     save(f"{d}/discard.wav", np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-14 * tt), peak=0.3)
 
 
-def music():
-    sr = 22050
-    bar = 4.0
-    chords = [(57, 60, 64), (53, 57, 60), (48, 52, 55), (55, 59, 62)]  # Am F C G
-    total = bar * len(chords) * 4
-    n = int(total * sr)
-    out = np.zeros(n)
-    t_bar = np.arange(int(bar * sr)) / sr
-    rng = np.random.default_rng(7)
-    for k in range(int(total / bar)):
-        ch = chords[k % len(chords)]
-        start = int(k * bar * sr)
-        env = np.minimum(1, t_bar / 1.2) * np.minimum(1, (bar - t_bar) / 1.2) * 0.9 + 0.1
-        pad = np.zeros_like(t_bar)
-        for m in ch:
-            for det in (-0.12, 0.12):
-                f = note(m + 12) * 2 ** (det / 12)
-                pad += (np.sin(2 * np.pi * f * t_bar) + 0.2 * np.sin(2 * np.pi * 3 * f * t_bar)) / 6
-        bass = np.sin(2 * np.pi * note(ch[0] - 12) * t_bar) * 0.5
-        seg = (pad * 0.55 + bass * 0.35) * env
-        out[start:start + len(seg)] += seg[: n - start]
-        # arpejo suave
-        for step in range(8):
-            if rng.random() < 0.7:
-                m = ch[step % 3] + 24 + (12 if rng.random() < 0.25 else 0)
-                b = bell(note(m), 1.6, 2.5, sr) * 0.13
-                i = start + int(step * bar / 8 * sr)
-                j = min(n, i + len(b))
-                out[i:j] += b[: j - i]
-    out = lowpass(out, 0.35)
-    # reverberacao simples (atrasos com realimentacao)
-    wet = np.zeros_like(out)
-    for dly, g in ((0.031, 0.5), (0.047, 0.45), (0.071, 0.4), (0.113, 0.35)):
-        d = int(dly * sr)
-        buf = np.copy(out)
-        for i in range(d, n):
-            buf[i] += g * buf[i - d]
-        wet += buf
-    mixd = out * 0.6 + wet / 4 * 0.6
-    # emenda o final no inicio para o loop ficar continuo
-    x = int(2.0 * sr)
-    fade = np.linspace(0, 1, x)
-    mixd[:x] = mixd[:x] * fade + mixd[-x:] * (1 - fade)
-    mixd = mixd[:-x]
-    save(os.path.join(ROOT, "assets", "music", "ambiente_provisorio.wav"), mixd, sr=sr, peak=0.5)
-
-
 if __name__ == "__main__":
     sfx()
-    music()
     print("sons gerados")

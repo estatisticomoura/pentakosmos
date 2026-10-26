@@ -25,6 +25,8 @@ func _ready() -> void:
 	resized.connect(_layout)
 	_layout()
 	show_menu()
+	_build_now_playing()
+	Audio.track_started.connect(_on_track_started)
 	Audio.start_music()
 
 
@@ -80,6 +82,33 @@ func _set_screen(s: Control) -> void:
 	stage.add_child(s)
 	s.modulate.a = 0.0
 	create_tween().tween_property(s, "modulate:a", 1.0, 0.3)
+
+
+var _np: Label
+var _np_tween: Tween
+
+
+func _build_now_playing() -> void:
+	## Aviso discreto com o nome da faixa que comecou a tocar.
+	_np = UITheme.label("", 11, Color(1, 0.92, 0.75))
+	_np.add_theme_constant_override("outline_size", 4)
+	_np.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+	_np.position = Vector2(14, 705)
+	_np.size = Vector2(900, 15)
+	_np.modulate.a = 0.0
+	_np.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stage.add_child(_np)
+
+
+func _on_track_started(info: Dictionary) -> void:
+	_np.text = "♪  %s — %s" % [info["title"], info["composer"]]
+	stage.move_child(_np, stage.get_child_count() - 1)
+	if _np_tween:
+		_np_tween.kill()
+	_np_tween = create_tween()
+	_np_tween.tween_property(_np, "modulate:a", 0.95, 0.6)
+	_np_tween.tween_interval(5.0)
+	_np_tween.tween_property(_np, "modulate:a", 0.0, 1.2)
 
 
 func show_menu() -> void:

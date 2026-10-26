@@ -125,7 +125,22 @@ Tudo é desenhado em código, e o jogo roda sem nenhuma imagem. Para usar arte p
 - `assets/cards/pentakosmos/` e `assets/cards/legacy/` — um arquivo por carta (os nomes estão em `assets/cards/CARD_LIST.csv`) e `back_l1.png` … `back_l3.png` para os versos;
 - `assets/philosophers/philosopher_1.png` … `philosopher_10.png`.
 
-A faixa com o elemento, os pontos e os custos é desenhada por cima da arte; se as suas cartas já trouxerem essas informações, mude `DRAW_INFO_OVER_ART` para `false` em `scripts/ui/card_view.gd`. Efeitos sonoros: `assets/sfx/<nome>.ogg` (têm prioridade sobre os `.wav` gerados); música: `assets/music/trilha_01.ogg` … `trilha_20.ogg`. `python3 tools/gerar_sons.py` gera de novo os sons provisórios.
+A faixa com o elemento, os pontos e os custos é desenhada por cima da arte; se as suas cartas já trouxerem essas informações, mude `DRAW_INFO_OVER_ART` para `false` em `scripts/ui/card_view.gd`. Efeitos sonoros: `assets/sfx/<nome>.ogg` (têm prioridade sobre os `.wav` gerados); `python3 tools/gerar_sons.py` gera de novo os efeitos provisórios.
+
+### Música
+
+19 peças clássicas, sintetizadas para o jogo a partir de composições em domínio público — nenhuma gravação comercial é usada. As partituras vêm do [Mutopia Project](https://www.mutopiaproject.org) e os instrumentos do banco de sons [GeneralUser GS](https://www.schristiancollins.com/generaluser.php). No menu inicial (e no menu de pausa) o jogador escolhe a playlist — **Calma**, **Animada**, **Todas** ou uma peça só — e o nome de cada peça aparece quando ela começa.
+
+| Elemento | Peça |
+|---|---|
+| Ar | Bach, *Air* (Suíte Orquestral nº 3) |
+| Água | Debussy, *Arabesque nº 1* |
+| Fogo | Handel, *La Réjouissance* (Música para os Reais Fogos de Artifício) |
+| Terra | Grieg, *Na Gruta do Rei da Montanha*; Mussorgsky, *Uma Noite no Monte Calvo* |
+| Éter | Holst, *Thaxted* (o tema de "Júpiter"); Debussy, *Clair de lune* |
+| Esfera | Johann Strauss II, *O Danúbio Azul* |
+
+Também: as três *Gymnopédies* e as três *Gnossiennes* de Satie, a *Ária das Variações Goldberg*, o *Prelúdio em Dó* e a *Tocata e Fuga em ré menor* de Bach, o *Noturno op. 9 nº 2* de Chopin e o *Verão* de Vivaldi. Os créditos e licenças completos estão no jogo (Processo criativo → Música) e em `data/music.json`. `python3 tools/musica/gerar_musica.py` gera de novo todas as faixas a partir das partituras.
 
 ## Estrutura
 

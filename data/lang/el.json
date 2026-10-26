@@ -180,5 +180,12 @@
  "AI": "ΤΝ",
  "{n}/{lim} tokens": "{n}/{lim} μάρκες",
  "Opponents": "Αντίπαλοι",
- "Back": "Πίσω"
+ "Back": "Πίσω",
+ "Playlist": "Λίστα",
+ "Calm": "Ήρεμη",
+ "Lively": "Ζωηρή",
+ "All (shuffled)": "Όλα (τυχαία)",
+ "Every track was synthesized for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and the GeneralUser GS sound bank (by S. Christian Collins). No commercial recording was used.": "Όλα τα κομμάτια συντέθηκαν ηλεκτρονικά για το Pentakosmos από έργα κοινού κτήματος, με ελεύθερες παρτιτούρες του Mutopia Project και την τράπεζα ήχων GeneralUser GS (του S. Christian Collins). Δεν χρησιμοποιήθηκε καμία εμπορική ηχογράφηση.",
+ "score": "παρτιτούρα",
+ "recording": "ηχογράφηση"
 }

@@ -180,5 +180,12 @@
  "AI": "ШІ",
  "{n}/{lim} tokens": "{n}/{lim} фішок",
  "Opponents": "Суперники",
- "Back": "Назад"
+ "Back": "Назад",
+ "Playlist": "Плейлист",
+ "Calm": "Спокійна",
+ "Lively": "Жвава",
+ "All (shuffled)": "Усі (вперемішку)",
+ "Every track was synthesized for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and the GeneralUser GS sound bank (by S. Christian Collins). No commercial recording was used.": "Усі треки синтезовано для Pentakosmos за творами в суспільному надбанні, з нотами під вільною ліцензією з Mutopia Project і звуковим банком GeneralUser GS (автор S. Christian Collins). Комерційні записи не використовувалися.",
+ "score": "ноти",
+ "recording": "запис"
 }

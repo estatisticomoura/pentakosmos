@@ -23,7 +23,7 @@ IDS = {"classico", "house", "gems_mode", "gold_mode", "take2_min", "market5", "e
        "noble_mode", "fixo", "decrescente", "noble_points_mode", "deck", "oficial", "caio", "hand_limit",
        "target", "color_win", "humano", "facil", "normal", "intermediaria", "dificil", "tatica",
        "evoluida", "muito_dificil", "mista", "gemas", "solidos", "poligonal", "rules", "story", "rules_pentakosmos",
-       "rules_legacy", "opponents", "Pentakosmos", "Legacy", ""}
+       "rules_legacy", "opponents", "music", "Pentakosmos", "Legacy", ""}
 LIT = r'"((?:[^"\\]|\\.)*)"'
 
 

@@ -8,7 +8,7 @@ signal back
 
 const PAGES := {
 	"rules": [["Pentakosmos", "rules_pentakosmos"], ["Legacy", "rules_legacy"], ["Opponents", "opponents"]],  # tr
-	"story": [["Creative process", "story"]],  # tr
+	"story": [["Creative process", "story"], ["Music", "music"]],  # tr
 }
 
 var which := "rules"
@@ -67,8 +67,22 @@ func _open(i: int) -> void:
 
 
 static func load_text(page: String) -> String:
+	if page == "music":
+		return music_credits()
 	for code in [L.code, "en"]:
 		var path := "res://data/texts/%s_%s.txt" % [page, code]
 		if FileAccess.file_exists(path):
 			return FileAccess.get_file_as_string(path)
 	return ""
+
+
+static func music_credits() -> String:
+	## Creditos gerados a partir de data/music.json (nomes proprios; o texto curto e traduzido).
+	var out := "[font_size=26][color=#f0c96a][b]%s[/b][/color][/font_size]\n" % L.t("Music")
+	out += L.t("Every track was synthesized for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and the GeneralUser GS sound bank (by S. Christian Collins). No commercial recording was used.") + "\n\n"
+	for t in Audio.tracks:
+		out += "[b]%s[/b] — %s (%s)\n" % [t["title"], t["composer"], t["year"]]
+		out += "[color=#9aa0b0]%s · %s: %s · %s: %s[/color]\n" % [t["score"], L.t("score"), t["score_license"],
+			L.t("recording"), t["recording_license"]]
+		out += "[url=%s][color=#8fb8ff]%s[/color][/url]\n\n" % [t["score_url"], t["score_url"].replace("https://", "")]
+	return out

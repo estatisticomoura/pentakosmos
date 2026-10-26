@@ -1,8 +1,11 @@
 extends Node
 ## Gerenciador de audio (autoload "Audio").
 ## Efeitos: res://assets/sfx/<nome>.ogg (personalizado) ou <nome>.wav (provisorio).
-## Musica: res://assets/music/trilha_01.ogg ... trilha_20.ogg, tocadas em sequencia.
-## Sem trilhas proprias, toca a ambientacao provisoria (ambiente_provisorio.wav).
+## Musica: as faixas listadas em res://data/music.json (gravadas a partir de partituras
+## em dominio publico; veja tools/musica/). Modos: "calm", "lively", "all", "off"
+## ou "track:<id>" (uma faixa so, repetida).
+
+signal track_started(info: Dictionary)
 
 const SFX := ["click", "select", "token", "chip", "buy", "reserve", "noble", "error", "turn", "win", "discard"]
 const POOL := 16
@@ -11,8 +14,10 @@ var _streams := {}
 var _pool: Array = []
 var _next := 0
 var _music: AudioStreamPlayer
-var _tracks: Array = []
-var _track_i := 0
+var tracks: Array = []        # registros de data/music.json
+var mode := "all"
+var current: Dictionary = {}
+var _queue: Array = []
 
 
 func _ready() -> void:
@@ -33,13 +38,14 @@ func _ready() -> void:
 	_music = AudioStreamPlayer.new()
 	_music.bus = "Music"
 	add_child(_music)
-	_music.finished.connect(_on_music_finished)
-	for i in range(1, 21):
-		var path := "res://assets/music/trilha_%02d.ogg" % i
-		if ResourceLoader.exists(path):
-			_tracks.append(path)
-	if _tracks.is_empty() and ResourceLoader.exists("res://assets/music/ambiente_provisorio.wav"):
-		_tracks.append("res://assets/music/ambiente_provisorio.wav")
+	_music.finished.connect(_next_track)
+	if FileAccess.file_exists("res://data/music.json"):
+		var data = JSON.parse_string(FileAccess.get_file_as_string("res://data/music.json"))
+		if data is Array:
+			for t in data:
+				if ResourceLoader.exists(t["file"]):
+					tracks.append(t)
+	mode = str(Store.get_value("audio", "playlist", "all"))
 	set_volume("Music", Store.get_value("audio", "music", 0.6))
 	set_volume("SFX", Store.get_value("audio", "sfx", 0.8))
 
@@ -64,16 +70,45 @@ func play(sfx_name: String, pitch_var := 0.06, volume_db := 0.0) -> void:
 
 
 func start_music() -> void:
-	if _tracks.is_empty() or _music.playing:
+	if _music.playing or mode == "off":
 		return
-	_music.stream = load(_tracks[_track_i])
-	_music.play()
+	_next_track()
 
 
-func _on_music_finished() -> void:
-	_track_i = (_track_i + 1) % _tracks.size()
-	_music.stream = load(_tracks[_track_i])
+func set_mode(m: String) -> void:
+	## Troca a playlist e comeca imediatamente.
+	mode = m
+	Store.set_value("audio", "playlist", m)
+	_queue = []
+	_music.stop()
+	current = {}
+	if m != "off":
+		_next_track()
+
+
+func _pool_for(m: String) -> Array:
+	if m.begins_with("track:"):
+		return tracks.filter(func(t): return t["id"] == m.substr(6))
+	if m == "all":
+		return tracks.duplicate()
+	return tracks.filter(func(t): return t["playlist"] == m)
+
+
+func _next_track() -> void:
+	if mode == "off" or tracks.is_empty():
+		return
+	if _queue.is_empty():
+		_queue = _pool_for(mode)
+		if _queue.is_empty():
+			return
+		_queue.shuffle()
+		# nao repete a ultima faixa logo em seguida
+		if _queue.size() > 1 and not current.is_empty() and _queue[0]["id"] == current["id"]:
+			_queue.push_back(_queue.pop_front())
+	current = _queue.pop_front()
+	_music.stream = load(current["file"])
 	_music.play()
+	track_started.emit(current)
 
 
 func set_volume(bus_name: String, linear: float) -> void:

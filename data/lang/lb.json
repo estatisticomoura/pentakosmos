@@ -180,5 +180,12 @@
  "AI": "KI",
  "{n}/{lim} tokens": "{n}/{lim} Jetonen",
  "Opponents": "Géigner",
- "Back": "Zréck"
+ "Back": "Zréck",
+ "Playlist": "Playlist",
+ "Calm": "Roueg",
+ "Lively": "Lieweg",
+ "All (shuffled)": "All (zoufälleg)",
+ "Every track was synthesized for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and the GeneralUser GS sound bank (by S. Christian Collins). No commercial recording was used.": "All d'Stécker goufe fir Pentakosmos aus gemengfräie Kompositioune synthetiséiert, mat fräi lizenzéierten Noten vum Mutopia Project an der Klangbank GeneralUser GS (vum S. Christian Collins). Et gouf keng kommerziell Opnam benotzt.",
+ "score": "Noten",
+ "recording": "Opnam"
 }

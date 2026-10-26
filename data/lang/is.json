@@ -180,5 +180,12 @@
  "AI": "Gervigreind",
  "{n}/{lim} tokens": "{n}/{lim} peð",
  "Opponents": "Andstæðingar",
- "Back": "Til baka"
+ "Back": "Til baka",
+ "Playlist": "Lagalisti",
+ "Calm": "Róleg",
+ "Lively": "Fjörug",
+ "All (shuffled)": "Öll (af handahófi)",
+ "Every track was synthesized for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and the GeneralUser GS sound bank (by S. Christian Collins). No commercial recording was used.": "Öll lögin voru hljóðgervð fyrir Pentakosmos úr verkum í almenningseign, með frjálst leyfðum nótum frá Mutopia Project og hljóðsafninu GeneralUser GS (eftir S. Christian Collins). Engin útgefin hljóðritun var notuð.",
+ "score": "nótur",
+ "recording": "hljóðritun"
 }

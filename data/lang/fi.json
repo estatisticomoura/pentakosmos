@@ -180,5 +180,12 @@
  "AI": "Tekoäly",
  "{n}/{lim} tokens": "{n}/{lim} merkkiä",
  "Opponents": "Vastustajat",
- "Back": "Takaisin"
+ "Back": "Takaisin",
+ "Playlist": "Soittolista",
+ "Calm": "Rauhallinen",
+ "Lively": "Vauhdikas",
+ "All (shuffled)": "Kaikki (satunnainen)",
+ "Every track was synthesized for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and the GeneralUser GS sound bank (by S. Christian Collins). No commercial recording was used.": "Kaikki kappaleet on syntetisoitu Pentakosmosta varten tekijänoikeudesta vapaista sävellyksistä, Mutopia Projectin vapaasti lisensoiduista nuoteista ja GeneralUser GS -äänipankilla (S. Christian Collins). Kaupallisia äänitteitä ei ole käytetty.",
+ "score": "nuotit",
+ "recording": "äänite"
 }
