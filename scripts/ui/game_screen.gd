@@ -88,14 +88,17 @@ func _build() -> void:
 	_round_label.position = Vector2(12, 6)
 	add_child(_round_label)
 	_log_label = UITheme.label("", 15, UITheme.TEXT)
-	_log_label.position = Vector2(470, 7)
-	_log_label.size = Vector2(700, 22)
+	_log_label.position = Vector2(440, 7)
+	_log_label.size = Vector2(640, 22)
 	_log_label.clip_text = true
 	add_child(_log_label)
 	var menu := UITheme.button(L.t("Menu"), 15, Vector2(80, 28))
 	menu.position = Vector2(1190, 3)
 	menu.pressed.connect(_show_pause)
 	add_child(menu)
+	var player := MusicControls.new()
+	player.position = Vector2(1086, 3)
+	add_child(player)
 
 	# nobres
 	_noble_box = Control.new()

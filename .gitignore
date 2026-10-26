@@ -11,3 +11,4 @@ tools/__pycache__/
 tools/evolucao_estado*.json
 *.tmp
 tools/musica/cache/
+__pycache__/

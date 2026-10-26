@@ -22,13 +22,17 @@ As versões prontas ficam na página [Releases](https://github.com/estatisticomo
 
 - **Linux:** descompacte e rode `chmod +x pentakosmos.x86_64 && ./pentakosmos.x86_64`.
 - **Windows:** descompacte e abra `Pentakosmos.exe`. O Windows pode avisar que o programa não é assinado; clique em "Mais informações" e depois em "Executar assim mesmo".
-- **Android:** gere a partir do código (veja abaixo).
+- **Android (7.0 ou mais novo):** baixe o `pentakosmos.apk` no celular e abra. O Android vai pedir para permitir a instalação de apps daquela origem (o navegador ou o gerenciador de arquivos); permita uma vez. O jogo roda na horizontal. Toque numa carta para selecioná-la e ver os detalhes, toque de novo para comprar; toque num filósofo para ver o requisito.
 
 As regras estão explicadas dentro do jogo, em **Como jogar**. A história de como o jogo foi feito está em **Processo criativo** (e também em [docs/PROCESSO_CRIATIVO.md](docs/PROCESSO_CRIATIVO.md)).
 
 | | |
 |---|---|
 | ![Tela inicial](docs/images/menu.png) | ![Como jogar](docs/images/rules.png) |
+
+No celular (horizontal, 20:9):
+
+![Mesa num celular 20:9](docs/images/phone.png)
 
 ## As regras em resumo
 
@@ -107,7 +111,13 @@ python3 tools/torneio.py --modo classico
    godot --headless --path . --export-release "Linux" build/linux/pentakosmos.x86_64
    godot --headless --path . --export-release "Windows" build/windows/Pentakosmos.exe
    ```
-4. O Android precisa também do JDK 17 (`sudo apt install openjdk-17-jdk`) e do Android SDK (Platform-Tools, Build-Tools e Command-line Tools), indicado em *Editor → Configurações do editor → Exportar → Android*. Para instalar: `adb install build/android/pentakosmos.apk`.
+4. O Android precisa também do JDK 17 (`sudo apt install openjdk-17-jdk`) e do Android SDK (Platform-Tools, Build-Tools e Command-line Tools), indicado em *Editor → Configurações do editor → Exportar → Android*. O preset exporta um APK sem assinatura; assine com a sua chave (use sempre a mesma, senão o celular recusa a atualização):
+   ```
+   godot --headless --path . --export-release "Android" build/android/unsigned.apk
+   python3 tools/assinar_apk.py nova-chave ~/pentakosmos-chave.pem    # só uma vez
+   python3 tools/assinar_apk.py assinar ~/pentakosmos-chave.pem build/android/unsigned.apk build/android/pentakosmos.apk
+   ```
+   Para instalar pelo cabo: `adb install build/android/pentakosmos.apk`.
 
 ## Idiomas
 
@@ -129,7 +139,9 @@ A faixa com o elemento, os pontos e os custos é desenhada por cima da arte; se 
 
 ### Música
 
-19 peças clássicas, sintetizadas para o jogo a partir de composições em domínio público — nenhuma gravação comercial é usada. As partituras vêm do [Mutopia Project](https://www.mutopiaproject.org) e os instrumentos do banco de sons [GeneralUser GS](https://www.schristiancollins.com/generaluser.php). No menu inicial (e no menu de pausa) o jogador escolhe a playlist — **Calma**, **Animada**, **Todas** ou uma peça só — e o nome de cada peça aparece quando ela começa.
+19 peças clássicas, criadas para o jogo a partir de composições em domínio público — nenhuma gravação comercial é usada. As partituras vêm do [Mutopia Project](https://www.mutopiaproject.org); as peças de piano são tocadas com o [Salamander Grand Piano](https://archive.org/details/SalamanderGrandPianoV3) (um piano de cauda real gravado nota a nota, de Alexander Holm, CC BY 3.0), e as orquestrais com o [VSCO 2 Community Edition](https://github.com/sgossner/VSCO-2-CE) (instrumentos de orquestra reais, da Versilian Studios, CC0). As partituras viraram interpretações com a melodia cantando sobre o acompanhamento, pedal natural, rubato suave e reverberação de sala; Grieg, Holst, Handel e Strauss ganharam arranjos para orquestra.
+
+No menu inicial (e no menu de pausa) o jogador escolhe a playlist — **Calma**, **Animada**, **Todas** ou uma peça só. Durante a partida, o pequeno tocador ao lado do botão Menu volta para a peça anterior, pausa ou pula para a próxima; o nome de cada peça aparece quando ela começa.
 
 | Elemento | Peça |
 |---|---|
@@ -169,5 +181,5 @@ Ideias, perguntas e histórias das suas partidas: **[Discussions](https://github
 
 - Código: [licença MIT](LICENSE) — use, modifique, compartilhe e até venda; só mantenha o aviso de copyright.
 - Textos, sons e imagens em `data/texts/`, `assets/` e `docs/`: [CC BY 4.0](LICENSE-ASSETS.md).
-- Criado por **Caio Moura** ([estatisticomoura](https://github.com/estatisticomoura)), com o Claude (Anthropic) como parceiro de programação.
+- Criado por **Caio Moura Quina** ([estatisticomoura](https://github.com/estatisticomoura)), com o Claude (Anthropic) como parceiro de programação.
 - Feito com o [Godot Engine](https://godotengine.org).
