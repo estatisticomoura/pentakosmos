@@ -22,4 +22,4 @@ If you have an idea, find a bug, want to improve a translation or just want to t
 • Bugs: [url=https://github.com/estatisticomoura/pentakosmos/issues]github.com/estatisticomoura/pentakosmos/issues[/url]
 
 Have a good game!
-— Caio Moura
+— Caio Moura Quina

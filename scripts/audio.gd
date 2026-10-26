@@ -6,6 +6,7 @@ extends Node
 ## ou "track:<id>" (uma faixa so, repetida).
 
 signal track_started(info: Dictionary)
+signal state_changed
 
 const SFX := ["click", "select", "token", "chip", "buy", "reserve", "noble", "error", "turn", "win", "discard"]
 const POOL := 16
@@ -18,6 +19,7 @@ var tracks: Array = []        # registros de data/music.json
 var mode := "all"
 var current: Dictionary = {}
 var _queue: Array = []
+var _history: Array = []      # faixas ja tocadas (para "anterior")
 
 
 func _ready() -> void:
@@ -80,6 +82,7 @@ func set_mode(m: String) -> void:
 	mode = m
 	Store.set_value("audio", "playlist", m)
 	_queue = []
+	_history = []
 	_music.stop()
 	current = {}
 	if m != "off":
@@ -105,10 +108,53 @@ func _next_track() -> void:
 		# nao repete a ultima faixa logo em seguida
 		if _queue.size() > 1 and not current.is_empty() and _queue[0]["id"] == current["id"]:
 			_queue.push_back(_queue.pop_front())
+	if not current.is_empty():
+		_history.append(current)
 	current = _queue.pop_front()
+	_play_current()
+
+
+func _play_current() -> void:
 	_music.stream = load(current["file"])
+	_music.stream_paused = false
 	_music.play()
 	track_started.emit(current)
+	state_changed.emit()
+
+
+# --- controles do tocador (tela de jogo) -------------------------------------
+func next_track() -> void:
+	if mode == "off":
+		return
+	_next_track()
+
+
+func prev_track() -> void:
+	## Volta para a faixa anterior; se a atual ja tocou mais de 5 s, recomeca a atual.
+	if mode == "off" or current.is_empty():
+		return
+	if _music.get_playback_position() > 5.0 or _history.is_empty():
+		_music.play(0.0)
+		_music.stream_paused = false
+		state_changed.emit()
+		return
+	_queue.push_front(current)
+	current = _history.pop_back()
+	_play_current()
+
+
+func toggle_pause() -> void:
+	if mode == "off":
+		return
+	if current.is_empty():
+		_next_track()
+		return
+	_music.stream_paused = not _music.stream_paused
+	state_changed.emit()
+
+
+func is_paused() -> bool:
+	return mode == "off" or current.is_empty() or _music.stream_paused
 
 
 func set_volume(bus_name: String, linear: float) -> void:

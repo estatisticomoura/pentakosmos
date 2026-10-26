@@ -22,13 +22,17 @@ Ready-to-play builds are published on the [Releases](https://github.com/estatist
 
 - **Linux:** unzip, then `chmod +x pentakosmos.x86_64 && ./pentakosmos.x86_64`.
 - **Windows:** unzip and open `Pentakosmos.exe`. Windows may warn that the program is not signed; click "More info" and then "Run anyway".
-- **Android:** build it from the source (see below).
+- **Android (7.0 or newer):** download `pentakosmos.apk` on the phone and open it. Android will ask you to allow installing apps from that source (the browser or file manager); allow it once. The game runs in landscape. Tap a card to select it and see its details, tap it again to buy; tap a philosopher to see its requirement.
 
 The rules are explained inside the game, in **How to play**. The story of how the game was made is in **Creative process** (also in [docs/CREATIVE_PROCESS.md](docs/CREATIVE_PROCESS.md)).
 
 | | |
 |---|---|
 | ![Start screen](docs/images/menu.png) | ![How to play](docs/images/rules.png) |
+
+On a phone (20:9 landscape):
+
+![Game table on a 20:9 phone screen](docs/images/phone.png)
 
 ## The rules in short
 
@@ -95,7 +99,12 @@ python3 tools/torneio.py --modo classico
    godot --headless --path . --export-release "Linux" build/linux/pentakosmos.x86_64
    godot --headless --path . --export-release "Windows" build/windows/Pentakosmos.exe
    ```
-4. Android also needs JDK 17 and the Android SDK (Platform-Tools, Build-Tools and Command-line Tools), configured in *Editor → Editor Settings → Export → Android*.
+4. Android also needs JDK 17 and the Android SDK (Platform-Tools, Build-Tools and Command-line Tools), configured in *Editor → Editor Settings → Export → Android*. The preset exports an unsigned APK; sign it with your own key (keep the same key for every version, or phones will refuse to update):
+   ```
+   godot --headless --path . --export-release "Android" build/android/unsigned.apk
+   python3 tools/assinar_apk.py nova-chave ~/pentakosmos-key.pem      # only once
+   python3 tools/assinar_apk.py assinar ~/pentakosmos-key.pem build/android/unsigned.apk build/android/pentakosmos.apk
+   ```
 
 ## Translations
 
@@ -117,7 +126,9 @@ Sound effects are `assets/sfx/<name>.ogg` (they take priority over the generated
 
 ### Music
 
-19 classical pieces, synthesized for the game from public-domain compositions — no commercial recording is used. The scores come from the [Mutopia Project](https://www.mutopiaproject.org) and the instruments from the [GeneralUser GS](https://www.schristiancollins.com/generaluser.php) sound bank. In the start menu (and in the pause menu) the player chooses a playlist — **Calm**, **Lively**, **All** or a single piece — and the name of each piece appears when it starts.
+19 classical pieces, created for the game from public-domain compositions — no commercial recording is used. The scores come from the [Mutopia Project](https://www.mutopiaproject.org); the piano pieces are played with the [Salamander Grand Piano](https://archive.org/details/SalamanderGrandPianoV3) (a real grand piano recorded note by note, by Alexander Holm, CC BY 3.0), and the orchestral ones with the [VSCO 2 Community Edition](https://github.com/sgossner/VSCO-2-CE) (real orchestral instruments, by Versilian Studios, CC0). The scores were turned into performances with a melody that sings over the accompaniment, natural pedalling, gentle rubato and room reverberation; Grieg, Holst, Handel and Strauss were arranged for orchestra.
+
+In the start menu (and in the pause menu) the player chooses a playlist — **Calm**, **Lively**, **All** or a single piece. During the game, the small player next to the Menu button goes to the previous piece, pauses or skips to the next one; the name of each piece appears when it starts.
 
 | Element | Piece |
 |---|---|
@@ -157,5 +168,5 @@ Ideas, questions and stories about your games: **[Discussions](https://github.co
 
 - Code: [MIT License](LICENSE) — use it, change it, share it and even sell it; just keep the copyright notice.
 - Texts, sounds and images in `data/texts/`, `assets/` and `docs/`: [CC BY 4.0](LICENSE-ASSETS.md).
-- Created by **Caio Moura** ([estatisticomoura](https://github.com/estatisticomoura)), with Claude (Anthropic) as programming partner.
+- Created by **Caio Moura Quina** ([estatisticomoura](https://github.com/estatisticomoura)), with Claude (Anthropic) as programming partner.
 - Made with [Godot Engine](https://godotengine.org).

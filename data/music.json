@@ -10,7 +10,8 @@
   "score": "Mutopia Project, typeset by Evin Robertson",
   "score_url": "https://github.com/MutopiaProject/MutopiaProject/tree/master/ftp/SatieE/gymnopedie_1",
   "score_license": "Public Domain",
-  "recording_license": "CC BY 4.0"
+  "recording_license": "CC BY 4.0",
+  "instruments": "piano: Salamander Grand Piano V3 (Alexander Holm, CC BY 3.0)"
  },
  {
   "id": "gymnopedie_2",
@@ -23,7 +24,8 @@
   "score": "Mutopia Project, typeset by Evin Robertson",
   "score_url": "https://github.com/MutopiaProject/MutopiaProject/tree/master/ftp/SatieE/gymnopedie_2",
   "score_license": "Public Domain",
-  "recording_license": "CC BY 4.0"
+  "recording_license": "CC BY 4.0",
+  "instruments": "piano: Salamander Grand Piano V3 (Alexander Holm, CC BY 3.0)"
  },
  {
   "id": "gymnopedie_3",
@@ -36,7 +38,8 @@
   "score": "Mutopia Project, typeset by Evin Robertson",
   "score_url": "https://github.com/MutopiaProject/MutopiaProject/tree/master/ftp/SatieE/gymnopedie_3",
   "score_license": "Public Domain",
-  "recording_license": "CC BY 4.0"
+  "recording_license": "CC BY 4.0",
+  "instruments": "piano: Salamander Grand Piano V3 (Alexander Holm, CC BY 3.0)"
  },
  {
   "id": "gnossienne_1",
@@ -49,7 +52,8 @@
   "score": "Mutopia Project, typeset by Knute Snortum",
   "score_url": "https://github.com/MutopiaProject/MutopiaProject/tree/master/ftp/SatieE/Gnossienne/no_1",
   "score_license": "CC BY-SA 4.0",
-  "recording_license": "CC BY-SA 4.0"
+  "recording_license": "CC BY-SA 4.0",
+  "instruments": "piano: Salamander Grand Piano V3 (Alexander Holm, CC BY 3.0)"
  },
  {
   "id": "gnossienne_2",
@@ -62,7 +66,8 @@
   "score": "Mutopia Project, typeset by Frédéric Duperray",
   "score_url": "https://github.com/MutopiaProject/MutopiaProject/tree/master/ftp/SatieE/Gnossienne/no_2",
   "score_license": "CC BY-SA 4.0",
-  "recording_license": "CC BY-SA 4.0"
+  "recording_license": "CC BY-SA 4.0",
+  "instruments": "piano: Salamander Grand Piano V3 (Alexander Holm, CC BY 3.0)"
  },
  {
   "id": "gnossienne_3",
@@ -75,7 +80,8 @@
   "score": "Mutopia Project, typeset by Frédéric Duperray",
   "score_url": "https://github.com/MutopiaProject/MutopiaProject/tree/master/ftp/SatieE/Gnossienne/no_3",
   "score_license": "CC BY-SA 4.0",
-  "recording_license": "CC BY-SA 4.0"
+  "recording_license": "CC BY-SA 4.0",
+  "instruments": "piano: Salamander Grand Piano V3 (Alexander Holm, CC BY 3.0)"
  },
  {
   "id": "bach_air",
@@ -88,7 +94,8 @@
   "score": "Mutopia Project, typeset by Jeff Covey",
   "score_url": "https://github.com/MutopiaProject/MutopiaProject/tree/master/ftp/BachJS/BWV1068/bach-air",
   "score_license": "CC BY-SA 3.0",
-  "recording_license": "CC BY-SA 3.0"
+  "recording_license": "CC BY-SA 3.0",
+  "instruments": "strings: VSCO 2 Community Edition (Versilian Studios, CC0)"
  },
  {
   "id": "bach_goldberg_aria",
@@ -101,7 +108,8 @@
   "score": "Mutopia Project, typeset by JD Erickson",
   "score_url": "https://github.com/MutopiaProject/MutopiaProject/tree/master/ftp/BachJS/BWV988/bwv-988-aria",
   "score_license": "CC BY-SA 3.0",
-  "recording_license": "CC BY-SA 3.0"
+  "recording_license": "CC BY-SA 3.0",
+  "instruments": "piano: Salamander Grand Piano V3 (Alexander Holm, CC BY 3.0)"
  },
  {
   "id": "bach_prelude_c",
@@ -114,7 +122,8 @@
   "score": "Mutopia Project, typeset by Tobias Erbsland",
   "score_url": "https://github.com/MutopiaProject/MutopiaProject/tree/master/ftp/BachJS/BWV846/wtk1-prelude1",
   "score_license": "Public Domain",
-  "recording_license": "CC BY 4.0"
+  "recording_license": "CC BY 4.0",
+  "instruments": "piano: Salamander Grand Piano V3 (Alexander Holm, CC BY 3.0)"
  },
  {
   "id": "chopin_nocturne_op9_2",
@@ -127,7 +136,8 @@
   "score": "Mutopia Project, typeset by Renato Biolcati Rinaldi",
   "score_url": "https://github.com/MutopiaProject/MutopiaProject/tree/master/ftp/ChopinFF/O9/chopin_nocturne_op9_n2",
   "score_license": "CC BY-SA 3.0",
-  "recording_license": "CC BY-SA 3.0"
+  "recording_license": "CC BY-SA 3.0",
+  "instruments": "piano: Salamander Grand Piano V3 (Alexander Holm, CC BY 3.0)"
  },
  {
   "id": "debussy_clair_de_lune",
@@ -140,7 +150,8 @@
   "score": "Mutopia Project, typeset by Keith OHara",
   "score_url": "https://github.com/MutopiaProject/MutopiaProject/tree/master/ftp/DebussyC/L75/debussy_Ste_Bergamesq_Clair",
   "score_license": "Public Domain",
-  "recording_license": "CC BY 4.0"
+  "recording_license": "CC BY 4.0",
+  "instruments": "piano: Salamander Grand Piano V3 (Alexander Holm, CC BY 3.0)"
  },
  {
   "id": "debussy_arabesque_1",
@@ -153,7 +164,8 @@
   "score": "Mutopia Project, typeset by Keith OHara",
   "score_url": "https://github.com/MutopiaProject/MutopiaProject/tree/master/ftp/DebussyC/L66/debussy_Arabesque_1",
   "score_license": "Public Domain",
-  "recording_license": "CC BY 4.0"
+  "recording_license": "CC BY 4.0",
+  "instruments": "piano: Salamander Grand Piano V3 (Alexander Holm, CC BY 3.0)"
  },
  {
   "id": "holst_thaxted",
@@ -166,7 +178,8 @@
   "score": "Mutopia Project, typeset by Peter Chubb",
   "score_url": "https://github.com/MutopiaProject/MutopiaProject/tree/master/ftp/HolstGT/Thaxted",
   "score_license": "Public Domain",
-  "recording_license": "CC BY 4.0"
+  "recording_license": "CC BY 4.0",
+  "instruments": "horns, trumpet, strings, clarinet and trombone (arrangement for Pentakosmos): VSCO 2 Community Edition (Versilian Studios, CC0)"
  },
  {
   "id": "bach_toccata_fugue",
@@ -179,7 +192,8 @@
   "score": "Mutopia Project, typeset by Anonymous",
   "score_url": "https://github.com/MutopiaProject/MutopiaProject/tree/master/ftp/BachJS/BWV565/ToccataFugue",
   "score_license": "Public Domain",
-  "recording_license": "CC BY 4.0"
+  "recording_license": "CC BY 4.0",
+  "instruments": "pipe organ: VSCO 2 Community Edition (Versilian Studios, CC0)"
  },
  {
   "id": "vivaldi_summer",
@@ -192,7 +206,8 @@
   "score": "Mutopia Project, typeset by Anonymous",
   "score_url": "https://github.com/MutopiaProject/MutopiaProject/tree/master/ftp/VivaldiA/O8/summer",
   "score_license": "CC BY-SA 3.0",
-  "recording_license": "CC BY-SA 3.0"
+  "recording_license": "CC BY-SA 3.0",
+  "instruments": "solo violin and strings: VSCO 2 Community Edition (Versilian Studios, CC0)"
  },
  {
   "id": "grieg_mountain_king",
@@ -205,7 +220,8 @@
   "score": "Mutopia Project, typeset by Coyau",
   "score_url": "https://github.com/MutopiaProject/MutopiaProject/tree/master/ftp/GriegE/O46/Dans_l_antre_du_roi_de_la_montagne",
   "score_license": "Public Domain",
-  "recording_license": "CC BY 4.0"
+  "recording_license": "CC BY 4.0",
+  "instruments": "orchestra (arrangement for Pentakosmos from the piano version): VSCO 2 Community Edition (Versilian Studios, CC0)"
  },
  {
   "id": "mussorgsky_bald_mountain",
@@ -218,7 +234,8 @@
   "score": "Mutopia Project, typeset by Robert Clausecker",
   "score_url": "https://github.com/MutopiaProject/MutopiaProject/tree/master/ftp/MussorgskyM/nobm",
   "score_license": "CC BY 3.0",
-  "recording_license": "CC BY 3.0"
+  "recording_license": "CC BY 3.0",
+  "instruments": "piano: Salamander Grand Piano V3 (Alexander Holm, CC BY 3.0)"
  },
  {
   "id": "handel_rejouissance",
@@ -231,7 +248,8 @@
   "score": "Mutopia Project, typeset by Cyprien Lecourt",
   "score_url": "https://github.com/MutopiaProject/MutopiaProject/tree/master/ftp/HandelGF/BWV351/LaRej",
   "score_license": "Public Domain",
-  "recording_license": "CC BY 4.0"
+  "recording_license": "CC BY 4.0",
+  "instruments": "trumpet, oboe, horns, strings and bassoon (arrangement for Pentakosmos): VSCO 2 Community Edition (Versilian Studios, CC0)"
  },
  {
   "id": "strauss_blue_danube",
@@ -244,6 +262,7 @@
   "score": "Mutopia Project, typeset by Nikos Kouremenos",
   "score_url": "https://github.com/MutopiaProject/MutopiaProject/tree/master/ftp/StraussJJ/O314/blue_danube",
   "score_license": "CC BY-SA 4.0",
-  "recording_license": "CC BY-SA 4.0"
+  "recording_license": "CC BY-SA 4.0",
+  "instruments": "strings, flute and horns (arrangement for Pentakosmos from the piano version): VSCO 2 Community Edition (Versilian Studios, CC0)"
  }
 ]
