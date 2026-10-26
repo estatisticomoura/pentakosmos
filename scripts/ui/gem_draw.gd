@@ -279,13 +279,13 @@ static func _draw_sphere(ci: CanvasItem, center: Vector2, r: float, col: Color, 
 	if t >= 0.0:
 		var la := t * 0.22 + 3.5
 		off = Vector2(0.75 * cos(la), -0.45 + 0.25 * sin(la * 0.7)).normalized() * 0.42
-	var gold := Color(1.0, 0.78, 0.16)
-	ci.draw_circle(center, r, gold.darkened(0.10))
+	var gold := Color(1.0, 0.88, 0.30)
+	ci.draw_circle(center, r, gold.darkened(0.08))
 	var steps := 10
 	for i in range(1, steps):
 		var k := float(i) / steps
 		var cc := center + off * r * k
-		ci.draw_circle(cc, r * (1.0 - k * 0.82), gold.darkened(0.10 * (1.0 - k)).lightened(0.10 + 0.55 * k * k))
+		ci.draw_circle(cc, r * (1.0 - k * 0.82), gold.darkened(0.08 * (1.0 - k)).lightened(0.12 + 0.60 * k * k))
 	var ph := (t if t >= 0.0 else 0.4) * 0.7
 	for m in range(3):
 		var a := fposmod(ph + m * PI / 3.0, PI)
@@ -296,8 +296,8 @@ static func _draw_sphere(ci: CanvasItem, center: Vector2, r: float, col: Color, 
 		for j in range(17):
 			var th := -PI / 2.0 + PI * j / 16.0
 			pts.append(center + Vector2(rx * cos(th) * (1 if sin(a) >= 0 else -1), r * sin(th)))
-		ci.draw_polyline(pts, Color(0.62, 0.44, 0.08, 0.30), maxf(1.0, r * 0.045), true)
-	ci.draw_arc(center, r, 0, TAU, 32, Color(0.55, 0.38, 0.05, 0.7), maxf(1.0, r * 0.05), true)
+		ci.draw_polyline(pts, Color(0.75, 0.58, 0.10, 0.28), maxf(1.0, r * 0.045), true)
+	ci.draw_arc(center, r, 0, TAU, 32, Color(0.70, 0.52, 0.08, 0.7), maxf(1.0, r * 0.05), true)
 	ci.draw_circle(center + off * 1.05 * r, r * 0.17, Color(1, 1, 0.92, 0.75))
 
 

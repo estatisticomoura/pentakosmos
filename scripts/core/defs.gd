@@ -23,7 +23,7 @@ const COLORS_SOLIDOS := [
 	Color(0.20, 0.66, 0.42),  # eter: dodecaedro
 	Color(0.90, 0.32, 0.18),  # fogo: tetraedro
 	Color(0.25, 0.15, 0.08),  # terra: cubo (marrom bem escuro)
-	Color(1.0, 0.82, 0.25),  # esfera (coringa)
+	Color(1.0, 0.88, 0.32),  # esfera (coringa): amarelo claro
 ]
 const INK_POLIGONAL := [
 	Color(0.10, 0.10, 0.12), Color(1, 1, 1), Color(1, 1, 1),
