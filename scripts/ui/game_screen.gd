@@ -49,6 +49,12 @@ var _overlay_kind := ""
 var _info: Control = null      # dica de carta, baralho ou nobre
 var _info_src: Control = null
 var _banner: Label
+# geometria (o modo toque reorganiza e aumenta tudo)
+var _px := float(PANEL_X)     # x dos paineis dos jogadores
+var _pw := float(PANEL_W)     # largura base dos paineis
+var _s := 1.0                 # escala de cartas, filosofos e reservas
+var _ps := 1.0                # escala dos paineis
+var _recent: Array = []       # modo toque: o que os outros fizeram desde a sua ultima jogada
 
 
 func _init() -> void:
@@ -78,6 +84,9 @@ func start(rules: RuleSet, players: Array) -> void:
 
 
 func _build() -> void:
+	if UITheme.touch:
+		_build_touch()
+		return
 	# barra superior
 	var top := ColorRect.new()
 	top.color = Color(0, 0, 0, 0.35)
@@ -202,20 +211,201 @@ func _build() -> void:
 	for b in [_btn_take, _btn_buy, _btn_reserve, _btn_clear, _btn_pass]:
 		bar.add_child(b)
 
+	_build_fx()
+
+
+func _build_fx() -> void:
 	# camada de efeitos
 	_fx = Control.new()
 	_fx.size = size
 	_fx.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_fx)
 	_banner = UITheme.label("", 34, UITheme.GOLD)
-	_banner.size = Vector2(1280, 60)
-	_banner.position = Vector2(0, 300)
+	_banner.size = Vector2(size.x, 60)
+	_banner.position = Vector2(0, size.y / 2.0 - 60)
 	_banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_banner.add_theme_constant_override("outline_size", 8)
 	_banner.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
 	_banner.modulate.a = 0.0
 	_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_banner)
+
+
+func _build_touch() -> void:
+	## Celular/tablet na horizontal: botoes numa coluna a esquerda (perto do polegar),
+	## registro das jogadas dos adversarios no alto, tudo maior.
+	var W := size.x
+	var H := size.y
+	const LW := 156.0                  # coluna da esquerda
+	const TB := 50.0                   # barra do registro
+	var m := g.rules.market_for(g.n)
+	var cols := m + 1
+	var s_h := (H - TB - 18.0) / (88.0 + 6.0 + 3.0 * ROW_H)
+	var s_w := (W - LW - 124.0) / (cols * COL_W + 380.0)   # os paineis podem ficar um pouco menores
+	_s = clampf(minf(s_h, s_w), 0.8, 1.35)
+	var mx := LW + 10.0
+	var top_y := TB + 6.0
+	var my := top_y + 88.0 * _s + 8.0
+	var bank_x := mx + cols * COL_W * _s + 4.0
+	_px = bank_x + 84.0
+	var avail_w := W - _px - 8.0
+
+	# coluna da esquerda: Menu, rodada, acoes, dica e musica
+	var left := ColorRect.new()
+	left.color = Color(0, 0, 0, 0.28)
+	left.size = Vector2(LW, H)
+	left.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(left)
+	var menu := UITheme.button(L.t("Menu"), 22, Vector2(LW - 20, 58))
+	menu.position = Vector2(10, 10)
+	menu.pressed.connect(_show_pause)
+	add_child(menu)
+	_round_label = UITheme.label("", 16, UITheme.GOLD)
+	_round_label.position = Vector2(12, 76)
+	_round_label.size = Vector2(LW - 20, 50)
+	_round_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	add_child(_round_label)
+	var col := VBoxContainer.new()
+	col.position = Vector2(10, 136)
+	col.add_theme_constant_override("separation", 10)
+	add_child(col)
+	_btn_take = UITheme.button(L.t("Take"), 22, Vector2(LW - 20, 62))
+	_btn_take.pressed.connect(_on_take)
+	_btn_buy = UITheme.button(L.t("Buy"), 22, Vector2(LW - 20, 62))
+	_btn_buy.pressed.connect(_on_buy)
+	_btn_reserve = UITheme.button(L.t("Reserve"), 22, Vector2(LW - 20, 62))
+	_btn_reserve.pressed.connect(_on_reserve)
+	_btn_clear = UITheme.button(L.t("Clear"), 20, Vector2(LW - 20, 54))
+	_btn_clear.pressed.connect(_clear_selection.bind(true))
+	_btn_pass = UITheme.button(L.t("Pass"), 20, Vector2(LW - 20, 54))
+	_btn_pass.pressed.connect(_on_pass)
+	for b in [_btn_take, _btn_buy, _btn_reserve, _btn_clear, _btn_pass]:
+		b.clip_text = true
+		col.add_child(b)
+	var player := MusicControls.new(42.0, 46.0)
+	player.position = Vector2((LW - player.size.x) / 2.0, H - 56.0)
+	add_child(player)
+	_hint = UITheme.label("", 14, UITheme.MUTED)
+	_hint.position = Vector2(10, 136 + 3 * 72 + 2 * 64 + 6)
+	_hint.size = Vector2(LW - 18, H - 62.0 - _hint.position.y)
+	_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_hint.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+	_hint.clip_text = true
+	add_child(_hint)
+
+	# registro: o que os adversarios fizeram desde a sua ultima jogada
+	var top := ColorRect.new()
+	top.color = Color(0, 0, 0, 0.35)
+	top.position = Vector2(LW, 0)
+	top.size = Vector2(W - LW, TB)
+	top.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(top)
+	_log_label = UITheme.label("", 16, UITheme.TEXT)
+	_log_label.position = Vector2(LW + 12, 2)
+	_log_label.size = Vector2(W - LW - 24, TB - 4)
+	_log_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_log_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_log_label.max_lines_visible = 2
+	_log_label.add_theme_constant_override("line_spacing", -2)
+	add_child(_log_label)
+
+	# filosofos e, logo depois deles, as fichas escolhidas
+	_noble_box = Control.new()
+	_noble_box.position = Vector2(mx, top_y)
+	add_child(_noble_box)
+	var tray_x := mx + g.nobles.size() * 100.0 * _s + 8.0
+	_tray = Control.new()
+	_tray.position = Vector2(tray_x, top_y + 6.0)
+	_tray.size = Vector2(maxf(150.0, minf(250.0, _px - 8.0 - tray_x)), 88.0 * _s - 12.0)
+	_tray.draw.connect(_draw_tray)
+	_tray.mouse_filter = Control.MOUSE_FILTER_STOP
+	_tray.gui_input.connect(_on_tray_input)
+	add_child(_tray)
+
+	# mercado
+	for lv in [3, 2, 1]:
+		var y: float = my + (3 - lv) * ROW_H * _s
+		var dv := CardView.new()
+		dv.position = Vector2(mx, y)
+		dv.src = "deck"
+		dv.lv = lv
+		_scale_card(dv)
+		dv.pressed.connect(_on_card_pressed)
+		add_child(dv)
+		_deck_views[lv] = dv
+		_market_views[lv] = []
+		for sl in range(m):
+			var cv := CardView.new()
+			cv.position = Vector2(mx + (sl + 1) * COL_W * _s, y)
+			cv.src = "m"
+			cv.lv = lv
+			cv.slot = sl
+			_scale_card(cv)
+			cv.pressed.connect(_on_card_pressed)
+			add_child(cv)
+			_market_views[lv].append(cv)
+
+	# banco
+	var step := minf(80.0, (H - my - 76.0) / 5.0)
+	for c in range(6):
+		var tv := TokenView.new()
+		tv.position = Vector2(bank_x, my + c * step)
+		tv.color_idx = c
+		tv.pressed.connect(_on_token_pressed)
+		add_child(tv)
+		_token_views.append(tv)
+
+	# reservas do jogador (embaixo, a direita) e paineis (em cima)
+	var res_h := 154.0 * _s
+	var res_y := H - res_h - 8.0
+	_reserve_title = UITheme.label("", 16, UITheme.MUTED)
+	_reserve_title.position = Vector2(_px + 4, res_y - 26)
+	add_child(_reserve_title)
+	for i in range(3):
+		var rv := CardView.new()
+		rv.position = Vector2(_px + 4 + i * 124 * _s, res_y)
+		rv.src = "r"
+		rv.slot = i
+		_scale_card(rv)
+		rv.pressed.connect(_on_card_pressed)
+		add_child(rv)
+		_reserve_views.append(rv)
+	var meta := UITheme.label("", 16, UITheme.MUTED)
+	meta.name = "Meta"
+	meta.position = Vector2(_px + 8 + 3 * 124 * _s, res_y + 6)
+	meta.size = Vector2(maxf(60.0, W - meta.position.x - 6), res_h)
+	meta.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	# sem espaco, some (a meta e o limite ja aparecem nos paineis: "/15" e "x/10")
+	meta.visible = meta.size.x >= 100.0
+	add_child(meta)
+	var ph_total := res_y - 32.0 - top_y
+	var each := minf((ph_total - 6.0 * (g.n - 1)) / g.n, 118.0 * _s)
+	_ps = clampf(minf(minf(_s, each / 84.0), avail_w / 448.0), 0.7, 1.35)
+	_pw = avail_w / _ps
+	for i in range(g.n):
+		var pp := PlayerPanel.new()
+		pp.g = g
+		pp.idx = i
+		pp.position = Vector2(_px, top_y + i * (each + 6.0))
+		pp.size = Vector2(_pw, each / _ps)
+		pp.scale = Vector2(_ps, _ps)
+		pp.zone_tap.connect(_on_zone_tap)
+		add_child(pp)
+		_panels.append(pp)
+	_build_fx()
+
+
+func _scale_card(cv: CardView) -> void:
+	cv.base_scale = _s
+	cv.pivot_offset = Vector2.ZERO
+	cv.scale = Vector2(_s, _s)
+
+
+func _gui_input(event: InputEvent) -> void:
+	# toque fora de tudo fecha as dicas abertas
+	if event is InputEventMouseButton and event.pressed:
+		_hide_info()
+		_hide_peek()
 
 
 # ---------------------------------------------------------------------------
@@ -230,10 +420,11 @@ func refresh() -> void:
 	var vp: GameState.PlayerState = g.players[viewer]
 	var human := _human_turn()
 	var who := L.f("Your turn, {name}", {"name": p.name}) if human else L.f("Turn: {name}", {"name": p.name})
+	var sep := "\n" if UITheme.touch else " · "
 	if g.finished:
-		_round_label.text = L.f("Round {n} · Game over", {"n": g.round_no})
+		_round_label.text = L.f("Round {n} · Game over", {"n": g.round_no}).replace(" · ", sep)
 	else:
-		_round_label.text = L.f("Round {n} · {who}", {"n": g.round_no, "who": who}) + (L.t(" · last round!") if g.end_triggered else "")
+		_round_label.text = (L.f("Round {n} · {who}", {"n": g.round_no, "who": who}) + (L.t(" · last round!") if g.end_triggered else "")).replace(" · ", sep)
 	# nobres
 	for v in _noble_views:
 		v.queue_free()
@@ -242,10 +433,12 @@ func refresh() -> void:
 	var pts_txt := str(g.rules.noble_pts(vp.nobles.size()))
 	for i in range(g.nobles.size()):
 		var nv := NobleView.new()
-		nv.position = Vector2(i * 100, 0)
+		nv.position = Vector2(i * 100 * _s, 0)
+		nv.scale = Vector2(_s, _s)
 		nv.setup(g.nobles[i], pts_txt, g.rules.noble_mode == "flexivel",
 			g.noble_distance(vp.bonus, Defs.NOBLES[g.nobles[i]]))
-		nv.hover_changed.connect(_on_noble_hover)
+		if not UITheme.touch:
+			nv.hover_changed.connect(_on_noble_hover)
 		nv.pressed.connect(_on_noble_tap)
 		_noble_box.add_child(nv)
 		_noble_views.append(nv)
@@ -349,7 +542,8 @@ func _draw_tray() -> void:
 		GemDraw.ctext(_tray, L.t("chosen tokens"), _tray.size / 2.0, 13, Color(1, 1, 1, 0.3))
 		return
 	for i in range(sel_tokens.size()):
-		GemDraw.draw_chip(_tray, sel_tokens[i], Vector2(40 + i * 70, _tray.size.y / 2.0), 24)
+		var r := minf(24.0 if not UITheme.touch else _tray.size.y / 2.0 - 6.0, (_tray.size.x - 44.0) / 6.0)
+		GemDraw.draw_chip(_tray, sel_tokens[i], Vector2(r + 14 + i * (2 * r + 8), _tray.size.y / 2.0), r)
 
 
 # ---------------------------------------------------------------------------
@@ -425,6 +619,7 @@ func _clear_selection(play_sound := false) -> void:
 
 
 func _on_take() -> void:
+	_hide_info()
 	if g.act_take(sel_tokens):
 		_clear_selection()
 		_continue()
@@ -433,6 +628,7 @@ func _on_take() -> void:
 
 
 func _on_buy() -> void:
+	_hide_info()
 	var ok := false
 	if sel_card.get("src", "") == "m":
 		ok = g.act_buy_market(sel_card["lv"], sel_card["slot"])
@@ -446,6 +642,7 @@ func _on_buy() -> void:
 
 
 func _on_reserve() -> void:
+	_hide_info()
 	var ok := false
 	if sel_card.get("src", "") == "m":
 		ok = g.act_reserve(sel_card["lv"], sel_card["slot"])
@@ -459,6 +656,7 @@ func _on_reserve() -> void:
 
 
 func _on_pass() -> void:
+	_hide_info()
 	if g.act_pass():
 		_clear_selection()
 		_continue()
@@ -536,7 +734,7 @@ func _animate_event(e: Dictionary) -> float:
 				var c: int = e["colors"][k]
 				_fly_chip(c, _center_of(_token_views[c]), _panel_point(panel, panel.token_pos(c)), k * 0.09,
 					func(): _land_token(panel, c))
-			_log(L.f("{name} took {colors}.", {"name": pname, "colors": L.colors(e["colors"])}))
+			_log(L.f("{name} took {colors}.", {"name": pname, "colors": L.colors(e["colors"])}), pi)
 			Audio.play("token", 0.06, -4.0)
 			return 0.7
 		"buy":
@@ -547,7 +745,7 @@ func _animate_event(e: Dictionary) -> float:
 			elif pi == viewer and e["idx"] < _reserve_views.size():
 				from = _rect_of(_reserve_views[e["idx"]])
 			else:
-				from = Rect2(_panel_point(panel, Vector2(PANEL_W / 2.0, 20)) - CardView.BASE_SIZE / 2.0, CardView.BASE_SIZE)
+				from = Rect2(_panel_point(panel, Vector2(_pw / 2.0, 20)) - CardView.BASE_SIZE / 2.0, CardView.BASE_SIZE)
 			var bc: int = cd.bonus
 			_fly_card(cd, from, _panel_point(panel, panel.bonus_pos(bc)), 1,
 				func(): _land_card(panel, bc))
@@ -560,23 +758,26 @@ func _animate_event(e: Dictionary) -> float:
 						func(): Audio.play("chip", 0.1, -12.0))
 					k2 += 1
 			_log(L.f("{name} bought a level {lv} card ({color}){pts}.", {"name": pname, "lv": cd.level,
-				"color": L.color(cd.bonus), "pts": (" +%d" % cd.points) if cd.points > 0 else ""}))
+				"color": L.color(cd.bonus), "pts": (" +%d" % cd.points) if cd.points > 0 else ""}), pi)
 			Audio.play("buy", 0.04, -3.0)
 			return 0.9
 		"reserve":
 			var cd2: Defs.CardDef = g.cards[e["card"]]
 			var from2: Rect2 = _rect_of(_deck_views[e["lv"]]) if e["blind"] else _rect_of(_market_views[e["lv"]][e["slot"]])
 			var to: Vector2 = _rect_of(_reserve_views[mini(g.players[pi].reserved.size() - 1, 2)]).get_center() if pi == viewer \
-				else _panel_point(panel, Vector2(PANEL_W / 2.0, 20))
+				else _panel_point(panel, Vector2(_pw / 2.0, 20))
 			_fly_card(null if e["blind"] else cd2, from2, to, e["lv"], func(): panel.pulse("r"))
 			if e["gold"]:
 				_fly_chip(Defs.GOLD, _center_of(_token_views[Defs.GOLD]), _panel_point(panel, panel.token_pos(Defs.GOLD)), 0.3,
 					func(): _land_token(panel, Defs.GOLD))
 			if e["blind"]:
-				_log(L.f("{name} reserved a level {lv} card face down.", {"name": pname, "lv": e["lv"]}))
+				_log(L.f("{name} reserved a level {lv} card face down.", {"name": pname, "lv": e["lv"]}), pi)
 			else:
-				_log(L.f("{name} reserved a level {lv} card ({color}){pts}. Hover over their reserves to see it again.", {"name": pname,
-					"lv": cd2.level, "color": L.color(cd2.bonus), "pts": (" +%d" % cd2.points) if cd2.points > 0 else ""}))
+				var rfmt := "{name} reserved a level {lv} card ({color}){pts}."  # tr
+				if not UITheme.touch:
+					rfmt = "{name} reserved a level {lv} card ({color}){pts}. Hover over their reserves to see it again."  # tr
+				_log(L.f(rfmt, {"name": pname, "lv": cd2.level, "color": L.color(cd2.bonus),
+					"pts": (" +%d" % cd2.points) if cd2.points > 0 else ""}), pi)
 			Audio.play("reserve", 0.04, -4.0)
 			return 0.85
 		"discard":
@@ -586,37 +787,50 @@ func _animate_event(e: Dictionary) -> float:
 			return 0.12
 		"noble":
 			var phil := L.t(Defs.PHILOSOPHERS[e["noble"]])
-			_log(L.f("{name}: {phil} joins the academy (+{pts})!", {"name": pname, "phil": phil, "pts": e["pts"]}))
+			_log(L.f("{name}: {phil} joins the academy (+{pts})!", {"name": pname, "phil": phil, "pts": e["pts"]}), pi)
 			_show_banner(L.f("{name}: {phil} joins the academy (+{pts})!", {"name": pname, "phil": phil, "pts": e["pts"]}))
 			for nv in _noble_views:
 				if nv.noble == e["noble"]:
 					var tw := create_tween().set_parallel()
-					tw.tween_property(nv, "global_position", _panel_point(panel, Vector2(PANEL_W - 120, 0)) + global_position, 0.6) \
+					tw.tween_property(nv, "global_position", _panel_point(panel, Vector2(_pw - 120, 0)) + global_position, 0.6) \
 						.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 					tw.tween_property(nv, "scale", Vector2(0.4, 0.4), 0.6)
 			Audio.play("noble")
 			return 0.9
 		"color":
 			_show_banner(L.f("{name}: {pts} points in {color}!", {"name": pname, "pts": e["pts"], "color": L.color(e["color"])}))
-			_log(L.f("{name} achieved the specialization victory ({pts} points in {color}).", {"name": pname, "pts": e["pts"], "color": L.color(e["color"])}))
+			_log(L.f("{name} achieved the specialization victory ({pts} points in {color}).", {"name": pname, "pts": e["pts"], "color": L.color(e["color"])}), pi)
 			Audio.play("noble")
 			return 1.0
 		"last_round":
 			_show_banner(L.t("Last round!"))
 			if e.get("reason", "pontos") == "cor":
-				_log(L.f("{name} reached the specialization victory: last round!", {"name": pname}))
+				_log(L.f("{name} reached the specialization victory: last round!", {"name": pname}), pi)
 			else:
-				_log(L.f("{name} reached {pts} points: last round!", {"name": pname, "pts": g.players[pi].points}))
+				_log(L.f("{name} reached {pts} points: last round!", {"name": pname, "pts": g.players[pi].points}), pi)
 			Audio.play("turn")
 			return 0.8
 		"pass":
-			_log(L.f("{name} passed.", {"name": pname}))
+			_log(L.f("{name} passed.", {"name": pname}), pi)
 			return 0.2
 	return 0.0
 
 
-func _log(s: String) -> void:
-	_log_label.text = s
+func _log(s: String, pi := -1) -> void:
+	if not UITheme.touch:
+		_log_label.text = s
+		return
+	# modo toque: a barra lista o que os outros fizeram desde a sua ultima jogada
+	if pi == viewer and not g.players[pi].is_ai():
+		_recent.clear()
+		_log_label.text = ""
+		return
+	_recent.append(s)
+	_log_label.text = "   ·   ".join(_recent)
+	# se nao couber em duas linhas, mostra as mais recentes
+	while _recent.size() > 1 and _log_label.get_line_count() > 2:
+		_recent.pop_front()
+		_log_label.text = "   ·   ".join(_recent)
 
 
 func _show_banner(s: String) -> void:
@@ -629,8 +843,9 @@ func _show_banner(s: String) -> void:
 
 # --- geometria e efeitos -----------------------------------------------------
 func _rect_of(c: Control) -> Rect2:
-	var gr := c.get_global_rect()
-	return Rect2(get_global_transform().affine_inverse() * gr.position, gr.size / c.scale)
+	## Retangulo na tela (ja com a escala do controle), em coordenadas desta mesa.
+	var t := c.get_global_transform()
+	return Rect2(get_global_transform().affine_inverse() * t.origin, c.size * t.get_scale())
 
 
 func _center_of(c: Control) -> Vector2:
@@ -639,8 +854,8 @@ func _center_of(c: Control) -> Vector2:
 
 func _panel_point(panel: PlayerPanel, local: Vector2) -> Vector2:
 	if panel == null:
-		return Vector2(PANEL_X, 60)
-	return panel.position + local
+		return Vector2(_px, 60)
+	return panel.position + local * panel.scale
 
 
 func _land_token(panel: PlayerPanel, c: int) -> void:
@@ -665,6 +880,7 @@ func _fly_card(cd: Defs.CardDef, from: Rect2, to_center: Vector2, back_level := 
 	v.pivot_offset = Vector2.ZERO
 	_fx.add_child(v)
 	var p0 := from.position
+	var start_scale := from.size.x / CardView.BASE_SIZE.x if from.size.x > 0 else 1.0
 	var end_scale := 0.22
 	var p2 := to_center - CardView.BASE_SIZE * end_scale / 2.0
 	var p1 := (p0 + p2) / 2.0 + Vector2(0, -110)
@@ -672,7 +888,7 @@ func _fly_card(cd: Defs.CardDef, from: Rect2, to_center: Vector2, back_level := 
 	var step := func(t: float) -> void:
 		var u := ease(t, -2.0)  # acelera e desacelera
 		v.position = p0.lerp(p1, u).lerp(p1.lerp(p2, u), u)
-		var sc := lerpf(1.0, end_scale, ease(t, 1.6))
+		var sc := lerpf(start_scale, end_scale, ease(t, 1.6))
 		v.scale = Vector2(sc, sc)
 		v.modulate.a = 1.0 if t < 0.85 else (1.0 - t) / 0.15
 	var land := func() -> void:
@@ -717,6 +933,8 @@ func _fly_chip(c: int, from: Vector2, to: Vector2, delay: float, on_land := Call
 # Consulta rapida: reservas e nobres de um jogador (mouse por cima ou toque)
 # ---------------------------------------------------------------------------
 func _on_zone_hover(panel: PlayerPanel, zone: String) -> void:
+	if UITheme.touch:
+		return
 	if zone == "":
 		_hide_peek()
 	else:
@@ -790,7 +1008,7 @@ func _show_peek(panel: PlayerPanel, zone: String) -> void:
 		return
 	var sz := box.get_combined_minimum_size()
 	box.size = sz
-	box.position = Vector2(PANEL_X - sz.x - 10, clampf(panel.position.y, 40, 720 - sz.y - 8))
+	box.position = Vector2(_px - sz.x - 10, clampf(panel.position.y, 40, size.y - sz.y - 8))
 
 
 # ---------------------------------------------------------------------------
@@ -804,6 +1022,8 @@ func _hide_info() -> void:
 
 
 func _on_card_hover(cv: CardView, on: bool) -> void:
+	if UITheme.touch:
+		return
 	if on:
 		_show_card_info(cv)
 	elif _info_src == cv:
@@ -863,9 +1083,10 @@ func _info_box(anchor: Control, lines: Array) -> void:
 		if it is Control:
 			v.add_child(it)
 		else:
-			var l := UITheme.label(it, 16 if first else 14, UITheme.GOLD if first else UITheme.TEXT)
+			var big := 3 if UITheme.touch else 0
+			var l := UITheme.label(it, (16 if first else 14) + big, UITheme.GOLD if first else UITheme.TEXT)
 			l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			l.custom_minimum_size = Vector2(260, 0)
+			l.custom_minimum_size = Vector2(320 if UITheme.touch else 260, 0)
 			v.add_child(l)
 		first = false
 	add_child(box)
@@ -878,9 +1099,9 @@ func _info_box(anchor: Control, lines: Array) -> void:
 	var sz := box.get_combined_minimum_size()
 	box.size = sz
 	var x := r.end.x + 10.0
-	if x + sz.x > 1270.0:
+	if x + sz.x > size.x - 10.0:
 		x = r.position.x - sz.x - 10.0
-	box.position = Vector2(clampf(x, 4.0, 1276.0 - sz.x), clampf(r.position.y, 40.0, 716.0 - sz.y))
+	box.position = Vector2(clampf(x, 4.0, size.x - 4.0 - sz.x), clampf(r.position.y, 40.0, size.y - 4.0 - sz.y))
 
 
 func _show_card_info(cv: CardView) -> void:

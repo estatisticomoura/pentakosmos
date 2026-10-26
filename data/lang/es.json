@@ -187,5 +187,10 @@
  "All (shuffled)": "Todas (aleatorio)",
  "score": "partitura",
  "recording": "grabación",
- "Every track was created for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and freely licensed recordings of real instruments: the Salamander Grand Piano (by Alexander Holm) and the VSCO 2 Community Edition orchestra (by Versilian Studios). No commercial recording was used.": "Todas las pistas se crearon para Pentakosmos a partir de composiciones de dominio público, con partituras de licencia libre del Mutopia Project y grabaciones libres de instrumentos reales: el Salamander Grand Piano (de Alexander Holm) y la orquesta VSCO 2 Community Edition (de Versilian Studios). No se usó ninguna grabación comercial."
+ "Every track was created for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and freely licensed recordings of real instruments: the Salamander Grand Piano (by Alexander Holm) and the VSCO 2 Community Edition orchestra (by Versilian Studios). No commercial recording was used.": "Todas las pistas se crearon para Pentakosmos a partir de composiciones de dominio público, con partituras de licencia libre del Mutopia Project y grabaciones libres de instrumentos reales: el Salamander Grand Piano (de Alexander Holm) y la orquesta VSCO 2 Community Edition (de Versilian Studios). No se usó ninguna grabación comercial.",
+ "Auto layout": "Diseño automático",
+ "Computer layout": "Diseño de ordenador",
+ "Touch layout": "Diseño táctil",
+ "Table layout": "Disposición de la mesa",
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name} reservó una carta de nivel {lv} ({color}){pts}."
 }

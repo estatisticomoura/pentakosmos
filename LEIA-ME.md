@@ -22,7 +22,7 @@ As versões prontas ficam na página [Releases](https://github.com/estatisticomo
 
 - **Linux:** descompacte e rode `chmod +x pentakosmos.x86_64 && ./pentakosmos.x86_64`.
 - **Windows:** descompacte e abra `Pentakosmos.exe`. O Windows pode avisar que o programa não é assinado; clique em "Mais informações" e depois em "Executar assim mesmo".
-- **Android (7.0 ou mais novo):** baixe o `pentakosmos.apk` no celular e abra. O Android vai pedir para permitir a instalação de apps daquela origem (o navegador ou o gerenciador de arquivos); permita uma vez. O jogo roda na horizontal. Toque numa carta para selecioná-la e ver os detalhes, toque de novo para comprar; toque num filósofo para ver o requisito.
+- **Android (7.0 ou mais novo):** baixe o `pentakosmos.apk` no celular e abra. O Android vai pedir para permitir a instalação de apps daquela origem (o navegador ou o gerenciador de arquivos); permita uma vez. O jogo roda na horizontal, com uma mesa feita para o toque: os botões de ação ficam numa coluna à esquerda, a barra de cima lista o que os adversários fizeram desde a sua última jogada, e tudo fica maior. Toque numa carta para selecioná-la e ver os detalhes, toque de novo para comprar; toque num filósofo para ver o requisito. A disposição também pode ser escolhida no menu (ao lado de *Visual*): automática, computador ou toque.
 
 As regras estão explicadas dentro do jogo, em **Como jogar**. A história de como o jogo foi feito está em **Processo criativo** (e também em [docs/PROCESSO_CRIATIVO.md](docs/PROCESSO_CRIATIVO.md)).
 
@@ -134,6 +134,8 @@ Tudo é desenhado em código, e o jogo roda sem nenhuma imagem. Para usar arte p
 
 - `assets/cards/pentakosmos/` e `assets/cards/legacy/` — um arquivo por carta (os nomes estão em `assets/cards/CARD_LIST.csv`) e `back_l1.png` … `back_l3.png` para os versos;
 - `assets/philosophers/philosopher_1.png` … `philosopher_10.png`.
+
+O ícone (um dodecaedro negro com arestas douradas) é gerado por `python3 tools/gerar_icone.py` em `assets/icon/`.
 
 A faixa com o elemento, os pontos e os custos é desenhada por cima da arte; se as suas cartas já trouxerem essas informações, mude `DRAW_INFO_OVER_ART` para `false` em `scripts/ui/card_view.gd`. Efeitos sonoros: `assets/sfx/<nome>.ogg` (têm prioridade sobre os `.wav` gerados); `python3 tools/gerar_sons.py` gera de novo os efeitos provisórios.
 

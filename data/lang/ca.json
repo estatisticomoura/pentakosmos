@@ -187,5 +187,10 @@
  "All (shuffled)": "Totes (aleatori)",
  "score": "partitura",
  "recording": "enregistrament",
- "Every track was created for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and freely licensed recordings of real instruments: the Salamander Grand Piano (by Alexander Holm) and the VSCO 2 Community Edition orchestra (by Versilian Studios). No commercial recording was used.": "Totes les peces s'han creat per a Pentakosmos a partir d'obres de domini públic, amb partitures de llicència lliure del Mutopia Project i enregistraments lliures d'instruments reals: el Salamander Grand Piano (d'Alexander Holm) i l'orquestra VSCO 2 Community Edition (de Versilian Studios). No s'ha fet servir cap enregistrament comercial."
+ "Every track was created for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and freely licensed recordings of real instruments: the Salamander Grand Piano (by Alexander Holm) and the VSCO 2 Community Edition orchestra (by Versilian Studios). No commercial recording was used.": "Totes les peces s'han creat per a Pentakosmos a partir d'obres de domini públic, amb partitures de llicència lliure del Mutopia Project i enregistraments lliures d'instruments reals: el Salamander Grand Piano (d'Alexander Holm) i l'orquestra VSCO 2 Community Edition (de Versilian Studios). No s'ha fet servir cap enregistrament comercial.",
+ "Auto layout": "Disposició automàtica",
+ "Computer layout": "Disposició d'ordinador",
+ "Touch layout": "Disposició tàctil",
+ "Table layout": "Disposició de la taula",
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name} ha reservat una carta de nivell {lv} ({color}){pts}."
 }

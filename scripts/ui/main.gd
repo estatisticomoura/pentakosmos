@@ -16,6 +16,7 @@ func _ready() -> void:
 	Defs.set_visual("poligonal" if vis == "gemas" else vis)
 	L.set_lang(str(Store.get_value("geral", "idioma", "en")))
 	theme = UITheme.build()
+	UITheme.update_touch()
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_build_background()
 	stage = Control.new()
@@ -31,7 +32,15 @@ func _ready() -> void:
 
 
 func _layout() -> void:
-	stage.position = ((size - BASE) / 2.0).floor()
+	# no modo toque a mesa ocupa a tela toda (celulares sao mais largos que 16:9);
+	# as outras telas continuam com 1280x720, centralizadas
+	var full := UITheme.touch and _screen is GameScreen
+	stage.size = size if full else BASE
+	stage.position = Vector2.ZERO if full else ((size - BASE) / 2.0).floor()
+	if _screen != null:
+		_screen.size = stage.size
+	if _np:
+		_np.position = Vector2(170 if full else 14, stage.size.y - 15)
 	if _bg:
 		_bg.size = size
 	if _dust:
@@ -79,7 +88,9 @@ func _set_screen(s: Control) -> void:
 	if _screen != null:
 		_screen.queue_free()
 	_screen = s
+	UITheme.update_touch()
 	stage.add_child(s)
+	_layout()
 	s.modulate.a = 0.0
 	create_tween().tween_property(s, "modulate:a", 1.0, 0.3)
 

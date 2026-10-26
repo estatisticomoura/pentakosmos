@@ -98,6 +98,11 @@ func bonus_pos(c: int) -> Vector2:
 	return Vector2(12 + c * 74 + 14, _row_y())
 
 
+func _f(sz: int) -> int:
+	## Textos pequenos ficam um pouco maiores no modo toque.
+	return sz + 2 if UITheme.touch else sz
+
+
 func _row_y() -> float:
 	return size.y - 26
 
@@ -122,8 +127,8 @@ func _draw() -> void:
 	elif KIND_LABEL.has(p.kind):
 		tag = L.t(KIND_LABEL[p.kind])
 	if tag != "":
-		GemDraw.text(self, tag, Vector2(18 + nw, 23), 12, Color(0.65, 0.7, 0.8))
-		nw += ThemeDB.fallback_font.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x + 6
+		GemDraw.text(self, tag, Vector2(18 + nw, 23), _f(12), Color(0.65, 0.7, 0.8))
+		nw += ThemeDB.fallback_font.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1, _f(12)).x + 6
 	# reservas: minicartas (visiveis para quem olha) ou versos (ocultas)
 	_res_zone = Rect2(24 + nw, 7, p.reserved.size() * 19 - 4, 21) if not p.reserved.is_empty() else Rect2()
 	for i in range(p.reserved.size()):
@@ -152,7 +157,7 @@ func _draw() -> void:
 	# pontos
 	GemDraw.text(self, str(p.points), Vector2(size.x - 64, 34), 32, Color(1.0, 0.88, 0.55),
 		HORIZONTAL_ALIGNMENT_RIGHT, 40, 3)
-	GemDraw.text(self, "/%d" % g.rules.target, Vector2(size.x - 22, 34), 13, Color(0.7, 0.7, 0.75),
+	GemDraw.text(self, "/%d" % g.rules.target, Vector2(size.x - 22, 34), _f(13), Color(0.7, 0.7, 0.75),
 		HORIZONTAL_ALIGNMENT_LEFT, -1)
 	# bonus + fichas por cor
 	var y := _row_y()
@@ -196,10 +201,10 @@ func _draw() -> void:
 		var gx := Vector2(size.x - 262, 17)
 		if cp > 0:
 			GemDraw.draw_gem(self, bc, gx, 7, false)
-		GemDraw.text(self, "%d/%d" % [cp, g.rules.color_win], gx + Vector2(10, 5), 12,
+		GemDraw.text(self, "%d/%d" % [cp, g.rules.color_win], gx + Vector2(10, 5), _f(12),
 			Color(1.0, 0.85, 0.35) if cp >= g.rules.color_win - 3 else Color(0.6, 0.62, 0.7))
 	# total de fichas vs limite
 	var tot := p.token_count()
 	var lim := g.rules.hand_limit
-	GemDraw.text(self, L.f("{n}/{lim} tokens", {"n": tot, "lim": lim}), Vector2(size.x - 200, 23), 12,
+	GemDraw.text(self, L.f("{n}/{lim} tokens", {"n": tot, "lim": lim}), Vector2(size.x - 200, 23), _f(12),
 		Color(1, 0.5, 0.4) if tot >= lim else Color(0.6, 0.62, 0.7))

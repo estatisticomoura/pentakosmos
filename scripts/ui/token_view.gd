@@ -19,6 +19,8 @@ func _init() -> void:
 
 
 func _ready() -> void:
+	if UITheme.touch:
+		return
 	mouse_entered.connect(func(): if enabled and color_idx != Defs.GOLD: create_tween().tween_property(self, "scale", Vector2(1.08, 1.08), 0.1))
 	mouse_exited.connect(func(): create_tween().tween_property(self, "scale", Vector2.ONE, 0.1))
 

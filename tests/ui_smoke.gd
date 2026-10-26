@@ -19,6 +19,9 @@ func _ready() -> void:
 			n = int(a)
 		elif a in ["house", "classico"]:
 			preset = a
+	var old_layout = Store.get_value("geral", "interface", "auto")
+	Store.set_value("geral", "interface", "toque" if args.has("toque") else "pc")
+	tree_exiting.connect(func(): Store.set_value("geral", "interface", old_layout))
 	if shots:
 		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(out_dir))
 	main = load("res://scenes/main.tscn").instantiate()

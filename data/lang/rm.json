@@ -187,5 +187,10 @@
  "All (shuffled)": "Tuts (a l'aventura)",
  "score": "partitura",
  "recording": "registraziun",
- "Every track was created for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and freely licensed recordings of real instruments: the Salamander Grand Piano (by Alexander Holm) and the VSCO 2 Community Edition orchestra (by Versilian Studios). No commercial recording was used.": "Tut ils tocs èn vegnids creads per Pentakosmos da cumposiziuns en il domen public, cun partituras cun licenza libra dal Mutopia Project e registraziuns libras d'instruments vairs: il Salamander Grand Piano (dad Alexander Holm) e l'orchester VSCO 2 Community Edition (da Versilian Studios). I n'è vegnida duvrada nagina registraziun commerziala."
+ "Every track was created for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and freely licensed recordings of real instruments: the Salamander Grand Piano (by Alexander Holm) and the VSCO 2 Community Edition orchestra (by Versilian Studios). No commercial recording was used.": "Tut ils tocs èn vegnids creads per Pentakosmos da cumposiziuns en il domen public, cun partituras cun licenza libra dal Mutopia Project e registraziuns libras d'instruments vairs: il Salamander Grand Piano (dad Alexander Holm) e l'orchester VSCO 2 Community Edition (da Versilian Studios). I n'è vegnida duvrada nagina registraziun commerziala.",
+ "Auto layout": "Disposiziun automatica",
+ "Computer layout": "Disposiziun computer",
+ "Touch layout": "Disposiziun tactila",
+ "Table layout": "Disposiziun da la maisa",
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name} ha reservà ina carta dal nivel {lv} ({color}){pts}."
 }

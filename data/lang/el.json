@@ -187,5 +187,10 @@
  "All (shuffled)": "Όλα (τυχαία)",
  "score": "παρτιτούρα",
  "recording": "ηχογράφηση",
- "Every track was created for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and freely licensed recordings of real instruments: the Salamander Grand Piano (by Alexander Holm) and the VSCO 2 Community Edition orchestra (by Versilian Studios). No commercial recording was used.": "Όλα τα κομμάτια δημιουργήθηκαν για το Pentakosmos από έργα κοινού κτήματος, με ελεύθερες παρτιτούρες του Mutopia Project και ελεύθερες ηχογραφήσεις πραγματικών οργάνων: το Salamander Grand Piano (του Alexander Holm) και την ορχήστρα VSCO 2 Community Edition (της Versilian Studios). Δεν χρησιμοποιήθηκε καμία εμπορική ηχογράφηση."
+ "Every track was created for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and freely licensed recordings of real instruments: the Salamander Grand Piano (by Alexander Holm) and the VSCO 2 Community Edition orchestra (by Versilian Studios). No commercial recording was used.": "Όλα τα κομμάτια δημιουργήθηκαν για το Pentakosmos από έργα κοινού κτήματος, με ελεύθερες παρτιτούρες του Mutopia Project και ελεύθερες ηχογραφήσεις πραγματικών οργάνων: το Salamander Grand Piano (του Alexander Holm) και την ορχήστρα VSCO 2 Community Edition (της Versilian Studios). Δεν χρησιμοποιήθηκε καμία εμπορική ηχογράφηση.",
+ "Auto layout": "Αυτόματη διάταξη",
+ "Computer layout": "Διάταξη υπολογιστή",
+ "Touch layout": "Διάταξη αφής",
+ "Table layout": "Διάταξη τραπεζιού",
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name}: κράτησε κάρτα επιπέδου {lv} ({color}){pts}."
 }

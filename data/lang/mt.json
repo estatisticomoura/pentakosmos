@@ -187,5 +187,10 @@
  "All (shuffled)": "Kollha (bl-addoċċ)",
  "score": "partitura",
  "recording": "reġistrazzjoni",
- "Every track was created for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and freely licensed recordings of real instruments: the Salamander Grand Piano (by Alexander Holm) and the VSCO 2 Community Edition orchestra (by Versilian Studios). No commercial recording was used.": "Il-biċċiet kollha nħolqu għal Pentakosmos minn kompożizzjonijiet fid-dominju pubbliku, b'partituri b'liċenzja ħielsa mill-Mutopia Project u reġistrazzjonijiet ħielsa ta' strumenti veri: is-Salamander Grand Piano (ta' Alexander Holm) u l-orkestra VSCO 2 Community Edition (ta' Versilian Studios). Ma ntużat l-ebda reġistrazzjoni kummerċjali."
+ "Every track was created for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and freely licensed recordings of real instruments: the Salamander Grand Piano (by Alexander Holm) and the VSCO 2 Community Edition orchestra (by Versilian Studios). No commercial recording was used.": "Il-biċċiet kollha nħolqu għal Pentakosmos minn kompożizzjonijiet fid-dominju pubbliku, b'partituri b'liċenzja ħielsa mill-Mutopia Project u reġistrazzjonijiet ħielsa ta' strumenti veri: is-Salamander Grand Piano (ta' Alexander Holm) u l-orkestra VSCO 2 Community Edition (ta' Versilian Studios). Ma ntużat l-ebda reġistrazzjoni kummerċjali.",
+ "Auto layout": "Tqassim awtomatiku",
+ "Computer layout": "Tqassim tal-kompjuter",
+ "Touch layout": "Tqassim tal-mess",
+ "Table layout": "Tqassim tal-mejda",
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name} irriserva karta tal-livell {lv} ({color}){pts}."
 }

@@ -187,5 +187,10 @@
  "All (shuffled)": "Gach ceann (randamach)",
  "score": "scór",
  "recording": "taifeadadh",
- "Every track was created for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and freely licensed recordings of real instruments: the Salamander Grand Piano (by Alexander Holm) and the VSCO 2 Community Edition orchestra (by Versilian Studios). No commercial recording was used.": "Cruthaíodh gach rian don Pentakosmos ó shaothair san fhearann poiblí, le scóir faoi cheadúnas saor ón Mutopia Project agus taifeadtaí saora d'uirlisí fíre: an Salamander Grand Piano (le Alexander Holm) agus an cheolfhoireann VSCO 2 Community Edition (ó Versilian Studios). Níor úsáideadh aon taifeadadh tráchtála."
+ "Every track was created for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and freely licensed recordings of real instruments: the Salamander Grand Piano (by Alexander Holm) and the VSCO 2 Community Edition orchestra (by Versilian Studios). No commercial recording was used.": "Cruthaíodh gach rian don Pentakosmos ó shaothair san fhearann poiblí, le scóir faoi cheadúnas saor ón Mutopia Project agus taifeadtaí saora d'uirlisí fíre: an Salamander Grand Piano (le Alexander Holm) agus an cheolfhoireann VSCO 2 Community Edition (ó Versilian Studios). Níor úsáideadh aon taifeadadh tráchtála.",
+ "Auto layout": "Leagan amach uathoibríoch",
+ "Computer layout": "Leagan amach ríomhaire",
+ "Touch layout": "Leagan amach tadhaill",
+ "Table layout": "Leagan amach an bhoird",
+ "{name} reserved a level {lv} card ({color}){pts}.": "Chuir {name} cárta de leibhéal {lv} in áirithe ({color}){pts}."
 }

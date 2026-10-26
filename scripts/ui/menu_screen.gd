@@ -155,6 +155,15 @@ func _build() -> void:
 	vo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	vo.item_selected.connect(_on_visual)
 	vh.add_child(vo)
+	# disposicao da mesa: automatica, computador ou toque
+	var io := UITheme.option(UITheme.LAYOUT_NAMES.map(func(x): return L.t(x)),
+		maxi(0, UITheme.LAYOUTS.find(str(Store.get_value("geral", "interface", "auto")))))
+	io.custom_minimum_size = Vector2(180, 0)
+	io.tooltip_text = L.t("Table layout")
+	io.item_selected.connect(func(i: int):
+		Store.set_value("geral", "interface", UITheme.LAYOUTS[i])
+		Audio.play("select"))
+	vh.add_child(io)
 	rv.add_child(vh)
 	var lh := HBoxContainer.new()
 	# "Language" sempre aparece tambem em ingles, para quem nao entende o idioma atual

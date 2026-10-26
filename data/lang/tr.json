@@ -187,5 +187,10 @@
  "All (shuffled)": "Tümü (karışık)",
  "score": "nota",
  "recording": "kayıt",
- "Every track was created for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and freely licensed recordings of real instruments: the Salamander Grand Piano (by Alexander Holm) and the VSCO 2 Community Edition orchestra (by Versilian Studios). No commercial recording was used.": "Tüm parçalar, kamu malı eserlerden, Mutopia Project'in özgür lisanslı notaları ve gerçek çalgıların özgür kayıtlarıyla Pentakosmos için yaratıldı: Salamander Grand Piano (Alexander Holm) ve VSCO 2 Community Edition orkestrası (Versilian Studios). Hiçbir ticari kayıt kullanılmadı."
+ "Every track was created for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and freely licensed recordings of real instruments: the Salamander Grand Piano (by Alexander Holm) and the VSCO 2 Community Edition orchestra (by Versilian Studios). No commercial recording was used.": "Tüm parçalar, kamu malı eserlerden, Mutopia Project'in özgür lisanslı notaları ve gerçek çalgıların özgür kayıtlarıyla Pentakosmos için yaratıldı: Salamander Grand Piano (Alexander Holm) ve VSCO 2 Community Edition orkestrası (Versilian Studios). Hiçbir ticari kayıt kullanılmadı.",
+ "Auto layout": "Otomatik düzen",
+ "Computer layout": "Bilgisayar düzeni",
+ "Touch layout": "Dokunmatik düzen",
+ "Table layout": "Masa düzeni",
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name}, {lv}. seviye bir kart ayırdı ({color}){pts}."
 }

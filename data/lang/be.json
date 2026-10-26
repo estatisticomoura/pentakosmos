@@ -187,5 +187,10 @@
  "All (shuffled)": "Усе (уперамешку)",
  "score": "ноты",
  "recording": "запіс",
- "Every track was created for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and freely licensed recordings of real instruments: the Salamander Grand Piano (by Alexander Holm) and the VSCO 2 Community Edition orchestra (by Versilian Studios). No commercial recording was used.": "Усе трэкі створаныя для Pentakosmos па творах у грамадскім набытку, з нотамі пад вольнай ліцэнзіяй з Mutopia Project і вольнымі запісамі сапраўдных інструментаў: Salamander Grand Piano (аўтар Alexander Holm) і аркестрам VSCO 2 Community Edition (Versilian Studios). Камерцыйныя запісы не выкарыстоўваліся."
+ "Every track was created for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and freely licensed recordings of real instruments: the Salamander Grand Piano (by Alexander Holm) and the VSCO 2 Community Edition orchestra (by Versilian Studios). No commercial recording was used.": "Усе трэкі створаныя для Pentakosmos па творах у грамадскім набытку, з нотамі пад вольнай ліцэнзіяй з Mutopia Project і вольнымі запісамі сапраўдных інструментаў: Salamander Grand Piano (аўтар Alexander Holm) і аркестрам VSCO 2 Community Edition (Versilian Studios). Камерцыйныя запісы не выкарыстоўваліся.",
+ "Auto layout": "Аўтаматычны макет",
+ "Computer layout": "Макет для камп'ютара",
+ "Touch layout": "Сэнсарны макет",
+ "Table layout": "Макет стала",
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name}: зарэзервавана карта ўзроўню {lv} ({color}){pts}."
 }

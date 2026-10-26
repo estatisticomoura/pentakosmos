@@ -187,5 +187,10 @@
  "All (shuffled)": "Visos (atsitiktinai)",
  "score": "natos",
  "recording": "įrašas",
- "Every track was created for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and freely licensed recordings of real instruments: the Salamander Grand Piano (by Alexander Holm) and the VSCO 2 Community Edition orchestra (by Versilian Studios). No commercial recording was used.": "Visi kūriniai Pentakosmos sukurti iš viešojo naudojimo kūrinių, naudojant laisvos licencijos Mutopia Project natas ir laisvus tikrų instrumentų įrašus: Salamander Grand Piano (Alexander Holm) ir orkestrą VSCO 2 Community Edition (Versilian Studios). Nebuvo naudotas joks komercinis įrašas."
+ "Every track was created for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and freely licensed recordings of real instruments: the Salamander Grand Piano (by Alexander Holm) and the VSCO 2 Community Edition orchestra (by Versilian Studios). No commercial recording was used.": "Visi kūriniai Pentakosmos sukurti iš viešojo naudojimo kūrinių, naudojant laisvos licencijos Mutopia Project natas ir laisvus tikrų instrumentų įrašus: Salamander Grand Piano (Alexander Holm) ir orkestrą VSCO 2 Community Edition (Versilian Studios). Nebuvo naudotas joks komercinis įrašas.",
+ "Auto layout": "Automatinis išdėstymas",
+ "Computer layout": "Kompiuterio išdėstymas",
+ "Touch layout": "Liečiamas išdėstymas",
+ "Table layout": "Stalo išdėstymas",
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name} rezervavo {lv} lygio kortą ({color}){pts}."
 }

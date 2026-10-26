@@ -27,6 +27,7 @@ var slot := -1
 
 var _t := 0.0
 var _hover := false
+var base_scale := 1.0     # escala da carta na mesa (maior no modo toque)
 var _tex: Texture2D = null
 var _back_tex: Texture2D = null
 static var _tex_cache := {}
@@ -84,12 +85,15 @@ func set_selected(v: bool) -> void:
 
 
 func _set_hover(v: bool) -> void:
+	# no toque o "mouse" fica parado onde o dedo tocou: sem efeito de passar por cima
+	if UITheme.touch:
+		return
 	_hover = v
 	hover_changed.emit(self, v)
 	if not interactive or (card == null and back_level == 0):
 		return
 	var tw := create_tween()
-	tw.tween_property(self, "scale", Vector2(1.05, 1.05) if v else Vector2.ONE, 0.12)
+	tw.tween_property(self, "scale", Vector2.ONE * base_scale * (1.05 if v else 1.0), 0.12)
 	z_index = 5 if v else 0
 
 

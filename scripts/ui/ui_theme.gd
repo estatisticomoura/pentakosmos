@@ -8,6 +8,16 @@ const TEXT := Color(0.92, 0.92, 0.96)
 const MUTED := Color(0.65, 0.68, 0.76)
 const PANEL := Color(0.08, 0.09, 0.13, 0.94)
 
+## Disposicao da mesa: "auto" (toque no celular, computador no resto), "pc" ou "toque".
+const LAYOUTS := ["auto", "pc", "toque"]
+const LAYOUT_NAMES := ["Auto layout", "Computer layout", "Touch layout"]  # tr
+static var touch := false
+
+
+static func update_touch() -> void:
+	var m := str(Store.get_value("geral", "interface", "auto"))
+	touch = OS.has_feature("mobile") if m == "auto" else m == "toque"
+
 
 static func box(bg: Color, border: Color = Color(0, 0, 0, 0), bw := 0, radius := 8, pad := 10.0) -> StyleBoxFlat:
 	var sb := StyleBoxFlat.new()

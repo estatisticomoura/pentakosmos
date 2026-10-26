@@ -187,5 +187,10 @@
  "All (shuffled)": "Kõik (juhuslikult)",
  "score": "noodid",
  "recording": "salvestis",
- "Every track was created for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and freely licensed recordings of real instruments: the Salamander Grand Piano (by Alexander Holm) and the VSCO 2 Community Edition orchestra (by Versilian Studios). No commercial recording was used.": "Kõik palad loodi Pentakosmose jaoks avalikku omandisse kuuluvatest teostest, kasutades Mutopia Projecti vaba litsentsiga noote ja päris pillide vabu salvestisi: Salamander Grand Piano (Alexander Holm) ja orkester VSCO 2 Community Edition (Versilian Studios). Ühtegi kommertssalvestist ei kasutatud."
+ "Every track was created for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and freely licensed recordings of real instruments: the Salamander Grand Piano (by Alexander Holm) and the VSCO 2 Community Edition orchestra (by Versilian Studios). No commercial recording was used.": "Kõik palad loodi Pentakosmose jaoks avalikku omandisse kuuluvatest teostest, kasutades Mutopia Projecti vaba litsentsiga noote ja päris pillide vabu salvestisi: Salamander Grand Piano (Alexander Holm) ja orkester VSCO 2 Community Edition (Versilian Studios). Ühtegi kommertssalvestist ei kasutatud.",
+ "Auto layout": "Automaatne paigutus",
+ "Computer layout": "Arvuti paigutus",
+ "Touch layout": "Puutepaigutus",
+ "Table layout": "Laua paigutus",
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name} broneeris taseme {lv} kaardi ({color}){pts}."
 }
