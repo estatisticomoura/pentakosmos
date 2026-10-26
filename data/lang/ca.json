@@ -159,7 +159,6 @@
  "Save": "Desa",
  "Delete": "Suprimeix",
  "Players": "Jugadors",
- "Number": "Nombre",
  "Visual": "Aspecte",
  "Language": "Llengua",
  "Audio": "So",
@@ -192,5 +191,10 @@
  "Computer layout": "Disposició d'ordinador",
  "Touch layout": "Disposició tàctil",
  "Table layout": "Disposició de la taula",
- "{name} reserved a level {lv} card ({color}){pts}.": "{name} ha reservat una carta de nivell {lv} ({color}){pts}."
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name} ha reservat una carta de nivell {lv} ({color}){pts}.",
+ "Customize rules": "Personalitza les regles",
+ "Options": "Opcions",
+ "New game": "Partida nova",
+ "Start game": "Comença la partida",
+ "Game": "Joc"
 }

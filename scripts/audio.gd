@@ -71,9 +71,18 @@ func play(sfx_name: String, pitch_var := 0.06, volume_db := 0.0) -> void:
 	pl.play()
 
 
+const FIRST_TRACK := "debussy_clair_de_lune"   # sempre a primeira ao abrir o jogo
+
+
 func start_music() -> void:
 	if _music.playing or mode == "off":
 		return
+	if not mode.begins_with("track:"):
+		for t in tracks:
+			if t["id"] == FIRST_TRACK:
+				current = t
+				_play_current()
+				return
 	_next_track()
 
 

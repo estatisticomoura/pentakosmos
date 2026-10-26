@@ -159,7 +159,6 @@
  "Save": "Kaydet",
  "Delete": "Sil",
  "Players": "Oyuncular",
- "Number": "Sayı",
  "Visual": "Görünüm",
  "Language": "Dil",
  "Audio": "Ses",
@@ -192,5 +191,10 @@
  "Computer layout": "Bilgisayar düzeni",
  "Touch layout": "Dokunmatik düzen",
  "Table layout": "Masa düzeni",
- "{name} reserved a level {lv} card ({color}){pts}.": "{name}, {lv}. seviye bir kart ayırdı ({color}){pts}."
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name}, {lv}. seviye bir kart ayırdı ({color}){pts}.",
+ "Customize rules": "Kuralları özelleştir",
+ "Options": "Seçenekler",
+ "New game": "Yeni oyun",
+ "Start game": "Oyunu başlat",
+ "Game": "Oyun"
 }

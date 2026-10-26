@@ -159,7 +159,6 @@
  "Save": "Lagre",
  "Delete": "Slett",
  "Players": "Spillere",
- "Number": "Antall",
  "Visual": "Utseende",
  "Language": "Språk",
  "Audio": "Lyd",
@@ -192,5 +191,10 @@
  "Computer layout": "Datamaskinoppsett",
  "Touch layout": "Berøringsoppsett",
  "Table layout": "Bordoppsett",
- "{name} reserved a level {lv} card ({color}){pts}.": "{name} reserverte et kort på nivå {lv} ({color}){pts}."
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name} reserverte et kort på nivå {lv} ({color}){pts}.",
+ "Customize rules": "Tilpass reglene",
+ "Options": "Innstillinger",
+ "New game": "Nytt spill",
+ "Start game": "Start spillet",
+ "Game": "Spill"
 }

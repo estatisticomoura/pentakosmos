@@ -159,7 +159,6 @@
  "Save": "Запази",
  "Delete": "Изтрий",
  "Players": "Играчи",
- "Number": "Брой",
  "Visual": "Външен вид",
  "Language": "Език",
  "Audio": "Звук",
@@ -192,5 +191,10 @@
  "Computer layout": "Оформление за компютър",
  "Touch layout": "Сензорно оформление",
  "Table layout": "Оформление на масата",
- "{name} reserved a level {lv} card ({color}){pts}.": "{name} резервира карта от ниво {lv} ({color}){pts}."
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name} резервира карта от ниво {lv} ({color}){pts}.",
+ "Customize rules": "Персонализиране на правилата",
+ "Options": "Настройки",
+ "New game": "Нова игра",
+ "Start game": "Започни играта",
+ "Game": "Игра"
 }

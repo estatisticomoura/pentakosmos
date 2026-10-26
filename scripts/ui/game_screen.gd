@@ -401,6 +401,15 @@ func _scale_card(cv: CardView) -> void:
 	cv.scale = Vector2(_s, _s)
 
 
+func _notification(what: int) -> void:
+	# botao "voltar" do Android: abre ou fecha a pausa
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST and g != null:
+		if _overlay_kind == "Pausa":
+			_close_overlay()
+		elif _overlay == null:
+			_show_pause()
+
+
 func _gui_input(event: InputEvent) -> void:
 	# toque fora de tudo fecha as dicas abertas
 	if event is InputEventMouseButton and event.pressed:

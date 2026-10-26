@@ -159,7 +159,6 @@
  "Save": "Uložiť",
  "Delete": "Zmazať",
  "Players": "Hráči",
- "Number": "Počet",
  "Visual": "Vzhľad",
  "Language": "Jazyk",
  "Audio": "Zvuk",
@@ -192,5 +191,10 @@
  "Computer layout": "Rozloženie pre počítač",
  "Touch layout": "Dotykové rozloženie",
  "Table layout": "Rozloženie stola",
- "{name} reserved a level {lv} card ({color}){pts}.": "{name} rezervuje kartu úrovne {lv} ({color}){pts}."
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name} rezervuje kartu úrovne {lv} ({color}){pts}.",
+ "Customize rules": "Upraviť pravidlá",
+ "Options": "Nastavenia",
+ "New game": "Nová hra",
+ "Start game": "Začať hru",
+ "Game": "Hra"
 }

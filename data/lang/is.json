@@ -159,7 +159,6 @@
  "Save": "Vista",
  "Delete": "Eyða",
  "Players": "Leikmenn",
- "Number": "Fjöldi",
  "Visual": "Útlit",
  "Language": "Tungumál",
  "Audio": "Hljóð",
@@ -192,5 +191,10 @@
  "Computer layout": "Tölvuútlit",
  "Touch layout": "Snertiútlit",
  "Table layout": "Útlit borðsins",
- "{name} reserved a level {lv} card ({color}){pts}.": "{name} tók frá spil á stigi {lv} ({color}){pts}."
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name} tók frá spil á stigi {lv} ({color}){pts}.",
+ "Customize rules": "Sérsníða reglur",
+ "Options": "Stillingar",
+ "New game": "Nýr leikur",
+ "Start game": "Hefja leik",
+ "Game": "Leikur"
 }

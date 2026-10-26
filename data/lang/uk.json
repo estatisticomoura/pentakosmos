@@ -159,7 +159,6 @@
  "Save": "Зберегти",
  "Delete": "Видалити",
  "Players": "Гравці",
- "Number": "Кількість",
  "Visual": "Вигляд",
  "Language": "Мова",
  "Audio": "Звук",
@@ -192,5 +191,10 @@
  "Computer layout": "Макет для комп'ютера",
  "Touch layout": "Сенсорний макет",
  "Table layout": "Макет столу",
- "{name} reserved a level {lv} card ({color}){pts}.": "{name}: зарезервовано карту рівня {lv} ({color}){pts}."
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name}: зарезервовано карту рівня {lv} ({color}){pts}.",
+ "Customize rules": "Налаштувати правила",
+ "Options": "Налаштування",
+ "New game": "Нова гра",
+ "Start game": "Почати гру",
+ "Game": "Гра"
 }

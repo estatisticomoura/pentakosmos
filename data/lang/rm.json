@@ -159,7 +159,6 @@
  "Save": "Memorisar",
  "Delete": "Stizzar",
  "Players": "Giugaders",
- "Number": "Dumber",
  "Visual": "Aspect",
  "Language": "Lingua",
  "Audio": "Tun",
@@ -192,5 +191,10 @@
  "Computer layout": "Disposiziun computer",
  "Touch layout": "Disposiziun tactila",
  "Table layout": "Disposiziun da la maisa",
- "{name} reserved a level {lv} card ({color}){pts}.": "{name} ha reservà ina carta dal nivel {lv} ({color}){pts}."
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name} ha reservà ina carta dal nivel {lv} ({color}){pts}.",
+ "Customize rules": "Adattar las reglas",
+ "Options": "Opziuns",
+ "New game": "Nov gieu",
+ "Start game": "Cumenzar il gieu",
+ "Game": "Gieu"
 }

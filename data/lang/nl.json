@@ -159,7 +159,6 @@
  "Save": "Opslaan",
  "Delete": "Verwijderen",
  "Players": "Spelers",
- "Number": "Aantal",
  "Visual": "Uiterlijk",
  "Language": "Taal",
  "Audio": "Geluid",
@@ -192,5 +191,10 @@
  "Computer layout": "Computerindeling",
  "Touch layout": "Aanraakindeling",
  "Table layout": "Tafelindeling",
- "{name} reserved a level {lv} card ({color}){pts}.": "{name} reserveert een kaart van niveau {lv} ({color}){pts}."
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name} reserveert een kaart van niveau {lv} ({color}){pts}.",
+ "Customize rules": "Regels aanpassen",
+ "Options": "Opties",
+ "New game": "Nieuw spel",
+ "Start game": "Spel starten",
+ "Game": "Spel"
 }

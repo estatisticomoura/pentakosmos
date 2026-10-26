@@ -28,6 +28,15 @@ func _ready() -> void:
 	add_child(main)
 	await _frames(20)
 	await _shot("menu")
+	for pg in ["setup", "rules", "opcoes", "language", "home"]:
+		main._screen.show_page(pg)
+		await _frames(8)
+		await _shot("menu_" + pg)
+	var vis := Defs.visual
+	Defs.set_visual("poligonal")
+	await _frames(4)
+	await _shot("menu_poligonal")
+	Defs.set_visual(vis)
 	var rules: RuleSet = RuleSet.house_full() if preset == "house" else RuleSet.classic()
 	# 1) partida so com IAs, acelerada
 	Engine.time_scale = 1.0 if shots else 25.0

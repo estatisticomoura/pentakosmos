@@ -159,7 +159,6 @@
  "Save": "Enregistrer",
  "Delete": "Supprimer",
  "Players": "Joueurs",
- "Number": "Nombre",
  "Visual": "Apparence",
  "Language": "Langue",
  "Audio": "Audio",
@@ -192,5 +191,10 @@
  "Computer layout": "Disposition ordinateur",
  "Touch layout": "Disposition tactile",
  "Table layout": "Disposition de la table",
- "{name} reserved a level {lv} card ({color}){pts}.": "{name} a réservé une carte de niveau {lv} ({color}){pts}."
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name} a réservé une carte de niveau {lv} ({color}){pts}.",
+ "Customize rules": "Personnaliser les règles",
+ "Options": "Options",
+ "New game": "Nouvelle partie",
+ "Start game": "Commencer la partie",
+ "Game": "Jeu"
 }

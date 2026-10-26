@@ -68,7 +68,10 @@ static func build() -> Theme:
 	t.set_stylebox("hover", "PopupMenu", box(Color(0.25, 0.22, 0.15), Color(0, 0, 0, 0), 0, 6, 4))
 	t.set_color("font_color", "PopupMenu", TEXT)
 	t.set_color("font_hover_color", "PopupMenu", Color(1, 0.95, 0.8))
-	t.set_font_size("font_size", "PopupMenu", 18)
+	t.set_font_size("font_size", "PopupMenu", 21)
+	t.set_constant("v_separation", "PopupMenu", 14)
+	t.set_constant("item_start_padding", "PopupMenu", 12)
+	t.set_constant("item_end_padding", "PopupMenu", 16)
 	# campos
 	var le := box(Color(0.06, 0.07, 0.10), Color(1, 1, 1, 0.15), 1, 6, 8)
 	t.set_stylebox("normal", "LineEdit", le)

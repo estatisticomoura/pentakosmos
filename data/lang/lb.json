@@ -159,7 +159,6 @@
  "Save": "Späicheren",
  "Delete": "Läschen",
  "Players": "Spiller",
- "Number": "Zuel",
  "Visual": "Ausgesinn",
  "Language": "Sprooch",
  "Audio": "Toun",
@@ -192,5 +191,10 @@
  "Computer layout": "Computer-Layout",
  "Touch layout": "Touch-Layout",
  "Table layout": "Layout vum Dësch",
- "{name} reserved a level {lv} card ({color}){pts}.": "{name} reservéiert eng Kaart vum Niveau {lv} ({color}){pts}."
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name} reservéiert eng Kaart vum Niveau {lv} ({color}){pts}.",
+ "Customize rules": "Reegelen upassen",
+ "Options": "Optiounen",
+ "New game": "Neit Spill",
+ "Start game": "Spill starten",
+ "Game": "Spill"
 }

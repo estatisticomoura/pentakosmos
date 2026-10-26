@@ -159,7 +159,6 @@
  "Save": "Mentés",
  "Delete": "Törlés",
  "Players": "Játékosok",
- "Number": "Létszám",
  "Visual": "Megjelenés",
  "Language": "Nyelv",
  "Audio": "Hang",
@@ -192,5 +191,10 @@
  "Computer layout": "Számítógépes elrendezés",
  "Touch layout": "Érintős elrendezés",
  "Table layout": "Az asztal elrendezése",
- "{name} reserved a level {lv} card ({color}){pts}.": "{name} lefoglalt egy {lv}. szintű lapot ({color}){pts}."
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name} lefoglalt egy {lv}. szintű lapot ({color}){pts}.",
+ "Customize rules": "Szabályok testreszabása",
+ "Options": "Beállítások",
+ "New game": "Új játék",
+ "Start game": "Játék indítása",
+ "Game": "Játék"
 }

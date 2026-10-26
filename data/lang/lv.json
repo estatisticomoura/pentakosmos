@@ -159,7 +159,6 @@
  "Save": "Saglabāt",
  "Delete": "Dzēst",
  "Players": "Spēlētāji",
- "Number": "Skaits",
  "Visual": "Izskats",
  "Language": "Valoda",
  "Audio": "Skaņa",
@@ -192,5 +191,10 @@
  "Computer layout": "Datora izkārtojums",
  "Touch layout": "Skārienekrāna izkārtojums",
  "Table layout": "Galda izkārtojums",
- "{name} reserved a level {lv} card ({color}){pts}.": "{name} rezervēja {lv}. līmeņa kārti ({color}){pts}."
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name} rezervēja {lv}. līmeņa kārti ({color}){pts}.",
+ "Customize rules": "Pielāgot noteikumus",
+ "Options": "Iestatījumi",
+ "New game": "Jauna spēle",
+ "Start game": "Sākt spēli",
+ "Game": "Spēle"
 }

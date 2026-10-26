@@ -159,7 +159,6 @@
  "Save": "Išsaugoti",
  "Delete": "Ištrinti",
  "Players": "Žaidėjai",
- "Number": "Skaičius",
  "Visual": "Išvaizda",
  "Language": "Kalba",
  "Audio": "Garsas",
@@ -192,5 +191,10 @@
  "Computer layout": "Kompiuterio išdėstymas",
  "Touch layout": "Liečiamas išdėstymas",
  "Table layout": "Stalo išdėstymas",
- "{name} reserved a level {lv} card ({color}){pts}.": "{name} rezervavo {lv} lygio kortą ({color}){pts}."
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name} rezervavo {lv} lygio kortą ({color}){pts}.",
+ "Customize rules": "Tinkinti taisykles",
+ "Options": "Nustatymai",
+ "New game": "Naujas žaidimas",
+ "Start game": "Pradėti žaidimą",
+ "Game": "Žaidimas"
 }

@@ -159,7 +159,6 @@
  "Save": "Issejvja",
  "Delete": "Ħassar",
  "Players": "Plejers",
- "Number": "Numru",
  "Visual": "Dehra",
  "Language": "Lingwa",
  "Audio": "Ħoss",
@@ -192,5 +191,10 @@
  "Computer layout": "Tqassim tal-kompjuter",
  "Touch layout": "Tqassim tal-mess",
  "Table layout": "Tqassim tal-mejda",
- "{name} reserved a level {lv} card ({color}){pts}.": "{name} irriserva karta tal-livell {lv} ({color}){pts}."
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name} irriserva karta tal-livell {lv} ({color}){pts}.",
+ "Customize rules": "Ippersonalizza r-regoli",
+ "Options": "Għażliet",
+ "New game": "Logħba ġdida",
+ "Start game": "Ibda l-logħba",
+ "Game": "Logħba"
 }

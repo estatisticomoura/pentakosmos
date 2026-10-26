@@ -159,7 +159,6 @@
  "Save": "Αποθήκευση",
  "Delete": "Διαγραφή",
  "Players": "Παίκτες",
- "Number": "Αριθμός",
  "Visual": "Εμφάνιση",
  "Language": "Γλώσσα",
  "Audio": "Ήχος",
@@ -192,5 +191,10 @@
  "Computer layout": "Διάταξη υπολογιστή",
  "Touch layout": "Διάταξη αφής",
  "Table layout": "Διάταξη τραπεζιού",
- "{name} reserved a level {lv} card ({color}){pts}.": "{name}: κράτησε κάρτα επιπέδου {lv} ({color}){pts}."
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name}: κράτησε κάρτα επιπέδου {lv} ({color}){pts}.",
+ "Customize rules": "Προσαρμογή κανόνων",
+ "Options": "Επιλογές",
+ "New game": "Νέο παιχνίδι",
+ "Start game": "Έναρξη παιχνιδιού",
+ "Game": "Παιχνίδι"
 }

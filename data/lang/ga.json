@@ -159,7 +159,6 @@
  "Save": "Sábháil",
  "Delete": "Scrios",
  "Players": "Imreoirí",
- "Number": "Líon",
  "Visual": "Cuma",
  "Language": "Teanga",
  "Audio": "Fuaim",
@@ -192,5 +191,10 @@
  "Computer layout": "Leagan amach ríomhaire",
  "Touch layout": "Leagan amach tadhaill",
  "Table layout": "Leagan amach an bhoird",
- "{name} reserved a level {lv} card ({color}){pts}.": "Chuir {name} cárta de leibhéal {lv} in áirithe ({color}){pts}."
+ "{name} reserved a level {lv} card ({color}){pts}.": "Chuir {name} cárta de leibhéal {lv} in áirithe ({color}){pts}.",
+ "Customize rules": "Saincheap na rialacha",
+ "Options": "Roghanna",
+ "New game": "Cluiche nua",
+ "Start game": "Tosaigh an cluiche",
+ "Game": "Cluiche"
 }

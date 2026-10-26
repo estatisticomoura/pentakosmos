@@ -159,7 +159,6 @@
  "Save": "Ruaj",
  "Delete": "Fshi",
  "Players": "Lojtarët",
- "Number": "Numri",
  "Visual": "Pamja",
  "Language": "Gjuha",
  "Audio": "Zëri",
@@ -192,5 +191,10 @@
  "Computer layout": "Paraqitje për kompjuter",
  "Touch layout": "Paraqitje me prekje",
  "Table layout": "Paraqitja e tavolinës",
- "{name} reserved a level {lv} card ({color}){pts}.": "{name} rezervoi një kartë të nivelit {lv} ({color}){pts}."
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name} rezervoi një kartë të nivelit {lv} ({color}){pts}.",
+ "Customize rules": "Përshtat rregullat",
+ "Options": "Opsionet",
+ "New game": "Lojë e re",
+ "Start game": "Fillo lojën",
+ "Game": "Loja"
 }

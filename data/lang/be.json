@@ -159,7 +159,6 @@
  "Save": "Захаваць",
  "Delete": "Выдаліць",
  "Players": "Гульцы",
- "Number": "Колькасць",
  "Visual": "Выгляд",
  "Language": "Мова",
  "Audio": "Гук",
@@ -192,5 +191,10 @@
  "Computer layout": "Макет для камп'ютара",
  "Touch layout": "Сэнсарны макет",
  "Table layout": "Макет стала",
- "{name} reserved a level {lv} card ({color}){pts}.": "{name}: зарэзервавана карта ўзроўню {lv} ({color}){pts}."
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name}: зарэзервавана карта ўзроўню {lv} ({color}){pts}.",
+ "Customize rules": "Наладзіць правілы",
+ "Options": "Налады",
+ "New game": "Новая гульня",
+ "Start game": "Пачаць гульню",
+ "Game": "Гульня"
 }

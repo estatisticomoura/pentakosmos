@@ -159,7 +159,6 @@
  "Save": "Gem",
  "Delete": "Slet",
  "Players": "Spillere",
- "Number": "Antal",
  "Visual": "Udseende",
  "Language": "Sprog",
  "Audio": "Lyd",
@@ -192,5 +191,10 @@
  "Computer layout": "Computerlayout",
  "Touch layout": "Touchlayout",
  "Table layout": "Bordlayout",
- "{name} reserved a level {lv} card ({color}){pts}.": "{name} reserverede et kort på niveau {lv} ({color}){pts}."
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name} reserverede et kort på niveau {lv} ({color}){pts}.",
+ "Customize rules": "Tilpas regler",
+ "Options": "Indstillinger",
+ "New game": "Nyt spil",
+ "Start game": "Start spillet",
+ "Game": "Spil"
 }

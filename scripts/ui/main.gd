@@ -14,7 +14,7 @@ var _players: Array = []
 func _ready() -> void:
 	var vis := str(Store.get_value("visual", "tema", "solidos"))
 	Defs.set_visual("poligonal" if vis == "gemas" else vis)
-	L.set_lang(str(Store.get_value("geral", "idioma", "en")))
+	L.set_lang(_initial_language())
 	theme = UITheme.build()
 	UITheme.update_touch()
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -29,6 +29,23 @@ func _ready() -> void:
 	_build_now_playing()
 	Audio.track_started.connect(_on_track_started)
 	Audio.start_music()
+
+
+func _initial_language() -> String:
+	## Idioma escolhido antes; na primeira vez, o idioma do aparelho (ou ingles).
+	var saved = Store.get_value("geral", "idioma", null)
+	if saved != null:
+		return str(saved)
+	var loc := OS.get_locale().to_lower()          # ex.: "pt_br", "sr_latn_rs", "nb_no"
+	var lang := OS.get_locale_language().to_lower()
+	if lang == "no" or lang == "nn":
+		lang = "nb"
+	if loc.begins_with("sr") and loc.ends_with("me"):
+		lang = "cnr"
+	for l in L.LANGS:
+		if l[0] == lang:
+			return lang
+	return "en"
 
 
 func _layout() -> void:

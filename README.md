@@ -22,7 +22,7 @@ Ready-to-play builds are published on the [Releases](https://github.com/estatist
 
 - **Linux:** unzip, then `chmod +x pentakosmos.x86_64 && ./pentakosmos.x86_64`.
 - **Windows:** unzip and open `Pentakosmos.exe`. Windows may warn that the program is not signed; click "More info" and then "Run anyway".
-- **Android (7.0 or newer):** download `pentakosmos.apk` on the phone and open it. Android will ask you to allow installing apps from that source (the browser or file manager); allow it once. The game runs in landscape with a layout made for touch: the action buttons are in a column on the left, the top bar lists what the opponents did since your last move, and everything is larger. Tap a card to select it and see its details, tap it again to buy; tap a philosopher to see its requirement. The layout can also be chosen in the menu (next to *Visual*): automatic, computer or touch.
+- **Android (7.0 or newer):** download `pentakosmos.apk` on the phone and open it. Android will ask you to allow installing apps from that source (the browser or file manager); allow it once. The game runs in landscape with a layout made for touch: the action buttons are in a column on the left, the top bar lists what the opponents did since your last move, and everything is larger. Tap a card to select it and see its details, tap it again to buy; tap a philosopher to see its requirement. The layout can also be chosen in *Options*: automatic, computer or touch.
 
 The rules are explained inside the game, in **How to play**. The story of how the game was made is in **Creative process** (also in [docs/CREATIVE_PROCESS.md](docs/CREATIVE_PROCESS.md)).
 
@@ -108,7 +108,7 @@ python3 tools/torneio.py --modo classico
 
 ## Translations
 
-The game starts in English; the language selector on the start screen ("Language") offers 38 languages: English, Portuguese, the 24 official languages of the European Union, and Albanian, Belarusian, Bosnian, Catalan, Icelandic, Luxembourgish, Macedonian, Montenegrin, Norwegian, Romansh, Russian, Serbian, Turkish and Ukrainian.
+On first launch the game uses the device's language when it has it, and English otherwise; the *Language* button on the start screen offers 38 languages: English, Portuguese, the 24 official languages of the European Union, and Albanian, Belarusian, Bosnian, Catalan, Icelandic, Luxembourgish, Macedonian, Montenegrin, Norwegian, Romansh, Russian, Serbian, Turkish and Ukrainian.
 
 - Texts are written in English in the code (`L.t("...")`, `L.f("...", {...})` in `scripts/core/lang.gd`). Each translation is `data/lang/<code>.json`: `{"English text": "translation"}`. Missing texts fall back to English.
 - The long texts (rules and creative process) are in `data/texts/<page>_<code>.txt`; for now there are English and Portuguese versions.

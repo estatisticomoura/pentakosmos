@@ -159,7 +159,6 @@
  "Save": "Salvează",
  "Delete": "Șterge",
  "Players": "Jucători",
- "Number": "Număr",
  "Visual": "Aspect",
  "Language": "Limbă",
  "Audio": "Sunet",
@@ -192,5 +191,10 @@
  "Computer layout": "Aspect pentru computer",
  "Touch layout": "Aspect tactil",
  "Table layout": "Aspectul mesei",
- "{name} reserved a level {lv} card ({color}){pts}.": "{name} a rezervat o carte de nivel {lv} ({color}){pts}."
+ "{name} reserved a level {lv} card ({color}){pts}.": "{name} a rezervat o carte de nivel {lv} ({color}){pts}.",
+ "Customize rules": "Personalizează regulile",
+ "Options": "Opțiuni",
+ "New game": "Joc nou",
+ "Start game": "Începe jocul",
+ "Game": "Joc"
 }
