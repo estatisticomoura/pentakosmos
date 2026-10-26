@@ -180,5 +180,12 @@
  "AI": "AI",
  "{n}/{lim} tokens": "{n}/{lim} žetonů",
  "Opponents": "Soupeři",
- "Back": "Zpět"
+ "Back": "Zpět",
+ "Playlist": "Seznam skladeb",
+ "Calm": "Klidný",
+ "Lively": "Živý",
+ "All (shuffled)": "Vše (náhodně)",
+ "Every track was synthesized for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and the GeneralUser GS sound bank (by S. Christian Collins). No commercial recording was used.": "Všechny skladby byly pro Pentakosmos syntetizovány z volných děl, s volně licencovanými notami z Mutopia Project a zvukovou bankou GeneralUser GS (S. Christian Collins). Nebyla použita žádná komerční nahrávka.",
+ "score": "noty",
+ "recording": "nahrávka"
 }

@@ -10,3 +10,4 @@ tests/capturas/*.png
 tools/__pycache__/
 tools/evolucao_estado*.json
 *.tmp
+tools/musica/cache/

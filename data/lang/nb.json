@@ -180,5 +180,12 @@
  "AI": "KI",
  "{n}/{lim} tokens": "{n}/{lim} brikker",
  "Opponents": "Motstandere",
- "Back": "Tilbake"
+ "Back": "Tilbake",
+ "Playlist": "Spilleliste",
+ "Calm": "Rolig",
+ "Lively": "Livlig",
+ "All (shuffled)": "Alle (tilfeldig)",
+ "Every track was synthesized for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and the GeneralUser GS sound bank (by S. Christian Collins). No commercial recording was used.": "Alle sporene er syntetisert for Pentakosmos fra verk i det fri, med fritt lisensierte noter fra Mutopia Project og lydbanken GeneralUser GS (av S. Christian Collins). Ingen kommersiell innspilling er brukt.",
+ "score": "noter",
+ "recording": "innspilling"
 }

@@ -180,5 +180,12 @@
  "AI": "YZ",
  "{n}/{lim} tokens": "{n}/{lim} fiş",
  "Opponents": "Rakipler",
- "Back": "Geri"
+ "Back": "Geri",
+ "Playlist": "Çalma listesi",
+ "Calm": "Sakin",
+ "Lively": "Canlı",
+ "All (shuffled)": "Tümü (karışık)",
+ "Every track was synthesized for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and the GeneralUser GS sound bank (by S. Christian Collins). No commercial recording was used.": "Tüm parçalar, kamu malı eserlerden, Mutopia Project'in özgür lisanslı notaları ve GeneralUser GS ses bankası (S. Christian Collins) kullanılarak Pentakosmos için sentezlendi. Hiçbir ticari kayıt kullanılmadı.",
+ "score": "nota",
+ "recording": "kayıt"
 }

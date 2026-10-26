@@ -113,7 +113,22 @@ Everything is drawn in code, so the game runs without any image file. To use you
 - `assets/cards/pentakosmos/` and `assets/cards/legacy/` — one file per card (names listed in `assets/cards/CARD_LIST.csv`) and `back_l1.png` … `back_l3.png`;
 - `assets/philosophers/philosopher_1.png` … `philosopher_10.png`.
 
-Sound effects are `assets/sfx/<name>.ogg` (they take priority over the generated `.wav` files); music is `assets/music/trilha_01.ogg` … `trilha_20.ogg`. `python3 tools/gerar_sons.py` regenerates the placeholder sounds.
+Sound effects are `assets/sfx/<name>.ogg` (they take priority over the generated `.wav` files); `python3 tools/gerar_sons.py` regenerates the placeholder effects.
+
+### Music
+
+19 classical pieces, synthesized for the game from public-domain compositions — no commercial recording is used. The scores come from the [Mutopia Project](https://www.mutopiaproject.org) and the instruments from the [GeneralUser GS](https://www.schristiancollins.com/generaluser.php) sound bank. In the start menu (and in the pause menu) the player chooses a playlist — **Calm**, **Lively**, **All** or a single piece — and the name of each piece appears when it starts.
+
+| Element | Piece |
+|---|---|
+| Air | Bach, *Air* (Orchestral Suite No. 3) |
+| Water | Debussy, *Arabesque No. 1* |
+| Fire | Handel, *La Réjouissance* (Music for the Royal Fireworks) |
+| Earth | Grieg, *In the Hall of the Mountain King*; Mussorgsky, *Night on Bald Mountain* |
+| Aether | Holst, *Thaxted* (the theme of "Jupiter"); Debussy, *Clair de lune* |
+| Sphere | Johann Strauss II, *The Blue Danube* |
+
+Also: Satie's three *Gymnopédies* and three *Gnossiennes*, Bach's *Goldberg Aria*, *Prelude in C* and *Toccata and Fugue in D minor*, Chopin's *Nocturne Op. 9 No. 2* and Vivaldi's *Summer*. Full credits and licenses are in the game (Creative process → Music) and in `data/music.json`. `python3 tools/musica/gerar_musica.py` regenerates every track from the scores.
 
 ## Project structure
 

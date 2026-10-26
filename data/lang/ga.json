@@ -180,5 +180,12 @@
  "AI": "IS",
  "{n}/{lim} tokens": "{n}/{lim} comhartha",
  "Opponents": "Céilí comhraic",
- "Back": "Siar"
+ "Back": "Siar",
+ "Playlist": "Seinnliosta",
+ "Calm": "Suaimhneach",
+ "Lively": "Bríomhar",
+ "All (shuffled)": "Gach ceann (randamach)",
+ "Every track was synthesized for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and the GeneralUser GS sound bank (by S. Christian Collins). No commercial recording was used.": "Sintéisíodh gach rian don Pentakosmos ó shaothair san fhearann poiblí, le scóir faoi cheadúnas saor ón Mutopia Project agus an banc fuaimeanna GeneralUser GS (le S. Christian Collins). Níor úsáideadh aon taifeadadh tráchtála.",
+ "score": "scór",
+ "recording": "taifeadadh"
 }

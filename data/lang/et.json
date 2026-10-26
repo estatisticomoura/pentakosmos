@@ -180,5 +180,12 @@
  "AI": "TI",
  "{n}/{lim} tokens": "{n}/{lim} žetooni",
  "Opponents": "Vastased",
- "Back": "Tagasi"
+ "Back": "Tagasi",
+ "Playlist": "Esitusloend",
+ "Calm": "Rahulik",
+ "Lively": "Elav",
+ "All (shuffled)": "Kõik (juhuslikult)",
+ "Every track was synthesized for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and the GeneralUser GS sound bank (by S. Christian Collins). No commercial recording was used.": "Kõik palad sünteesiti Pentakosmose jaoks avalikku omandisse kuuluvatest teostest, kasutades Mutopia Projecti vaba litsentsiga noote ja helipanka GeneralUser GS (S. Christian Collins). Ühtegi kommertssalvestist ei kasutatud.",
+ "score": "noodid",
+ "recording": "salvestis"
 }

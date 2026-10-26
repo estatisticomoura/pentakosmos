@@ -180,5 +180,12 @@
  "AI": "IA",
  "{n}/{lim} tokens": "{n}/{lim} jetoane",
  "Opponents": "Adversari",
- "Back": "Înapoi"
+ "Back": "Înapoi",
+ "Playlist": "Listă de redare",
+ "Calm": "Calmă",
+ "Lively": "Animată",
+ "All (shuffled)": "Toate (aleatoriu)",
+ "Every track was synthesized for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and the GeneralUser GS sound bank (by S. Christian Collins). No commercial recording was used.": "Toate piesele au fost sintetizate pentru Pentakosmos din compoziții aflate în domeniul public, cu partituri cu licență liberă de la Mutopia Project și banca de sunete GeneralUser GS (de S. Christian Collins). Nu s-a folosit nicio înregistrare comercială.",
+ "score": "partitură",
+ "recording": "înregistrare"
 }

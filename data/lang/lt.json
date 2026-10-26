@@ -180,5 +180,12 @@
  "AI": "DI",
  "{n}/{lim} tokens": "{n}/{lim} žetonų",
  "Opponents": "Varžovai",
- "Back": "Atgal"
+ "Back": "Atgal",
+ "Playlist": "Grojaraštis",
+ "Calm": "Rami",
+ "Lively": "Gyva",
+ "All (shuffled)": "Visos (atsitiktinai)",
+ "Every track was synthesized for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and the GeneralUser GS sound bank (by S. Christian Collins). No commercial recording was used.": "Visi kūriniai Pentakosmos buvo sintezuoti iš viešojo naudojimo kūrinių, naudojant laisvos licencijos Mutopia Project natas ir garsų banką GeneralUser GS (S. Christian Collins). Nebuvo naudotas joks komercinis įrašas.",
+ "score": "natos",
+ "recording": "įrašas"
 }

@@ -180,5 +180,12 @@
  "AI": "IA",
  "{n}/{lim} tokens": "{n}/{lim} gettuns",
  "Opponents": "Adversaris",
- "Back": "Enavos"
+ "Back": "Enavos",
+ "Playlist": "Glista da tocs",
+ "Calm": "Quieta",
+ "Lively": "Viva",
+ "All (shuffled)": "Tuts (a l'aventura)",
+ "Every track was synthesized for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and the GeneralUser GS sound bank (by S. Christian Collins). No commercial recording was used.": "Tut ils tocs èn vegnids sintetisads per Pentakosmos da cumposiziuns en il domen public, cun partituras cun licenza libra dal Mutopia Project e la banca da tuns GeneralUser GS (da S. Christian Collins). I n'è vegnida duvrada nagina registraziun commerziala.",
+ "score": "partitura",
+ "recording": "registraziun"
 }

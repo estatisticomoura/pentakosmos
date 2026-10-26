@@ -180,5 +180,12 @@
  "AI": "AI",
  "{n}/{lim} tokens": "{n}/{lim} fiches",
  "Opponents": "Tegenstanders",
- "Back": "Terug"
+ "Back": "Terug",
+ "Playlist": "Afspeellijst",
+ "Calm": "Rustig",
+ "Lively": "Levendig",
+ "All (shuffled)": "Alle (willekeurig)",
+ "Every track was synthesized for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and the GeneralUser GS sound bank (by S. Christian Collins). No commercial recording was used.": "Alle nummers zijn voor Pentakosmos gesynthetiseerd uit composities in het publieke domein, met vrij gelicentieerde partituren van het Mutopia Project en de klankbank GeneralUser GS (van S. Christian Collins). Er is geen commerciële opname gebruikt.",
+ "score": "partituur",
+ "recording": "opname"
 }

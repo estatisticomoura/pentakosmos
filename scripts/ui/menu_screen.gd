@@ -169,6 +169,14 @@ func _build() -> void:
 	rv.add_child(HSeparator.new())
 	rv.add_child(UITheme.label(L.t("Audio"), 20, UITheme.GOLD))
 	rv.add_child(_slider_row(L.t("Music"), "Music"))
+	var mp := HBoxContainer.new()
+	var mpl := UITheme.label(L.t("Playlist"), 16, UITheme.MUTED)
+	mpl.custom_minimum_size = Vector2(90, 0)
+	mp.add_child(mpl)
+	var picker := MusicPicker.make()
+	picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	mp.add_child(picker)
+	rv.add_child(mp)
 	rv.add_child(_slider_row(L.t("Effects"), "SFX"))
 
 	# --- botoes ---

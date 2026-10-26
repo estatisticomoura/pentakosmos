@@ -180,5 +180,12 @@
  "AI": "MI",
  "{n}/{lim} tokens": "{n}/{lim} zseton",
  "Opponents": "Ellenfelek",
- "Back": "Vissza"
+ "Back": "Vissza",
+ "Playlist": "Lejátszási lista",
+ "Calm": "Nyugodt",
+ "Lively": "Élénk",
+ "All (shuffled)": "Mind (véletlenszerű)",
+ "Every track was synthesized for Pentakosmos from public-domain compositions, using freely licensed scores from the Mutopia Project and the GeneralUser GS sound bank (by S. Christian Collins). No commercial recording was used.": "Minden zeneszámot a Pentakosmos számára szintetizáltunk közkincs művekből, a Mutopia Project szabad licencű kottáival és a GeneralUser GS hangbankkal (S. Christian Collins). Kereskedelmi felvételt nem használtunk.",
+ "score": "kotta",
+ "recording": "felvétel"
 }
