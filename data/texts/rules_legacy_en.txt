@@ -1,0 +1,14 @@
+[font_size=26][color=#f0c96a][b]Legacy[/b][/color][/font_size]
+The Legacy rules are the traditional rules of this kind of card game, played with the Legacy deck. Turns, buying, reserving and the end of the game work as in Pentakosmos; these are the differences:
+
+• [b]Element tokens per pile:[/b] 4 / 5 / 7 / 8 for 2 / 3 / 4 / 5 players.
+• [b]Spheres:[/b] always 5.
+• [b]Take 2 of the same element:[/b] only from a pile with at least 4 tokens.
+• [b]Market:[/b] 4 cards per level, also with 5 players.
+• [b]Philosophers:[/b] the requirement must be met exactly, and each philosopher is worth 3 points.
+• [b]Deck:[/b] the Legacy deck (90 cards, without formulas).
+• [b]No specialization victory:[/b] only the 15-point goal ends the game.
+
+Taking 1 or 2 tokens of different elements is allowed in every mode, so a nearly full hand never forces you to take tokens only to return them.
+
+The game was designed for 2 to 4 players; 5 players is an extension.

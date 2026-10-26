@@ -1,0 +1,25 @@
+[font_size=26][color=#f0c96a][b]Como nasceu o Pentakosmos[/b][/color][/font_size]
+
+Tudo começou na mesa, com um jogo de cartas de que eu gostava muito e um punhado de regras que eu vivia mudando com os amigos. Quantas fichas deveria haver com três jogadores? E se os filósofos pedissem um pouco menos, mas premiassem mais o primeiro do que o último? E se a partida com cinco jogadores tivesse um mercado maior? Essas perguntas eram divertidas, mas eu queria respostas que fossem mais do que palpites.
+
+[font_size=22][color=#f0c96a]Regras postas à prova[/color][/font_size]
+Então sentei com o Claude, um assistente de inteligência artificial, e transformamos cada ideia em um experimento. Escrevemos um simulador e deixamos o meu próprio computador jogar dezenas de milhares de partidas, comparando cada variante com as regras tradicionais, para dois, três, quatro e cinco jogadores: quanto as partidas duravam, com que frequência alguém precisava descartar fichas, quanto o primeiro jogador era favorecido. Quando algo nos surpreendia, íamos mais fundo — e quando um resultado contrariava a minha intuição, os números davam a palavra final. Muitas das regras do modo Pentakosmos sobreviveram a esse processo: a quantidade de fichas por número de jogadores, pegar duas iguais de uma pilha com três, o mercado maior para cinco, os filósofos flexíveis que valem 3, 2 e 1 pontos.
+
+[font_size=22][color=#f0c96a]Um deck feito de fórmulas[/color][/font_size]
+Depois veio a parte de que mais me orgulho, e que eu desenhei sozinho: o deck. Em vez de desenhar 90 cartas uma a uma, escrevi 18 fórmulas. Cada fórmula descreve uma carta em relação ao seu próprio elemento — o nível, os pontos e quanto ela custa nos elementos que vêm antes e depois dele num ciclo fixo (ar, água, éter, fogo, terra). Aplicada aos cinco elementos, cada fórmula gera cinco cartas que são espelhos perfeitos umas das outras. O deck é equilibrado por construção: nenhum elemento é mais forte do que outro, e toda carta tem um motivo para existir. As simulações mostraram depois como ele se comportava diante do deck tradicional e me ajudaram a afiná-lo.
+
+[font_size=22][color=#f0c96a]Das planilhas para um jogo de verdade[/color][/font_size]
+Com as regras firmes, quis que qualquer pessoa pudesse jogá-las — no Linux, no Windows e no Android, de graça. O Claude e eu construímos o jogo no Godot, com cada regra disponível como opção no menu. Eu queria adversários à altura, então criamos vários tipos de inteligência artificial e os deixamos evoluir: um algoritmo genético ajustou a estratégia deles ao longo de centenas de milhares de partidas no meu computador, e um torneio decidiu qual merecia cada lugar. No caminho surgiu uma ideia nova — a vitória por especialização, para quem domina um único elemento — e os adversários aprenderam a buscá-la e a impedi-la.
+
+[font_size=22][color=#f0c96a]Os cinco sólidos[/color][/font_size]
+Por fim, o jogo encontrou a sua própria alma. No Timeu, Platão associa os elementos aos cinco sólidos regulares: o fogo ao tetraedro, o ar ao octaedro, a água ao icosaedro, a terra ao cubo, e o dodecaedro ao próprio cosmos. As fichas viraram sólidos girando devagar, o coringa virou uma esfera dourada, os visitantes de cada academia viraram os filósofos que primeiro perguntaram do que o mundo é feito, e os adversários do computador emprestaram os nomes das pessoas que conversam nos diálogos de Platão. O nome veio naturalmente: [b]Pentakosmos[/b], o cosmos dos cinco.
+
+[font_size=22][color=#f0c96a]Livre, para todos[/color][/font_size]
+Fiz este jogo pelo prazer de fazê-lo: de testar uma ideia, ver os números confirmarem (ou não) e ver um detalhe se encaixar. Esse prazer é para ser compartilhado. O Pentakosmos é gratuito e de código aberto, sob a licença MIT: você pode jogá-lo, estudá-lo, traduzi-lo, modificá-lo, criar a sua própria versão e até vendê-la — só peço que mencione de onde ele partiu.
+
+Se você tiver uma ideia, encontrar um erro, quiser melhorar uma tradução ou só quiser me contar sobre uma partida, vou adorar saber:
+• Conversas e sugestões: [url=https://github.com/estatisticomoura/pentakosmos/discussions]github.com/estatisticomoura/pentakosmos/discussions[/url]
+• Erros: [url=https://github.com/estatisticomoura/pentakosmos/issues]github.com/estatisticomoura/pentakosmos/issues[/url]
+
+Bom jogo!
+— Caio Moura

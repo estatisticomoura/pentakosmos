@@ -1,0 +1,15 @@
+[font_size=26][color=#f0c96a][b]Adversários[/b][/color][/font_size]
+Os adversários do computador têm nomes de personagens dos diálogos de Platão. Do mais brando ao mais forte:
+
+[b]Lísis[/b] — joga pelo ganho imediato: a cada turno, faz o que rende mais pelo esforço.
+
+[b]Críton[/b] — um estrategista: escolhe um caminho (cartas de nível 2 e 3 e um filósofo), reserva cedo e revê o plano ao longo da partida.
+
+[b]Fedro, Teeteto e Timeu[/b] — os três mais fortes. A ordem não foi decidida à mão: três candidatos disputaram um torneio de milhares de partidas entre si, e o resultado decidiu quem é quem.
+• O adversário [b]evoluído[/b] é o estrategista com os seus 24 parâmetros ajustados por um algoritmo genético: 16 variantes por geração, 1.000 partidas cada, ao longo de 30 gerações, seguidas de uma final e de uma validação em partidas que ele nunca tinha visto.
+• O adversário [b]tático[/b] acrescenta a negação cirúrgica (reserva ou pega o que você mais precisa quando você está perto de uma carta ou de um filósofo) e, perto do fim, simula o resto da partida para cada jogada candidata, sorteando as cartas ocultas — sem nunca espiar.
+• O adversário [b]misto[/b] é o tático usando os parâmetros do evoluído.
+
+Nos torneios atuais, Timeu é o misto, Teeteto o tático e Fedro o evoluído. Há treinos separados para as regras Pentakosmos, as regras Legacy e qualquer outra combinação; os arquivos ficam na pasta data, e qualquer pessoa pode treiná-los de novo com as ferramentas descritas na documentação do projeto.
+
+Eles são fortes contra outros programas, mas pessoas encontram caminhos novos — se você descobrir um jeito de vencer o Timeu sempre, conte para nós!

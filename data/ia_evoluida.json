@@ -1,0 +1,282 @@
+{
+  "params": {
+    "buy_ratio": 0.9327,
+    "demand_base": 0.4736,
+    "demand_pts": 0.4267,
+    "demand_res": 3.1285,
+    "engine_w": 1.7424,
+    "goal_effort_off": 1.7545,
+    "goal_pts_off": 0.6741,
+    "goal_reserved": 1.2573,
+    "gold_gain": 1.78,
+    "hoard": 0.0714,
+    "noble_rest": 0.1752,
+    "noise": 0.0407,
+    "plan_base_engine": 0.2857,
+    "plan_color_w": 2.358,
+    "plan_demand_w": 0.9768,
+    "plan_every": 5,
+    "plan_goal_bonus": 0.7466,
+    "plan_noble_other": 0.3274,
+    "plan_noble_w": 0.6365,
+    "plan_reserve_turns": 3,
+    "plan_switch": 1.0221,
+    "scarcity_pen": 3.2145,
+    "tok_w2": 0.4206,
+    "tok_w3": 0.3556
+  },
+  "vantagem_sobre_normal_pp": 5.75,
+  "geracoes": 30,
+  "modo": "geral",
+  "comparacao_com_geral": null,
+  "generalizacao": {
+    "2 jogadores": {
+      "pp": 2.7,
+      "ic": 3.08,
+      "partidas": 1000
+    },
+    "3 jogadores": {
+      "pp": 6.02,
+      "ic": 3.02,
+      "partidas": 1000
+    },
+    "4 jogadores": {
+      "pp": 7.25,
+      "ic": 2.89,
+      "partidas": 1000
+    },
+    "5 jogadores": {
+      "pp": 7.05,
+      "ic": 2.75,
+      "partidas": 1000
+    },
+    "classico": {
+      "pp": 7.17,
+      "ic": 2.93,
+      "partidas": 1000
+    },
+    "house completa": {
+      "pp": 3.47,
+      "ic": 2.91,
+      "partidas": 1000
+    },
+    "variantes": {
+      "pp": 6.19,
+      "ic": 2.09,
+      "partidas": 2000
+    },
+    "deck caio": {
+      "pp": 6.53,
+      "ic": 2.11,
+      "partidas": 1981
+    },
+    "deck oficial": {
+      "pp": 4.99,
+      "ic": 2.04,
+      "partidas": 2019
+    },
+    "meta 12-13": {
+      "pp": 7.45,
+      "ic": 3.93,
+      "partidas": 566
+    },
+    "meta 14-16": {
+      "pp": 5.02,
+      "ic": 1.73,
+      "partidas": 2853
+    },
+    "meta 17-18": {
+      "pp": 7.69,
+      "ic": 3.94,
+      "partidas": 581
+    },
+    "mao 10": {
+      "pp": 6.09,
+      "ic": 1.8,
+      "partidas": 2646
+    },
+    "mao 11": {
+      "pp": 6.21,
+      "ic": 3.5,
+      "partidas": 710
+    },
+    "mao 9": {
+      "pp": 3.87,
+      "ic": 3.69,
+      "partidas": 644
+    },
+    "nobres -2 flexivel": {
+      "pp": 4.21,
+      "ic": 2.08,
+      "partidas": 1956
+    },
+    "nobres exatos": {
+      "pp": 7.23,
+      "ic": 2.07,
+      "partidas": 2044
+    },
+    "pegar 2 com 3+": {
+      "pp": 4.68,
+      "ic": 2.05,
+      "partidas": 2019
+    },
+    "pegar 2 com 4+": {
+      "pp": 6.85,
+      "ic": 2.1,
+      "partidas": 1981
+    }
+  },
+  "historico": [
+    {
+      "geracao": 1,
+      "melhor": 4.06666666666666,
+      "media": 1.0166666666666733
+    },
+    {
+      "geracao": 2,
+      "melhor": 2.3166666666666753,
+      "media": 0.679166666666671
+    },
+    {
+      "geracao": 3,
+      "melhor": 3.866666666666657,
+      "media": 0.9479166666666748
+    },
+    {
+      "geracao": 4,
+      "melhor": 3.966666666666634,
+      "media": 1.4145833333333424
+    },
+    {
+      "geracao": 5,
+      "melhor": 4.1666666666666705,
+      "media": 0.17291666666666888
+    },
+    {
+      "geracao": 6,
+      "melhor": 3.749999999999962,
+      "media": 0.462500000000001
+    },
+    {
+      "geracao": 7,
+      "melhor": 4.616666666666637,
+      "media": 2.7541666666666718
+    },
+    {
+      "geracao": 8,
+      "melhor": 4.566666666666633,
+      "media": 1.5031249999999974
+    },
+    {
+      "geracao": 9,
+      "melhor": 7.166666666666629,
+      "media": 2.815624999999989
+    },
+    {
+      "geracao": 10,
+      "melhor": 4.366666666666624,
+      "media": 1.235416666666673
+    },
+    {
+      "geracao": 11,
+      "melhor": 3.7666666666666475,
+      "media": 0.6979166666666695
+    },
+    {
+      "geracao": 12,
+      "melhor": 4.166666666666659,
+      "media": 0.9187500000000071
+    },
+    {
+      "geracao": 13,
+      "melhor": 5.6166666666666405,
+      "media": 3.1916666666666527
+    },
+    {
+      "geracao": 14,
+      "melhor": 6.016666666666599,
+      "media": 3.2822916666666564
+    },
+    {
+      "geracao": 15,
+      "melhor": 5.049999999999976,
+      "media": 2.2145833333333362
+    },
+    {
+      "geracao": 16,
+      "melhor": 8.666666666666638,
+      "media": 3.9624999999999906
+    },
+    {
+      "geracao": 17,
+      "melhor": 6.716666666666605,
+      "media": 4.51979166666664
+    },
+    {
+      "geracao": 18,
+      "melhor": 5.816666666666639,
+      "media": 4.068749999999996
+    },
+    {
+      "geracao": 19,
+      "melhor": 6.699999999999946,
+      "media": 4.0
+    },
+    {
+      "geracao": 20,
+      "melhor": 8.266666666666643,
+      "media": 6.044791666666633
+    },
+    {
+      "geracao": 21,
+      "melhor": 5.816666666666637,
+      "media": 3.744791666666663
+    },
+    {
+      "geracao": 22,
+      "melhor": 7.916666666666636,
+      "media": 4.5385416666666485
+    },
+    {
+      "geracao": 23,
+      "melhor": 7.066666666666614,
+      "media": 5.344791666666633
+    },
+    {
+      "geracao": 24,
+      "melhor": 5.8666666666666485,
+      "media": 3.9406250000000007
+    },
+    {
+      "geracao": 25,
+      "melhor": 6.716666666666612,
+      "media": 4.804166666666641
+    },
+    {
+      "geracao": 26,
+      "melhor": 6.816666666666621,
+      "media": 4.6468749999999766
+    },
+    {
+      "geracao": 27,
+      "melhor": 8.76666666666666,
+      "media": 5.462499999999967
+    },
+    {
+      "geracao": 28,
+      "melhor": 6.516666666666588,
+      "media": 4.691666666666641
+    },
+    {
+      "geracao": 29,
+      "melhor": 7.966666666666636,
+      "media": 5.184374999999984
+    },
+    {
+      "geracao": 30,
+      "melhor": 8.366666666666655,
+      "media": 5.091666666666651
+    }
+  ],
+  "data": "2026-10-25 21:01"
+}

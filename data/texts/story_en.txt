@@ -1,0 +1,25 @@
+[font_size=26][color=#f0c96a][b]How Pentakosmos was born[/b][/color][/font_size]
+
+It all started at the table, with a card game I loved and a handful of rules I kept changing with friends. How many tokens should there be with three players? What if the philosophers asked a little less, but rewarded the first one more than the last? What if a five-player game had a bigger market? Those questions were fun, but I wanted answers that were more than hunches.
+
+[font_size=22][color=#f0c96a]Rules, put to the test[/color][/font_size]
+So I sat down with Claude, an AI assistant, and we turned each idea into an experiment. We wrote a simulator and let my own computer play tens of thousands of games, comparing every variant against the traditional rules, for two, three, four and five players: how long games lasted, how often players had to throw tokens away, how much the first player was favoured. When something surprised us, we dug deeper — and when a result contradicted my intuition, the numbers had the last word. Many of the rules you see in the Pentakosmos mode survived that process: the token counts by number of players, taking two of a kind from a pile of three, the larger market for five, the flexible philosophers worth 3, 2 and 1 points.
+
+[font_size=22][color=#f0c96a]A deck made of formulas[/color][/font_size]
+Then came the part I am proudest of, and which I designed on my own: the deck. Instead of drawing 90 cards one by one, I wrote 18 formulas. Each formula describes a card relative to its own element — level, points and how much it costs in the elements that come before and after it in a fixed cycle (air, water, aether, fire, earth). Applied to the five elements, each formula yields five cards that are perfect mirrors of one another. The deck is balanced by construction: no element is stronger than another, and every card has a reason to exist. The simulations then showed how it behaved against the traditional deck, and helped me fine-tune it.
+
+[font_size=22][color=#f0c96a]From spreadsheets to a real game[/color][/font_size]
+Once the rules were solid, I wanted anyone to be able to play them — on Linux, Windows and Android, for free. Claude and I built the game in Godot, with every rule available as an option in the menu. I wanted opponents worthy of the name, so we created several kinds of artificial intelligence and let them evolve: a genetic algorithm tuned their strategy over hundreds of thousands of games on my computer, and a tournament decided which one deserved each place. Along the way a new idea appeared — the specialization victory, for whoever masters a single element — and the opponents learned to pursue it and to stop it.
+
+[font_size=22][color=#f0c96a]The five solids[/color][/font_size]
+Finally the game found its own soul. In the Timaeus, Plato associates the elements with the five regular solids: fire with the tetrahedron, air with the octahedron, water with the icosahedron, earth with the cube, and the dodecahedron with the cosmos itself. The tokens became slowly turning solids, the joker became a golden sphere, the visitors of each academy became the philosophers who first wondered what the world is made of, and the computer opponents borrowed their names from the people who talk in Plato's dialogues. The name followed naturally: [b]Pentakosmos[/b], the cosmos of the five.
+
+[font_size=22][color=#f0c96a]Free, for everyone[/color][/font_size]
+I made this game for the joy of making it: of testing an idea, watching the numbers confirm it (or not), and seeing a detail fall into place. That joy is meant to be shared. Pentakosmos is free and open source under the MIT license: you can play it, study it, translate it, change it, build your own version and even sell it — I only ask that you mention where it started.
+
+If you have an idea, find a bug, want to improve a translation or just want to tell me about a game you played, I would love to hear from you:
+• Conversations and suggestions: [url=https://github.com/estatisticomoura/pentakosmos/discussions]github.com/estatisticomoura/pentakosmos/discussions[/url]
+• Bugs: [url=https://github.com/estatisticomoura/pentakosmos/issues]github.com/estatisticomoura/pentakosmos/issues[/url]
+
+Have a good game!
+— Caio Moura
