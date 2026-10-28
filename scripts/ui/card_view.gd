@@ -2,7 +2,7 @@ class_name CardView
 extends Control
 ## Carta de desenvolvimento desenhada em codigo. Se existir uma imagem em
 ## res://assets/cards/<pasta do deck>/<chave>.png ela e usada como arte de fundo
-## (pastas: pentakosmos e legacy; lista em assets/cards/CARD_LIST.csv).
+## (pastas: pentakosmos e arcaico; lista em assets/cards/CARD_LIST.csv).
 
 signal pressed(view: CardView)
 signal hover_changed(view: CardView, on: bool)
@@ -10,10 +10,15 @@ signal hover_changed(view: CardView, on: bool)
 const BASE_SIZE := Vector2(112, 154)
 ## false = quando houver arte em PNG, mostra so a imagem (sem faixa, pontos e custos)
 const DRAW_INFO_OVER_ART := true
-const BACK_COLORS := [Color(0, 0, 0), Color(0.16, 0.42, 0.30), Color(0.60, 0.46, 0.14), Color(0.20, 0.27, 0.62)]
+# verso: ceu escuro com uma estrela; basicas = laranja pequena, intermediarias = branco-amarelada,
+# avancadas = azul-branca e grande (cores tambem usadas nas minicartas ocultas dos paineis)
+const BACK_COLORS := [Color(0, 0, 0), Color(1.0, 0.62, 0.30), Color(1.0, 0.93, 0.72), Color(0.62, 0.74, 1.0)]
+const STAR_CORE := [Color(0, 0, 0), Color(1.0, 0.70, 0.40), Color(1.0, 0.97, 0.86), Color(0.72, 0.82, 1.0)]
+const STAR_R := [0.0, 9.0, 14.0, 22.0]
+static var _dust: Array = []
 
 var card: Defs.CardDef = null
-var deck_name := "oficial"
+var deck_name := "arcaico"
 var back_level := 0         # > 0 desenha o verso (baralho ou reserva oculta)
 var back_count := -1        # cartas restantes no baralho (-1 = nao mostra)
 var selected := false
@@ -130,24 +135,46 @@ func _draw() -> void:
 
 
 func _draw_back(r: Rect2) -> void:
-	var col: Color = BACK_COLORS[back_level]
 	if _back_tex != null:
 		draw_texture_rect(_back_tex, r, false)
 	else:
-		GemDraw.rounded(self, r, col.darkened(0.35), 12, col.lightened(0.25), 2)
-		GemDraw.rounded(self, r.grow(-8), col.darkened(0.1), 8, Color(1, 1, 1, 0.15), 1)
-		# losango decorativo
-		var c := r.get_center()
-		var pts := PackedVector2Array([c + Vector2(0, -34), c + Vector2(26, 0), c + Vector2(0, 34), c + Vector2(-26, 0)])
-		draw_colored_polygon(pts, Color(1, 1, 1, 0.10))
-		var closed := pts.duplicate()
-		closed.append(pts[0])
-		draw_polyline(closed, Color(1, 1, 1, 0.35), 2.0, true)
-	GemDraw.ctext(self, L.f("Level {lv}", {"lv": ["", "I", "II", "III"][back_level]}), Vector2(r.size.x / 2, 22), 15, Color(1, 1, 1, 0.9), 3)
-	for i in range(back_level):
-		draw_circle(Vector2(r.size.x / 2 + (i - (back_level - 1) / 2.0) * 14, r.size.y / 2), 4.5, Color(1, 1, 1, 0.85))
+		var glow: Color = BACK_COLORS[back_level]
+		GemDraw.rounded(self, r, Color(0.035, 0.04, 0.07), 12, Color(glow, 0.6), 2)
+		if _dust.is_empty():
+			var rng := RandomNumberGenerator.new()
+			rng.seed = 7
+			for i in range(46):
+				_dust.append([Vector2(rng.randf(), rng.randf()), rng.randf_range(0.4, 1.2), rng.randf_range(0.25, 0.8)])
+		for d in _dust:
+			draw_circle(Vector2(8, 8) + d[0] * (r.size - Vector2(16, 16)), d[1], Color(1, 1, 1, d[2] * 0.55))
+		var c := Vector2(r.size.x / 2.0, r.size.y * 0.48)
+		var rad: float = STAR_R[back_level]
+		for k in range(12, 0, -1):
+			var f := k / 12.0
+			draw_circle(c, rad * (1.0 + 2.4 * f), Color(glow, 0.05 * (1.0 - f) + 0.012))
+		var core: Color = STAR_CORE[back_level]
+		draw_circle(c, rad, core)
+		draw_circle(c + Vector2(-0.25, -0.3) * rad, rad * 0.55, core.lightened(0.35))
+		draw_circle(c + Vector2(-0.3, -0.35) * rad, rad * 0.25, Color(1, 1, 1, 0.55))
+		# orbita com 1, 2 ou 3 planetas
+		var rx := r.size.x * 0.40
+		var ry := rx * 0.32
+		var pts := PackedVector2Array()
+		for k in range(49):
+			var ang := TAU * k / 48.0
+			pts.append(c + Vector2(cos(ang) * rx, sin(ang) * ry))
+		draw_polyline(pts, Color(0.93, 0.76, 0.40, 0.35), 1.2, true)
+		for k in range(back_level):
+			var ang := 0.6 + k * TAU / back_level
+			draw_circle(c + Vector2(cos(ang) * rx, sin(ang) * ry), 3.0, Color(0.93, 0.76, 0.40))
+	# grupo (Basicas, Intermediarias, Avancadas)
+	var word := L.t(Defs.LEVEL_SHORT[back_level])
+	var fs := 15
+	while fs > 9 and ThemeDB.fallback_font.get_string_size(word, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > r.size.x - 12:
+		fs -= 1
+	GemDraw.ctext(self, word, Vector2(r.size.x / 2, 20), fs, Color(0.93, 0.76, 0.40), 3)
 	if back_count >= 0:
-		GemDraw.ctext(self, str(back_count), Vector2(r.size.x / 2, r.size.y - 20), 18, Color(1, 1, 1, 0.95), 4)
+		GemDraw.ctext(self, str(back_count), Vector2(r.size.x / 2, r.size.y - 20), 20, Color(1, 1, 1, 0.95), 4)
 
 
 func _draw_face(r: Rect2) -> void:
@@ -191,24 +218,27 @@ func _draw_face(r: Rect2) -> void:
 	if Defs.visual == "solidos":
 		draw_circle(Vector2(r.size.x - 24, 24), 17, Color(0.07, 0.08, 0.11, 0.85))
 	GemDraw.draw_gem(self, card.bonus, Vector2(r.size.x - 24, 24), 15)
-	# custos: ordem fixa de cima para baixo (branco, azul, verde, vermelho, preto),
-	# com o numero a direita do simbolo
+	# custos embaixo, na ordem fixa (ar, agua, eter, fogo, terra): 1 coluna ate 2 cores,
+	# 2 colunas com 3 ou 4 cores (a primeira coluna enche primeiro)
 	var cols: Array = []
 	for c in range(5):
 		if card.cost[c] > 0:
 			cols.append(c)
+	var ncol := 1 if cols.size() <= 2 else 2
+	var rows := int(ceil(cols.size() / float(ncol)))
+	var rowh := 29.0
+	var y0 := r.size.y - 9.0 - rows * rowh + rowh / 2.0
 	for i in range(cols.size()):
+		var ci := 0 if (ncol == 1 or i < rows) else 1
+		var ri := i if ci == 0 else i - rows
 		var c: int = cols[i]
-		var center := Vector2(18, r.size.y - 20 - (cols.size() - 1 - i) * 26)
-		GemDraw.draw_gem(self, c, center, 11)
-		GemDraw.text(self, str(card.cost[c]), center + Vector2(14, 7), 19, Color(1, 1, 1),
+		var center := Vector2(17 + ci * 52, y0 + ri * rowh)
+		GemDraw.draw_gem(self, c, center, 12)
+		GemDraw.text(self, str(card.cost[c]), center + Vector2(14, 8), 23, Color(1, 1, 1),
 			HORIZONTAL_ALIGNMENT_LEFT, -1, 4, Color(0, 0, 0, 0.85))
-	# nivel
-	for i in range(card.level):
-		draw_circle(Vector2(r.size.x - 12 - i * 10, r.size.y - 12), 3.2, Color(1, 1, 1, 0.55))
 	# selo "pode comprar"
 	if affordable:
-		var cc := Vector2(r.size.x - 18, r.size.y - 34)
+		var cc := Vector2(r.size.x / 2.0 + 4, 23)
 		draw_circle(cc, 11, Color(0.15, 0.65, 0.3))
 		draw_polyline(PackedVector2Array([cc + Vector2(-5, 0), cc + Vector2(-1, 4), cc + Vector2(6, -4)]),
 			Color.WHITE, 2.5, true)

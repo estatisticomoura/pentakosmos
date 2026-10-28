@@ -1,7 +1,7 @@
 extends SceneTree
 ## Executor de partidas IA x IA para as ferramentas de evolucao e torneio.
 ## Uso: godot --headless --path . --script res://tests/partidas.gd -- entrada.json saida.json
-## entrada: {"matches": [{"rules": "house"|"classico"|"house_oficial"|"classico_caio"|{dicionario de regras},
+## entrada: {"matches": [{"rules": "house"|"classico"|"house_arcaico"|"classico_caio"|{dicionario de regras},
 ##                        "seats": ["normal", "tatica", "{...json...}"], "seed": 123}, ...]}
 ## saida:   {"results": [{"win": [0, 1, 0], "points": [..], "rounds": n}, ...]}
 
@@ -12,9 +12,9 @@ func _rules(spec) -> RuleSet:
 	match name:
 		"house":
 			return RuleSet.house_full()
-		"house_oficial":
+		"house_arcaico":
 			var r := RuleSet.house_full()
-			r.deck = "oficial"
+			r.deck = "arcaico"
 			return r
 		"classico_caio":
 			var r2 := RuleSet.classic()

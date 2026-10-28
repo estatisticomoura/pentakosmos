@@ -9,9 +9,9 @@ func _init() -> void:
 	var kind := args[2] if args.size() > 2 else "normal"
 	var games := int(args[3]) if args.size() > 3 else 200
 	var rules: RuleSet = RuleSet.house_full() if preset == "house" else RuleSet.classic()
-	if preset == "house_oficial":
+	if preset == "house_arcaico":
 		rules = RuleSet.house_full()
-		rules.deck = "oficial"
+		rules.deck = "arcaico"
 	var rounds: Array = []
 	var nob := 0.0
 	var seat := []

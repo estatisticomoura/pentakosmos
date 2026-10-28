@@ -16,6 +16,11 @@ const GOLD := Defs.GOLD
 # negacao cirurgica
 const SURG_MIN_VALUE := 3
 const SURG_RESERVE_VALUE := 4
+# reserva defensiva: pontos minimos (carta + filosofo/escritor que ela traria) de uma carta
+# que um adversario pode comprar na proxima vez, para valer tira-la do mercado
+const DEFEND_VALUE := 3
+# com a reserva defensiva, a coleta so e escolhida para negar fichas se bloquear isto
+const DEFEND_TOKEN_BLOCK := 2.0
 # busca no fim de jogo
 const ENDGAME_MARGIN := 5      # ativa quando alguem esta a 5 pontos ou menos da meta
 const ENDGAME_ROLLOUTS := 8    # simulacoes por jogada candidata
@@ -75,17 +80,16 @@ static func card_value(g: GameState, p: GameState.PlayerState, cid: int, demand:
 	var phase := maxf(0.0, 1.0 - float(p.points) / g.rules.target)
 	if maxdemand > 0:
 		v += P["engine_w"] * phase * (P["demand_base"] + demand[cd.bonus] / maxdemand)
-	var nxt := g.rules.noble_pts(p.nobles.size())
 	var best := 0.0
 	var rest := 0.0
 	for nb in g.nobles:
-		var req: Array = Defs.NOBLES[nb]
+		var req: Array = Defs.patron_req(nb)
 		if req[cd.bonus] <= p.bonus[cd.bonus]:
 			continue
-		var d := g.noble_distance(p.bonus, req)
+		var d := g.patron_distance(p.bonus, nb)
 		if d <= 0:
 			continue
-		var val := float(nxt) / d
+		var val := float(g.patron_pts(p, nb)) / d
 		if val > best:
 			rest += best
 			best = val
@@ -163,14 +167,19 @@ static func token_utility(g: GameState, p: GameState.PlayerState, targets: Array
 
 
 static func immediate_noble_pts(g: GameState, p: GameState.PlayerState, color: int) -> int:
+	## Pontos de filosofo e de escritor que chegariam com mais uma carta desta cor
+	## (no maximo um de cada por vez).
 	p.bonus[color] += 1
-	var ok := false
+	var phil := 0
+	var wri := 0
 	for nb in g.nobles:
-		if g.noble_distance(p.bonus, Defs.NOBLES[nb]) == 0:
-			ok = true
-			break
+		if g.patron_distance(p.bonus, nb) == 0:
+			if Defs.is_writer(nb):
+				wri = Defs.WRITER_PTS
+			else:
+				phil = g.patron_pts(p, nb)
 	p.bonus[color] -= 1
-	return g.rules.noble_pts(p.nobles.size()) if ok else 0
+	return phil + wri
 
 
 static func opponent_threat(g: GameState, idx: int) -> Array:
@@ -263,10 +272,15 @@ static func choose_action(g: GameState, idx: int) -> Array:
 	if p.denial >= 0.0:
 		# 4b) reserva para tirar do mercado uma carta valiosa que um adversario ja pode comprar
 		if p.reserved.size() < 3:
-			var hr := hate_reserve_target(g, idx)
-			if not hr.is_empty() and (gain < 1.0 + p.denial or targets.has(hr[2])):
-				return ["reserve", hr[0], hr[1]]
-		if blocked > 0 and not act.is_empty():
+			if p.defend:
+				var dr := defend_target(g, idx, targets)
+				if not dr.is_empty() and (gain < 1.5 + p.denial or targets.has(dr[2]) or dr[3] >= 6):
+					return ["reserve", dr[0], dr[1]]
+			else:
+				var hr := hate_reserve_target(g, idx)
+				if not hr.is_empty() and (gain < 1.0 + p.denial or targets.has(hr[2])):
+					return ["reserve", hr[0], hr[1]]
+		if blocked >= (DEFEND_TOKEN_BLOCK if p.defend else 0.01) and not act.is_empty():
 			p.blocks += 1
 			return act
 	# 5) reserva para pegar ouro, quando coletar rende pouco
@@ -426,7 +440,7 @@ static func pick_noble(g: GameState, idx: int, options: Array) -> int:
 		var d := 1 << 30
 		for j in range(g.n):
 			if j != idx:
-				d = mini(d, g.noble_distance(g.players[j].bonus, Defs.NOBLES[nb]))
+				d = mini(d, g.patron_distance(g.players[j].bonus, nb))
 		if d < best_d:
 			best_d = d
 			best = nb
@@ -485,10 +499,10 @@ static func build_plan(g: GameState, p: GameState.PlayerState, goals = null):
 		tot = 1.0
 	var best_nb := -1
 	var best_ns := 0.0
-	var nxt := g.rules.noble_pts(p.nobles.size())
 	for nb in g.nobles:
-		var req: Array = Defs.NOBLES[nb]
-		var d := g.noble_distance(p.bonus, req)
+		var req: Array = Defs.patron_req(nb)
+		var d := g.patron_distance(p.bonus, nb)
+		var nxt := g.patron_pts(p, nb)
 		var overlap := 0.0
 		for c in range(5):
 			if req[c] > 0:
@@ -499,7 +513,7 @@ static func build_plan(g: GameState, p: GameState.PlayerState, goals = null):
 			best_ns = ns
 			best_nb = nb
 	if best_nb >= 0:
-		var req2: Array = Defs.NOBLES[best_nb]
+		var req2: Array = Defs.patron_req(best_nb)
 		var nw: float = P["plan_noble_w"]
 		for c in range(5):
 			if req2[c] > p.bonus[c]:
@@ -554,16 +568,15 @@ static func card_value_plan(g: GameState, p: GameState.PlayerState, cid: int, pl
 	v += ew * phase * (P["plan_base_engine"] + P["plan_color_w"] * w[cd.bonus])
 	if maxdemand > 0:
 		v += P["plan_demand_w"] * ew * phase * demand[cd.bonus] / maxdemand
-	var nxt := g.rules.noble_pts(p.nobles.size())
 	var other: float = P["plan_noble_other"]
 	for nb in g.nobles:
-		var req: Array = Defs.NOBLES[nb]
+		var req: Array = Defs.patron_req(nb)
 		if req[cd.bonus] <= p.bonus[cd.bonus]:
 			continue
-		var d := g.noble_distance(p.bonus, req)
+		var d := g.patron_distance(p.bonus, nb)
 		if d <= 0:
 			continue
-		v += (1.0 if plan != null and nb == plan["noble"] else other) * nxt / d
+		v += (1.0 if plan != null and nb == plan["noble"] else other) * g.patron_pts(p, nb) / d
 	if plan != null and plan["goals"].has(cid):
 		var gb: float = P["plan_goal_bonus"]
 		v += gb if cid == plan["goals"][0] else 0.5 * gb
@@ -665,6 +678,28 @@ static func blocked_value(g: GameState, threats: Array) -> float:
 				after = maxi(after, nv[1])
 		total += before - after
 	return total
+
+
+static func defend_target(g: GameState, idx: int, my_targets: Array) -> Array:
+	## Carta do mercado que um adversario ja pode comprar na proxima vez e que lhe daria muitos
+	## pontos (carta + o filosofo ou escritor que ela traria). [linha, coluna, id, valor] ou [].
+	## Em empate, prefere a que tambem serve a este jogador.
+	var best: Array = []
+	var best_v := -1.0
+	for j in range(g.n):
+		if j == idx:
+			continue
+		var q: GameState.PlayerState = g.players[j]
+		for e in g.market_cards():
+			if GameState.shortfall_of(q, g.cards[e[2]].cost) <= 0:
+				var v := threat_value(g, q, e[2])
+				if v < DEFEND_VALUE:
+					continue
+				var score := float(v) + (0.5 if my_targets.has(e[2]) else 0.0)
+				if score > best_v:
+					best_v = score
+					best = [e[0], e[1], e[2], v]
+	return best
 
 
 static func hate_reserve_target(g: GameState, idx: int) -> Array:

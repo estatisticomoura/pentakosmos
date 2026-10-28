@@ -7,7 +7,7 @@ extends Control
 signal back
 
 const PAGES := {
-	"rules": [["Pentakosmos", "rules_pentakosmos"], ["Legacy", "rules_legacy"], ["Opponents", "opponents"]],  # tr
+	"rules": [["Pentakosmos", "rules_pentakosmos"], ["Archaic", "rules_arcaico"], ["Opponents", "opponents"]],  # tr
 	"story": [["Creative process", "story"], ["Music", "music"]],  # tr
 }
 
@@ -46,8 +46,8 @@ func _ready() -> void:
 	_text.bbcode_enabled = true
 	_text.scroll_active = true
 	_text.selection_enabled = false
-	_text.add_theme_font_size_override("normal_font_size", 21)
-	_text.add_theme_font_size_override("bold_font_size", 21)
+	_text.add_theme_font_size_override("normal_font_size", UITheme.fs(21))
+	_text.add_theme_font_size_override("bold_font_size", UITheme.fs(21))
 	_text.add_theme_color_override("default_color", UITheme.TEXT)
 	_text.meta_clicked.connect(func(m): OS.shell_open(str(m)))
 	panel.add_child(_text)

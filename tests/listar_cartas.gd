@@ -4,7 +4,7 @@ extends SceneTree
 func _init() -> void:
 	var f := FileAccess.open("res://assets/cards/CARD_LIST.csv", FileAccess.WRITE)
 	f.store_line("deck,file,level,bonus,points,cost")
-	for deck in ["caio", "oficial"]:
+	for deck in ["caio", "arcaico"]:
 		var dir: String = Defs.DECK_DIRS[deck]
 		for c in Defs.build_deck(deck):
 			var parts: Array = []

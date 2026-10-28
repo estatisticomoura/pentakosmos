@@ -10,6 +10,6 @@ The computer opponents are named after characters from Plato's dialogues. From t
 • The [b]tactical[/b] opponent adds surgical denial (it reserves or takes what you need most when you are close to a card or a philosopher) and, near the end, simulates the rest of the game for each candidate move, drawing the hidden cards at random — it never peeks.
 • The [b]mixed[/b] opponent is the tactical one using the evolved parameters.
 
-In the current tournaments, Timaeus is the mixed opponent, Theaetetus the tactical one and Phaedrus the evolved one. There are separate trainings for the Pentakosmos rules, the Legacy rules and any other combination; the files are in the data folder, and anyone can train them again with the tools described in the project documentation.
+In the current tournaments, Timaeus is the mixed opponent, Theaetetus the tactical one and Phaedrus the evolved one. There are separate trainings for the Pentakosmos rules, the Archaic rules and any other combination; the files are in the data folder, and anyone can train them again with the tools described in the project documentation.
 
 They are strong against other programs, but people find new paths — if you discover a way to beat Timaeus every time, please tell us!

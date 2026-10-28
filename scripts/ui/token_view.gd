@@ -51,7 +51,8 @@ func _draw() -> void:
 	# pilha: algumas fichas por baixo
 	var layers := mini(count, 4)
 	for i in range(layers, 0, -1):
-		draw_circle(c + Vector2(0, i * 3), r, Defs.COLORS[color_idx].darkened(0.5))
+		# a pilha de esferas fica no mesmo amarelo claro das esferas dos jogadores
+		draw_circle(c + Vector2(0, i * 3), r, Defs.COLORS[color_idx].darkened(0.18 if color_idx == Defs.GOLD else 0.5))
 	if count == 0:
 		draw_arc(c, r, 0, TAU, 32, Color(1, 1, 1, 0.18), 2.0, true)
 	else:

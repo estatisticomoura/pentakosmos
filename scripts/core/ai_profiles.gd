@@ -73,11 +73,15 @@ static func rules_mode(rules: RuleSet) -> String:
 	## com treino especializado; "geral" para qualquer outra combinacao.
 	if rules == null:
 		return "geral"
-	if rules.equals(RuleSet.classic()):
+	if rules.same_game(RuleSet.classic()):
 		return "classico"
-	if rules.equals(RuleSet.house_full()):
+	if rules.same_game(RuleSet.house_full()):
 		return "house"
 	return "geral"
+
+
+# reserva defensiva nos perfis tatico e misto (Teeteto e Timeu)
+const DEFEND := true
 
 
 static func profile(name: String, rules: RuleSet = null) -> Dictionary:
@@ -89,11 +93,11 @@ static func profile(name: String, rules: RuleSet = null) -> Dictionary:
 		"normal", "estrategista":
 			return {"policy": "plano", "params": DEFAULTS, "denial": -1.0, "endgame": false}
 		"tatica":
-			return {"policy": "plano", "params": DEFAULTS, "denial": 1.0, "endgame": true}
+			return {"policy": "plano", "params": DEFAULTS, "denial": 1.0, "endgame": true, "defend": DEFEND}
 		"evoluida":
 			return {"policy": "plano", "params": evolved_params(mode), "denial": -1.0, "endgame": false}
 		"mista":
-			return {"policy": "plano", "params": evolved_params(mode), "denial": 1.0, "endgame": true}
+			return {"policy": "plano", "params": evolved_params(mode), "denial": 1.0, "endgame": true, "defend": DEFEND}
 		"intermediaria", "dificil", "muito_dificil":
 			var target: String = level_map(mode).get(name, LEVEL_DEFAULTS[name])
 			if target in LEVEL_DEFAULTS:
@@ -102,6 +106,13 @@ static func profile(name: String, rules: RuleSet = null) -> Dictionary:
 	if name.begins_with("{"):
 		# perfil passado como JSON (usado pelo algoritmo genetico e pelo torneio)
 		var d = JSON.parse_string(name)
+		if d is Dictionary and d.has("base"):
+			# um perfil existente com alguns campos trocados (para comparar variantes no torneio)
+			var b: Dictionary = profile(str(d["base"]), rules).duplicate()
+			for k in ["denial", "endgame", "defend"]:
+				if d.has(k):
+					b[k] = d[k]
+			return b
 		if d is Dictionary:
 			var params := DEFAULTS.duplicate()
 			params.merge(d.get("params", {}), true)

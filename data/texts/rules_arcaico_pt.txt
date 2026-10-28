@@ -1,0 +1,17 @@
+[font_size=26][color=#f0c96a][b]Arcaico[/b][/color][/font_size]
+O modo Arcaico mantém o ritmo tradicional deste tipo de jogo de cartas e acrescenta os escritores à academia. Ele é jogado com o deck Arcaico. Turnos, compras, reservas e o fim de jogo funcionam como no Pentakosmos; estas são as diferenças:
+
+• [b]Fichas de elemento por pilha:[/b] 4 / 5 / 7 / 8 para 2 / 3 / 4 / 5 jogadores.
+• [b]Esferas:[/b] sempre 5.
+• [b]Pegar 2 do mesmo elemento:[/b] só de uma pilha com pelo menos 4 fichas.
+• [b]Mercado:[/b] 4 cartas por grupo, também com 5 jogadores.
+• [b]Filósofos:[/b] o requisito precisa ser atendido exatamente, e cada filósofo vale 3 pontos.
+• [b]Escritores:[/b] também ficam 2 escritores na mesa. Cada um pede cartas nas combinações de elementos que os filósofos não usam (3 + 3 de dois elementos, ou 2 + 2 + 2 de três), precisa ser atendido exatamente e vale 1 ponto. No mesmo turno você pode receber um filósofo e um escritor.
+• [b]Sem vitória por especialização:[/b] só a meta de 15 pontos encerra a partida.
+
+[font_size=22][color=#f0c96a]O deck Arcaico[/color][/font_size]
+Como o deck Pentakosmos, as suas 90 cartas vêm de 18 fórmulas aplicadas a cada um dos cinco elementos, com os mesmos custos médios por grupo, mas com moldes próprios: os custos caem em outras posições do ciclo ar → água → éter → fogo → terra.
+
+Pegar 1 ou 2 fichas de elementos diferentes vale em todos os modos, para que a mão quase cheia nunca obrigue a pegar fichas só para devolvê-las.
+
+O jogo foi pensado para 2 a 4 jogadores; 5 jogadores é uma extensão.

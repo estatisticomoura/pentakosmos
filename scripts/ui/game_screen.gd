@@ -55,6 +55,18 @@ var _pw := float(PANEL_W)     # largura base dos paineis
 var _s := 1.0                 # escala de cartas, filosofos e reservas
 var _ps := 1.0                # escala dos paineis
 var _recent: Array = []       # modo toque: o que os outros fizeram desde a sua ultima jogada
+var _ns := 1.0                # escala dos cartoes de filosofos/escritores (mais cartoes = menores)
+var _noble_avail := 800.0     # largura disponivel para a fila de filosofos/escritores
+const RES_K := 0.8            # reservas do jogador a 80% do tamanho das cartas
+# cronometros
+var _timer: TimerView
+var _game_secs := 0.0
+var _turn_left := -1.0        # segundos restantes da vez do humano (-1 = sem limite)
+var _turn_limit := 0
+# estatisticas: tempo de cada acao dos humanos
+var _act_start := -1.0
+var _act_times := {}          # indice do jogador -> [soma em segundos, quantidade]
+var _recorded := false
 
 
 func _init() -> void:
@@ -93,9 +105,12 @@ func _build() -> void:
 	top.size = Vector2(1280, 34)
 	top.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(top)
-	_round_label = UITheme.label("", 16, UITheme.GOLD)
-	_round_label.position = Vector2(12, 6)
-	add_child(_round_label)
+	_round_label = Label.new()       # o texto da rodada fica no cronometro
+	_timer = TimerView.new()
+	_timer.compact = true
+	_timer.position = Vector2(12, 4)
+	_timer.size = Vector2(420, 28)
+	add_child(_timer)
 	_log_label = UITheme.label("", 15, UITheme.TEXT)
 	_log_label.position = Vector2(440, 7)
 	_log_label.size = Vector2(640, 22)
@@ -149,7 +164,10 @@ func _build() -> void:
 		_token_views.append(tv)
 
 	# paineis dos jogadores
-	var h := clampf((454.0 - 6.0 * (g.n - 1)) / g.n, 84.0, 112.0)
+	_noble_avail = PANEL_X - 24.0
+	var res_h := CardView.BASE_SIZE.y * RES_K
+	var res_y := 720.0 - res_h - 8.0
+	var h := clampf((res_y - 34.0 - 40.0 - 6.0 * (g.n - 1)) / g.n, 84.0, 118.0)
 	for i in range(g.n):
 		var pp := PlayerPanel.new()
 		pp.g = g
@@ -163,30 +181,28 @@ func _build() -> void:
 
 	# reservas do jogador observado
 	_reserve_title = UITheme.label("", 15, UITheme.MUTED)
-	_reserve_title.position = Vector2(PANEL_X + 4, 504)
+	_reserve_title.position = Vector2(PANEL_X + 4, res_y - 26)
 	add_child(_reserve_title)
+	var rw := CardView.BASE_SIZE.x * RES_K
 	for i in range(3):
 		var rv := CardView.new()
-		rv.position = Vector2(PANEL_X + 8 + i * 124, 530)
+		rv.position = Vector2(PANEL_X + 8 + i * (rw + 10), res_y)
 		rv.src = "r"
 		rv.slot = i
+		_scale_card(rv, RES_K)
 		rv.pressed.connect(_on_card_pressed)
 		rv.hover_changed.connect(_on_card_hover)
 		add_child(rv)
 		_reserve_views.append(rv)
-	var meta := UITheme.label("", 14, UITheme.MUTED)
+	var meta := UITheme.label("", 15, UITheme.MUTED)
 	meta.name = "Meta"
-	meta.position = Vector2(PANEL_X + 380, 540)
-	meta.size = Vector2(70, 120)
+	meta.position = Vector2(PANEL_X + 8 + 3 * (rw + 10) + 4, res_y + 8)
+	meta.size = Vector2(1272 - (PANEL_X + 8 + 3 * (rw + 10) + 4), res_h)
 	meta.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(meta)
 
-	# acoes
-	_hint = UITheme.label("", 15, UITheme.MUTED)
-	_hint.position = Vector2(12, 614)
-	_hint.size = Vector2(800, 22)
-	_hint.clip_text = true
-	add_child(_hint)
+	# acoes (a antiga dica de texto saiu: as regras ficam em "Como jogar")
+	_hint = Label.new()
 	_tray = Control.new()
 	_tray.position = Vector2(12, 642)
 	_tray.size = Vector2(250, 66)
@@ -250,48 +266,51 @@ func _build_touch() -> void:
 	_px = bank_x + 84.0
 	var avail_w := W - _px - 8.0
 
-	# coluna da esquerda: Menu, rodada, acoes, dica e musica
+	# coluna da esquerda: cronometros, Menu, acoes (espacadas por igual) e musica
 	var left := ColorRect.new()
 	left.color = Color(0, 0, 0, 0.28)
 	left.size = Vector2(LW, H)
 	left.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(left)
-	var menu := UITheme.button(L.t("Menu"), 22, Vector2(LW - 20, 58))
-	menu.position = Vector2(10, 10)
+	_round_label = Label.new()
+	_timer = TimerView.new()
+	_timer.position = Vector2(10, 8)
+	_timer.size = Vector2(LW - 20, 104)
+	add_child(_timer)
+	var menu := UITheme.button(L.t("Menu"), 22, Vector2(LW - 20, 56))
+	menu.position = Vector2(10, 120)
 	menu.pressed.connect(_show_pause)
 	add_child(menu)
-	_round_label = UITheme.label("", 16, UITheme.GOLD)
-	_round_label.position = Vector2(12, 76)
-	_round_label.size = Vector2(LW - 20, 50)
-	_round_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	add_child(_round_label)
-	var col := VBoxContainer.new()
-	col.position = Vector2(10, 136)
-	col.add_theme_constant_override("separation", 10)
-	add_child(col)
-	_btn_take = UITheme.button(L.t("Take"), 22, Vector2(LW - 20, 62))
+	_btn_take = UITheme.button(L.t("Take"), 24, Vector2(LW - 20, 84))
 	_btn_take.pressed.connect(_on_take)
-	_btn_buy = UITheme.button(L.t("Buy"), 22, Vector2(LW - 20, 62))
+	_btn_buy = UITheme.button(L.t("Buy"), 24, Vector2(LW - 20, 84))
 	_btn_buy.pressed.connect(_on_buy)
-	_btn_reserve = UITheme.button(L.t("Reserve"), 22, Vector2(LW - 20, 62))
+	_btn_reserve = UITheme.button(L.t("Reserve"), 24, Vector2(LW - 20, 84))
 	_btn_reserve.pressed.connect(_on_reserve)
-	_btn_clear = UITheme.button(L.t("Clear"), 20, Vector2(LW - 20, 54))
+	_btn_clear = UITheme.button(L.t("Clear"), 24, Vector2(LW - 20, 84))
 	_btn_clear.pressed.connect(_clear_selection.bind(true))
-	_btn_pass = UITheme.button(L.t("Pass"), 20, Vector2(LW - 20, 54))
+	_btn_pass = UITheme.button(L.t("Pass"), 24, Vector2(LW - 20, 84))
 	_btn_pass.pressed.connect(_on_pass)
-	for b in [_btn_take, _btn_buy, _btn_reserve, _btn_clear, _btn_pass]:
-		b.clip_text = true
-		col.add_child(b)
+	var top_b := 196.0
+	var bottom_b := H - 72.0
+	var gap := maxf(8.0, (bottom_b - top_b - 4 * 84.0) / 3.0)
+	var bh := minf(84.0, (bottom_b - top_b - 3 * gap) / 4.0)
+	var order := [_btn_take, _btn_buy, _btn_reserve, _btn_clear]
+	for i in range(4):
+		var b: Button = order[i]
+		b.position = Vector2(10, top_b + i * (bh + gap))
+		b.size = Vector2(LW - 20, bh)
+		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		add_child(b)
+	# "Passar" so aparece quando nao ha jogada possivel: ocupa o lugar de "Pegar"
+	_btn_pass.position = _btn_take.position
+	_btn_pass.size = _btn_take.size
+	_btn_pass.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	add_child(_btn_pass)
 	var player := MusicControls.new(42.0, 46.0)
 	player.position = Vector2((LW - player.size.x) / 2.0, H - 56.0)
 	add_child(player)
-	_hint = UITheme.label("", 14, UITheme.MUTED)
-	_hint.position = Vector2(10, 136 + 3 * 72 + 2 * 64 + 6)
-	_hint.size = Vector2(LW - 18, H - 62.0 - _hint.position.y)
-	_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_hint.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
-	_hint.clip_text = true
-	add_child(_hint)
+	_hint = Label.new()
 
 	# registro: o que os adversarios fizeram desde a sua ultima jogada
 	var top := ColorRect.new()
@@ -313,7 +332,8 @@ func _build_touch() -> void:
 	_noble_box = Control.new()
 	_noble_box.position = Vector2(mx, top_y)
 	add_child(_noble_box)
-	var tray_x := mx + g.nobles.size() * 100.0 * _s + 8.0
+	var tray_x := mx + minf(g.nobles.size() * 100.0 * _s, _px - mx - 200.0) + 8.0
+	_noble_avail = tray_x - mx - 8.0
 	_tray = Control.new()
 	_tray.position = Vector2(tray_x, top_y + 6.0)
 	_tray.size = Vector2(maxf(150.0, minf(250.0, _px - 8.0 - tray_x)), 88.0 * _s - 12.0)
@@ -355,24 +375,25 @@ func _build_touch() -> void:
 		add_child(tv)
 		_token_views.append(tv)
 
-	# reservas do jogador (embaixo, a direita) e paineis (em cima)
-	var res_h := 154.0 * _s
+	# reservas do jogador (embaixo, a direita, a 80%) e paineis (em cima)
+	var res_h := CardView.BASE_SIZE.y * _s * RES_K
 	var res_y := H - res_h - 8.0
+	var rstep := (CardView.BASE_SIZE.x * RES_K + 10.0) * _s
 	_reserve_title = UITheme.label("", 16, UITheme.MUTED)
 	_reserve_title.position = Vector2(_px + 4, res_y - 26)
 	add_child(_reserve_title)
 	for i in range(3):
 		var rv := CardView.new()
-		rv.position = Vector2(_px + 4 + i * 124 * _s, res_y)
+		rv.position = Vector2(_px + 4 + i * rstep, res_y)
 		rv.src = "r"
 		rv.slot = i
-		_scale_card(rv)
+		_scale_card(rv, RES_K)
 		rv.pressed.connect(_on_card_pressed)
 		add_child(rv)
 		_reserve_views.append(rv)
 	var meta := UITheme.label("", 16, UITheme.MUTED)
 	meta.name = "Meta"
-	meta.position = Vector2(_px + 8 + 3 * 124 * _s, res_y + 6)
+	meta.position = Vector2(_px + 8 + 3 * rstep, res_y + 6)
 	meta.size = Vector2(maxf(60.0, W - meta.position.x - 6), res_h)
 	meta.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	# sem espaco, some (a meta e o limite ja aparecem nos paineis: "/15" e "x/10")
@@ -395,10 +416,10 @@ func _build_touch() -> void:
 	_build_fx()
 
 
-func _scale_card(cv: CardView) -> void:
-	cv.base_scale = _s
+func _scale_card(cv: CardView, k := 1.0) -> void:
+	cv.base_scale = _s * k
 	cv.pivot_offset = Vector2.ZERO
-	cv.scale = Vector2(_s, _s)
+	cv.scale = Vector2(_s * k, _s * k)
 
 
 func _notification(what: int) -> void:
@@ -429,23 +450,22 @@ func refresh() -> void:
 	var vp: GameState.PlayerState = g.players[viewer]
 	var human := _human_turn()
 	var who := L.f("Your turn, {name}", {"name": p.name}) if human else L.f("Turn: {name}", {"name": p.name})
-	var sep := "\n" if UITheme.touch else " · "
-	if g.finished:
-		_round_label.text = L.f("Round {n} · Game over", {"n": g.round_no}).replace(" · ", sep)
-	else:
-		_round_label.text = (L.f("Round {n} · {who}", {"n": g.round_no, "who": who}) + (L.t(" · last round!") if g.end_triggered else "")).replace(" · ", sep)
+	_timer.round_text = L.f("Round {n}", {"n": g.round_no})
+	_timer.who = L.t("Game over.") if g.finished else (who + (L.t(" · last round!") if g.end_triggered else ""))
+	_timer.queue_redraw()
 	# nobres
 	for v in _noble_views:
 		v.queue_free()
 	_noble_views = []
-	# pontos que cada filosofo daria ao jogador observado agora (3, depois 2, depois 1)
-	var pts_txt := str(g.rules.noble_pts(vp.nobles.size()))
+	# filosofos e escritores: pontos que dariam ao jogador observado agora
+	_ns = minf(_s, _noble_avail / maxf(1.0, g.nobles.size() * 100.0))
 	for i in range(g.nobles.size()):
+		var id: int = g.nobles[i]
 		var nv := NobleView.new()
-		nv.position = Vector2(i * 100 * _s, 0)
-		nv.scale = Vector2(_s, _s)
-		nv.setup(g.nobles[i], pts_txt, g.rules.noble_mode == "flexivel",
-			g.noble_distance(vp.bonus, Defs.NOBLES[g.nobles[i]]))
+		nv.position = Vector2(i * 100 * _ns, 0)
+		nv.scale = Vector2(_ns, _ns)
+		nv.setup(id, str(g.patron_pts(vp, id)), g.rules.writer_free if Defs.is_writer(id) else g.rules.noble_free,
+			g.patron_distance(vp.bonus, id))
 		if not UITheme.touch:
 			nv.hover_changed.connect(_on_noble_hover)
 		nv.pressed.connect(_on_noble_tap)
@@ -497,7 +517,7 @@ func refresh() -> void:
 			rv.affordable = false
 		rv.set_selected(sel_card.get("src", "") == "r" and sel_card.get("idx", -1) == i)
 	var meta: Label = get_node("Meta")
-	meta.text = L.f("Goal\n{pts} pts\n\nHand\n{n} tokens", {"pts": g.rules.target, "n": g.rules.hand_limit})
+	meta.text = L.f("Goal {pts} pts · hand {n} tokens", {"pts": g.rules.target, "n": g.rules.hand_limit})
 	_update_buttons()
 	_tray.queue_redraw()
 
@@ -523,7 +543,8 @@ func _update_buttons() -> void:
 	_btn_reserve.disabled = not can_res
 	_btn_clear.disabled = not human or (sel_tokens.is_empty() and sel_card.is_empty())
 	_btn_pass.visible = human and not g.has_any_action()
-	_hint.text = _hint_text()
+	if UITheme.touch:
+		_btn_take.visible = not _btn_pass.visible
 
 
 func _hint_text() -> String:
@@ -540,7 +561,7 @@ func _hint_text() -> String:
 		return L.f("Pick up to 3 different elements, or 2 of the same element from a pile of {n}+.", {"n": g.rules.take2_min})
 	if not sel_card.is_empty():
 		if sel_card["src"] == "deck":
-			return L.f("Reserve the top card of level {lv} face down (you gain 1 {gold}).", {"lv": sel_card["lv"], "gold": L.color(Defs.GOLD)})
+			return L.f("Reserve the top card of the pile ({group}) face down (you gain 1 {gold}).", {"group": L.t(Defs.LEVEL_SHORT[sel_card["lv"]]), "gold": L.color(Defs.GOLD)})
 		return L.t("Tap the card again to buy it quickly, or use the buttons.")
 	return L.t("Take tokens, buy an element card (green seal = affordable) or reserve one.")
 
@@ -561,7 +582,6 @@ func _draw_tray() -> void:
 func _on_token_pressed(tv: TokenView) -> void:
 	if not _human_turn() or tv.color_idx == Defs.GOLD:
 		if tv.color_idx == Defs.GOLD and _human_turn():
-			_hint.text = L.f("You only get {gold} by reserving a card.", {"gold": L.color(Defs.GOLD)})
 			Audio.play("error")
 		return
 	var c := tv.color_idx
@@ -618,6 +638,66 @@ func _on_card_pressed(cv: CardView) -> void:
 	_show_card_info(cv)
 
 
+func _note_action() -> void:
+	## Guarda quanto tempo o humano levou para agir (estatisticas) e para o cronometro.
+	if _act_start >= 0.0 and g != null:
+		var e: Array = _act_times.get(g.current, [0.0, 0])
+		e[0] += _game_secs - _act_start
+		e[1] += 1
+		_act_times[g.current] = e
+	_act_start = -1.0
+	_turn_left = -1.0
+
+
+func _humans_count() -> int:
+	var k := 0
+	for p in g.players:
+		if not p.is_ai():
+			k += 1
+	return k
+
+
+func _process(delta: float) -> void:
+	if g == null or not _alive:
+		return
+	var paused := _overlay_kind == "Pausa" or _overlay_kind == "Vez"
+	if not g.finished and not paused:
+		_game_secs += delta
+		if _turn_left >= 0.0:
+			_turn_left -= delta
+			if _turn_left <= 0.0:
+				_on_timeout()
+	if _timer != null:
+		_timer.game_secs = _game_secs
+		_timer.left = _turn_left
+		_timer.limit = _turn_limit
+		_timer.queue_redraw()
+
+
+func _start_human_clock() -> void:
+	## Comeca a contagem da vez do humano (se houver limite nas regras).
+	_act_start = _game_secs
+	_turn_limit = g.rules.turn_time(_humans_count())
+	_turn_left = float(_turn_limit) if _turn_limit > 0 else -1.0
+
+
+func _on_timeout() -> void:
+	## Acabou o tempo: a vez passa sem acao (descarte e escolhas: o jogo decide).
+	_turn_left = -1.0
+	_note_action()
+	_close_overlay()
+	_clear_selection()
+	var guard := 0
+	while not g.finished and not g.cur().is_ai() and g.current == viewer and guard < 20:
+		var before := g.turns_total
+		g.timeout()
+		guard += 1
+		if g.turns_total != before:
+			break
+	Audio.play("error")
+	_continue()
+
+
 func _clear_selection(play_sound := false) -> void:
 	sel_tokens = []
 	sel_card = {}
@@ -629,6 +709,7 @@ func _clear_selection(play_sound := false) -> void:
 
 func _on_take() -> void:
 	_hide_info()
+	_note_action()
 	if g.act_take(sel_tokens):
 		_clear_selection()
 		_continue()
@@ -638,6 +719,7 @@ func _on_take() -> void:
 
 func _on_buy() -> void:
 	_hide_info()
+	_note_action()
 	var ok := false
 	if sel_card.get("src", "") == "m":
 		ok = g.act_buy_market(sel_card["lv"], sel_card["slot"])
@@ -652,6 +734,7 @@ func _on_buy() -> void:
 
 func _on_reserve() -> void:
 	_hide_info()
+	_note_action()
 	var ok := false
 	if sel_card.get("src", "") == "m":
 		ok = g.act_reserve(sel_card["lv"], sel_card["slot"])
@@ -666,6 +749,7 @@ func _on_reserve() -> void:
 
 func _on_pass() -> void:
 	_hide_info()
+	_note_action()
 	if g.act_pass():
 		_clear_selection()
 		_continue()
@@ -710,6 +794,7 @@ func _continue() -> void:
 				return
 		viewer = g.current
 		refresh()
+		_start_human_clock()
 		if g.phase == "descarte":
 			_show_discard()
 		elif g.phase == "nobre":
@@ -766,7 +851,7 @@ func _animate_event(e: Dictionary) -> float:
 					_fly_chip(c, _panel_point(panel, panel.token_pos(c)), _center_of(tv), 0.25 + 0.06 * k2,
 						func(): Audio.play("chip", 0.1, -12.0))
 					k2 += 1
-			_log(L.f("{name} bought a level {lv} card ({color}){pts}.", {"name": pname, "lv": cd.level,
+			_log(L.f("{name} bought a card ({group} · {color}){pts}.", {"name": pname, "group": L.t(Defs.LEVEL_SHORT[cd.level]),
 				"color": L.color(cd.bonus), "pts": (" +%d" % cd.points) if cd.points > 0 else ""}), pi)
 			Audio.play("buy", 0.04, -3.0)
 			return 0.9
@@ -780,12 +865,12 @@ func _animate_event(e: Dictionary) -> float:
 				_fly_chip(Defs.GOLD, _center_of(_token_views[Defs.GOLD]), _panel_point(panel, panel.token_pos(Defs.GOLD)), 0.3,
 					func(): _land_token(panel, Defs.GOLD))
 			if e["blind"]:
-				_log(L.f("{name} reserved a level {lv} card face down.", {"name": pname, "lv": e["lv"]}), pi)
+				_log(L.f("{name} reserved a face-down card ({group}).", {"name": pname, "group": L.t(Defs.LEVEL_SHORT[e["lv"]])}), pi)
 			else:
-				var rfmt := "{name} reserved a level {lv} card ({color}){pts}."  # tr
+				var rfmt := "{name} reserved a card ({group} · {color}){pts}."  # tr
 				if not UITheme.touch:
-					rfmt = "{name} reserved a level {lv} card ({color}){pts}. Hover over their reserves to see it again."  # tr
-				_log(L.f(rfmt, {"name": pname, "lv": cd2.level, "color": L.color(cd2.bonus),
+					rfmt = "{name} reserved a card ({group} · {color}){pts}. Hover over their reserves to see it again."  # tr
+				_log(L.f(rfmt, {"name": pname, "group": L.t(Defs.LEVEL_SHORT[cd2.level]), "color": L.color(cd2.bonus),
 					"pts": (" +%d" % cd2.points) if cd2.points > 0 else ""}), pi)
 			Audio.play("reserve", 0.04, -4.0)
 			return 0.85
@@ -795,7 +880,7 @@ func _animate_event(e: Dictionary) -> float:
 			Audio.play("discard", 0.06, -6.0)
 			return 0.12
 		"noble":
-			var phil := L.t(Defs.PHILOSOPHERS[e["noble"]])
+			var phil := L.t(Defs.patron_name(e["noble"]))
 			_log(L.f("{name}: {phil} joins the academy (+{pts})!", {"name": pname, "phil": phil, "pts": e["pts"]}), pi)
 			_show_banner(L.f("{name}: {phil} joins the academy (+{pts})!", {"name": pname, "phil": phil, "pts": e["pts"]}))
 			for nv in _noble_views:
@@ -1001,14 +1086,19 @@ func _show_peek(panel: PlayerPanel, zone: String) -> void:
 		if note != "":
 			v.add_child(UITheme.label(note, 12, UITheme.MUTED))
 	else:
-		v.add_child(UITheme.label(L.f("Philosophers: {name}", {"name": p.name}), 16, UITheme.GOLD))
+		v.add_child(UITheme.label(L.f("Academy: {name}", {"name": p.name}), 18, UITheme.GOLD))
+		var kphil := 0
 		for k in range(p.nobles.size()):
+			var id: int = p.nobles[k]
 			var nv := NobleView.new()
 			nv.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			nv.setup(p.nobles[k], "+%d" % g.rules.noble_pts(k), false)
+			var pts: int = Defs.WRITER_PTS if Defs.is_writer(id) else g.rules.noble_pts(kphil)
+			if not Defs.is_writer(id):
+				kphil += 1
+			nv.setup(id, "+%d" % pts, 0)
 			h.add_child(nv)
 		v.add_child(h)
-		v.add_child(UITheme.label(L.f("{n} points from philosophers", {"n": p.noble_points}), 12, UITheme.MUTED))
+		v.add_child(UITheme.label(L.f("{n} points from the academy", {"n": p.noble_points}), 15, UITheme.MUTED))
 	add_child(box)
 	_peek = box
 	_peek_src = [panel, zone]
@@ -1060,42 +1150,43 @@ func _need_of(p: GameState.PlayerState, cd: Defs.CardDef) -> Array:
 	return need
 
 
-func _gem_row(counts: Array, prefix := "") -> Control:
-	## Linha de simbolos com numeros (so as cores com valor > 0).
+func _gem_row(counts: Array, prefix := "", big := 26) -> Control:
+	## Linha de simbolos com numeros (so as cores com valor > 0), em letra grande.
 	var cols: Array = []
 	for c in range(counts.size()):
 		if counts[c] > 0:
 			cols.append(c)
+	var step := big * 2.3
 	var ctl := Control.new()
-	ctl.custom_minimum_size = Vector2(maxi(1, cols.size()) * 52, 30)
+	ctl.custom_minimum_size = Vector2(maxi(1, cols.size()) * step, big * 1.3)
 	ctl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ctl.draw.connect(func():
 		for i in range(cols.size()):
 			var c: int = cols[i]
-			var center := Vector2(14 + i * 52, 15)
-			GemDraw.draw_gem(ctl, c, center, 11)
-			GemDraw.text(ctl, prefix + str(counts[c]), center + Vector2(15, 6), 16, Color.WHITE, HORIZONTAL_ALIGNMENT_LEFT, -1, 3))
+			var center := Vector2(big * 0.55 + i * step, big * 0.65)
+			GemDraw.draw_gem(ctl, c, center, big * 0.48)
+			GemDraw.text(ctl, prefix + str(counts[c]), center + Vector2(big * 0.62, big * 0.36), big, Color.WHITE,
+				HORIZONTAL_ALIGNMENT_LEFT, -1, 3))
 	return ctl
 
 
 func _info_box(anchor: Control, lines: Array) -> void:
-	## lines: Strings (texto) ou Controls.
+	## Dica curta: lines sao Strings, [texto, cor] ou Controls. A primeira linha e o titulo.
 	_hide_info()
 	var box := PanelContainer.new()
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.z_index = 20
 	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 4)
+	v.add_theme_constant_override("separation", 2)
 	box.add_child(v)
 	var first := true
 	for it in lines:
 		if it is Control:
 			v.add_child(it)
 		else:
-			var big := 3 if UITheme.touch else 0
-			var l := UITheme.label(it, (16 if first else 14) + big, UITheme.GOLD if first else UITheme.TEXT)
-			l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			l.custom_minimum_size = Vector2(320 if UITheme.touch else 260, 0)
+			var txt: String = it if it is String else it[0]
+			var col: Color = (UITheme.GOLD if first else UITheme.TEXT) if it is String else it[1]
+			var l := UITheme.label(txt, 26 if first else 21, col)
 			v.add_child(l)
 		first = false
 	add_child(box)
@@ -1117,13 +1208,7 @@ func _show_card_info(cv: CardView) -> void:
 	var vp: GameState.PlayerState = g.players[viewer]
 	if cv.src == "deck":
 		var lv := cv.lv
-		var total := 0
-		for cd in g.cards:
-			if cd.level == lv:
-				total += 1
-		var left: int = g.decks[lv].size()
-		_info_box(cv, [L.f("Level {lv} deck", {"lv": lv}),
-			L.f("{n} cards left in the deck; {out} have already been drawn.", {"n": left, "out": total - left})])
+		_info_box(cv, [L.t(Defs.LEVEL_NAMES[lv]), L.f("{n} cards in the deck", {"n": g.decks[lv].size()})])
 		return
 	var cid := -1
 	if cv.src == "m":
@@ -1139,40 +1224,41 @@ func _show_card_info(cv: CardView) -> void:
 	for c in range(5):
 		short += need[c]
 	var gold: int = vp.tokens[Defs.GOLD]
-	var gname := L.color(Defs.GOLD)
-	var lines: Array = [L.t("To buy this card")]
+	var lines: Array = []
 	if short == 0:
-		lines.append(L.f("You can buy it with elements only (no {gold}).", {"gold": gname}))
+		lines.append([L.t("You can buy it"), Color(0.55, 0.9, 0.6)])
+		lines.append(L.t("without using spheres"))
 	else:
-		lines.append(L.f("Elements only: {n} missing", {"n": short}))
-		lines.append(_gem_row(need, "−"))
-		if gold == 0:
-			lines.append(L.f("You have no {gold}.", {"gold": gname}))
-		elif short <= gold:
-			lines.append(L.f("With {gold} (you have {g}): you can buy it", {"gold": gname, "g": gold}))
-		else:
-			lines.append(L.f("With {gold} (you have {g}): {n} missing", {"gold": gname, "g": gold, "n": short - gold}))
+		lines.append(L.f("{n} missing", {"n": short}))
+		lines.append(_gem_row(need))
+		if gold > 0:
+			lines.append(L.f("With {g} spheres: you can buy it", {"g": gold}) if short <= gold
+				else L.f("With {g} spheres: {n} missing", {"g": gold, "n": short - gold}))
 	if g.rules.color_win > 0 and cd.points > 0:
-		lines.append(L.f("Specialization: {a} → {b} points in {color}", {"a": vp.color_pts[cd.bonus],
-			"b": vp.color_pts[cd.bonus] + cd.points, "color": L.color(cd.bonus)}))
+		lines.append([L.f("{color}: {a} → {b} of {cw}", {"color": L.color(cd.bonus), "a": vp.color_pts[cd.bonus],
+			"b": vp.color_pts[cd.bonus] + cd.points, "cw": g.rules.color_win}), UITheme.MUTED])
 	_info_box(cv, lines)
 
 
 func _show_noble_info(nv: NobleView) -> void:
-	var lines: Array = [L.t(Defs.PHILOSOPHERS[nv.noble]) if nv.noble >= 0 else L.t("Philosopher")]
-	lines.append(L.t("A philosopher joins your academy automatically at the end of your turn when your element cards (bonuses) meet the requirement shown."))
-	lines.append(L.t("Top left: the points this philosopher would give you now."))
-	if nv.progress >= 0:
-		if nv.progress == 0:
-			lines.append(L.t("The number in the corner shows how many more cards you need: you already meet this one."))
-		else:
-			lines.append(L.f("The number in the corner shows how many more cards you need: {n}.", {"n": nv.progress}))
-	if nv.flexible:
-		lines.append(L.t("−2 any: the total requirement is 2 cards lower, and those 2 can be missing from any elements."))
-	if g.rules.noble_points_mode == "decrescente":
-		lines.append(L.t("Your first philosopher is worth 3 points, the second 2, and each one after that 1."))
+	if nv.noble < 0:
+		return
+	var vp: GameState.PlayerState = g.players[viewer]
+	var id := nv.noble
+	var lines: Array = [L.f("{name} · {n} points", {"name": L.t(Defs.patron_name(id)), "n": g.patron_pts(vp, id)})]
+	var d := g.patron_distance(vp.bonus, id)
+	if d == 0:
+		lines.append([L.t("Already met: arrives at the end of your turn"), Color(0.55, 0.9, 0.6)])
 	else:
-		lines.append(L.t("Each philosopher is worth 3 points."))
+		lines.append(L.f("{n} more cards", {"n": d}))
+		var req: Array = Defs.patron_req(id)
+		var miss := [0, 0, 0, 0, 0]
+		for c in range(5):
+			miss[c] = maxi(0, req[c] - vp.bonus[c])
+		lines.append(_gem_row(miss))
+	var free_n: int = g.rules.writer_free if Defs.is_writer(id) else g.rules.noble_free
+	if free_n > 0:
+		lines.append([L.f("−{n} any", {"n": free_n}), UITheme.MUTED])
 	_info_box(nv, lines)
 
 
@@ -1217,7 +1303,7 @@ func _close_overlay() -> void:
 
 func _hotseat(idx: int) -> void:
 	var nm: String = g.players[idx].name
-	var v := _open_overlay(L.f("Turn: {name}", {"name": nm}))
+	var v := _open_overlay(L.f("Turn: {name}", {"name": nm}), "Vez")
 	v.add_child(UITheme.label(L.f("Pass the device to {name}.", {"name": nm}), 18))
 	var b := UITheme.button(L.f("I'm {name}, start", {"name": nm}), 20, Vector2(320, 54))
 	v.add_child(b)
@@ -1248,7 +1334,11 @@ func _show_discard() -> void:
 				Audio.play("discard")
 				if g.phase != "descarte":
 					_close_overlay()
-					_continue()
+					if g.phase == "nobre":
+						_show_noble_choice()
+					else:
+						_note_action()
+						_continue()
 				else:
 					upd.call()
 					refresh())
@@ -1258,21 +1348,28 @@ func _show_discard() -> void:
 
 
 func _show_noble_choice() -> void:
-	var v := _open_overlay(L.t("Choose a philosopher"))
-	v.add_child(UITheme.label(L.t("You meet the requirements of more than one philosopher."), 17))
+	var writers: bool = Defs.is_writer(g.noble_options[0])
+	var v := _open_overlay(L.t("Choose a writer") if writers else L.t("Choose a philosopher"))
+	v.add_child(UITheme.label(L.t("You meet the requirements of more than one writer.") if writers
+		else L.t("You meet the requirements of more than one philosopher."), 18))
 	var h := HBoxContainer.new()
 	h.alignment = BoxContainer.ALIGNMENT_CENTER
-	h.add_theme_constant_override("separation", 16)
+	h.add_theme_constant_override("separation", 22)
 	v.add_child(h)
-	var pts := g.rules.noble_pts(g.cur().nobles.size())
 	for nb in g.noble_options:
 		var nv := NobleView.new()
-		nv.setup(nb, "+%d" % pts, g.rules.noble_mode == "flexivel")
+		nv.setup(nb, "+%d" % g.patron_pts(g.cur(), nb), g.rules.writer_free if writers else g.rules.noble_free)
+		nv.custom_minimum_size = Vector2(141, 132)
+		nv.size = nv.custom_minimum_size
 		nv.selectable = true
 		nv.pressed.connect(func(x: NobleView):
 			if g.choose_noble(x.noble):
 				_close_overlay()
-				_continue())
+				if g.phase == "nobre":
+					_show_noble_choice()
+				else:
+					_note_action()
+					_continue())
 		h.add_child(nv)
 
 
@@ -1280,9 +1377,14 @@ func _show_pause() -> void:
 	if _overlay != null:
 		return
 	var v := _open_overlay(L.t("Pause"), "Pausa")
-	var cont := UITheme.button(L.t("Continue"), 20, Vector2(320, 50))
+	var cont := UITheme.button(L.t("Continue"), 22, Vector2(420, 56))
 	cont.pressed.connect(_close_overlay)
 	v.add_child(cont)
+	# idioma: troca na hora e volta para a partida ja traduzida
+	var lang_cap := L.t("Language") if L.code == "en" else L.t("Language") + " · Language"
+	var lb := UITheme.button("%s: %s" % [lang_cap, L.LANGS[L.index()][1]], 20, Vector2(420, 52))
+	lb.pressed.connect(_show_languages)
+	v.add_child(lb)
 	var speed := HBoxContainer.new()
 	speed.add_child(UITheme.label(L.t("AI speed"), 16, UITheme.MUTED))
 	var so := UITheme.option([L.t("Slow"), L.t("Normal"), L.t("Fast")], [1.1, 0.6, 0.2].find(ai_delay) if [1.1, 0.6, 0.2].has(ai_delay) else 1)
@@ -1292,8 +1394,8 @@ func _show_pause() -> void:
 	speed.add_child(so)
 	v.add_child(speed)
 	var rv := HBoxContainer.new()
-	rv.add_child(UITheme.label(L.t("Opponents' reserves"), 16, UITheme.MUTED))
-	var ro := UITheme.option([L.t("Until the player's next turn"), L.t("Always visible")], 1 if reveal_mode == "sempre" else 0)
+	rv.add_child(UITheme.label(L.t("See reserves"), 16, UITheme.MUTED))
+	var ro := UITheme.option([L.t("From the last turn"), L.t("Always visible")], 1 if reveal_mode == "sempre" else 0)
 	ro.item_selected.connect(func(i):
 		reveal_mode = ["rodada", "sempre"][i]
 		Store.set_value("game", "reserva_visivel", reveal_mode)
@@ -1332,17 +1434,74 @@ func _show_pause() -> void:
 	v.add_child(mm)
 
 
+func _show_languages() -> void:
+	_close_overlay()
+	var v := _open_overlay(L.t("Language") if L.code == "en" else L.t("Language") + " · Language", "Pausa")
+	var grid := GridContainer.new()
+	grid.columns = 4 if size.x >= 1200 else 3
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 6)
+	v.add_child(grid)
+	for i in range(L.LANGS.size()):
+		var b := UITheme.button(L.LANGS[i][1], 18, Vector2(240, 40))
+		if i == L.index():
+			b.add_theme_color_override("font_color", UITheme.GOLD)
+		var code: String = L.LANGS[i][0]
+		b.pressed.connect(func():
+			L.set_lang(code)
+			Store.set_value("geral", "idioma", code)
+			_rebuild())
+		grid.add_child(b)
+	var back := UITheme.button(L.t("Back"), 18, Vector2(240, 44))
+	back.pressed.connect(func():
+		_close_overlay()
+		_show_pause())
+	v.add_child(back)
+
+
+func _rebuild() -> void:
+	## Remonta a mesa (ex.: depois de trocar o idioma), mantendo a partida.
+	_close_overlay()
+	_hide_info()
+	_hide_peek()
+	for ch in get_children():
+		ch.queue_free()
+	_market_views = [[], [], [], []]
+	_deck_views = [null, null, null, null]
+	_token_views = []
+	_panels = []
+	_reserve_views = []
+	_noble_views = []
+	_recent = []
+	_build()
+	refresh()
+	if g.finished:
+		_show_game_over()
+	elif not g.cur().is_ai() and g.current == viewer:
+		if g.phase == "descarte":
+			_show_discard()
+		elif g.phase == "nobre":
+			_show_noble_choice()
+
+
 func _show_game_over() -> void:
+	if not _recorded and _humans_count() > 0:
+		_recorded = true
+		Stats.record_game(g, _game_secs, _act_times)
 	var w := g.winners()
 	var title := L.f("{name} wins!", {"name": g.players[w[0]].name}) if w.size() == 1 else L.t("Draw!")
 	Audio.play("win")
 	var v := _open_overlay(title, "Fim")
 	var grid := GridContainer.new()
-	grid.columns = 5
+	var wr := g.rules.uses_writers()
+	grid.columns = 6 if wr else 5
 	grid.add_theme_constant_override("h_separation", 22)
 	v.add_child(grid)
-	for hd in ["", L.t("Player"), L.t("Points"), L.t("Cards"), L.t("Philosophers")]:
-		grid.add_child(UITheme.label(hd, 15, UITheme.MUTED))
+	var heads := ["", L.t("Player"), L.t("Points"), L.t("Cards"), L.t("Philosophers")]
+	if wr:
+		heads.append(L.t("Writers"))
+	for hd in heads:
+		grid.add_child(UITheme.label(hd, 16, UITheme.MUTED))
 	var pos := 1
 	for i in g.ranking():
 		var p: GameState.PlayerState = g.players[i]
@@ -1351,13 +1510,17 @@ func _show_game_over() -> void:
 		grid.add_child(UITheme.label(p.name, 18, col))
 		grid.add_child(UITheme.label(str(p.points), 18, col))
 		grid.add_child(UITheme.label(str(p.cards), 18, col))
-		grid.add_child(UITheme.label(str(p.nobles.size()), 18, col))
+		var nphil := GameState.philosopher_count(p)
+		grid.add_child(UITheme.label(str(nphil), 18, col))
+		if wr:
+			grid.add_child(UITheme.label(str(p.nobles.size() - nphil), 18, col))
 		pos += 1
 	var wp: GameState.PlayerState = g.players[w[0]]
 	if g.meets_color(wp):
 		var bc := g.best_color(wp)
 		v.add_child(UITheme.label(L.f("Specialization victory: {pts} points in {color} cards", {"pts": wp.color_pts[bc], "color": L.color(bc)}), 16, UITheme.GOLD))
-	v.add_child(UITheme.label(L.f("{n} rounds · ties are broken by fewer cards bought", {"n": g.round_no}), 13, UITheme.MUTED))
+	v.add_child(UITheme.label(L.f("{n} rounds · {t} · ties are broken by fewer cards bought",
+		{"n": g.round_no, "t": TimerView.clock(_game_secs)}), 15, UITheme.MUTED))
 	var h := HBoxContainer.new()
 	h.alignment = BoxContainer.ALIGNMENT_CENTER
 	h.add_theme_constant_override("separation", 12)

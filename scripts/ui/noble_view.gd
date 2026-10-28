@@ -1,15 +1,18 @@
 class_name NobleView
 extends Control
-## Filosofo (o antigo "nobre"). Arte opcional em res://assets/philosophers/philosopher_<n>.png (n = 1..10).
+## Cartao de filosofo (id 0..9) ou escritor (id 100..109).
+## Pontos a esquerda; simbolos do requisito numa linha e os numeros embaixo; a linha
+## "-N livre" (quando ha desconto); o nome; e uma bolha no canto com quantas cartas faltam.
+## Arte opcional em res://assets/philosophers/philosopher_<n>.png ou assets/writers/writer_<n>.png.
 
 signal pressed(view: NobleView)
 signal hover_changed(view: NobleView, on: bool)
 
 var noble := -1
 var points_text := "3"
-var flexible := false
+var free_n := 0          # cartas livres no requisito (0 = exato)
 var selectable := false
-var progress := -1      # cartas que faltam para o jogador observado (-1 = nao mostra)
+var progress := -1       # cartas que faltam para o jogador observado (-1 = nao mostra)
 var _tex: Texture2D = null
 var _t := 0.0
 
@@ -23,13 +26,18 @@ func _init() -> void:
 	mouse_exited.connect(func(): hover_changed.emit(self, false))
 
 
-func setup(nb: int, pts: String, flex: bool, prog: int = -1) -> void:
+func setup(nb: int, pts: String, p_free: int, prog: int = -1) -> void:
 	noble = nb
 	points_text = pts
-	flexible = flex
+	free_n = p_free
 	progress = prog
-	var path := "res://assets/philosophers/philosopher_%d.png" % (nb + 1)
-	_tex = load(path) if ResourceLoader.exists(path) else null
+	var path := ""
+	if nb >= 0:
+		if Defs.is_writer(nb):
+			path = "res://assets/writers/writer_%d.png" % (nb - Defs.WRITER_BASE + 1)
+		else:
+			path = "res://assets/philosophers/philosopher_%d.png" % (nb + 1)
+	_tex = load(path) if path != "" and ResourceLoader.exists(path) else null
 	queue_redraw()
 
 
@@ -45,45 +53,53 @@ func _gui_input(event: InputEvent) -> void:
 		accept_event()
 
 
+func is_writer() -> bool:
+	return noble >= 0 and Defs.is_writer(noble)
+
+
 func _draw() -> void:
 	var r := Rect2(Vector2.ZERO, size)
+	var k := size.y / 100.0
+	var writer := is_writer()
+	var frame := Color(0.62, 0.78, 0.92) if writer else Color(0.93, 0.76, 0.40)
+	var bg := Color(0.11, 0.15, 0.22) if writer else Color(0.20, 0.13, 0.17)
 	if selectable:
 		GemDraw.glow(self, r, Color(1.0, 0.85, 0.35), 0.7 + 0.3 * sin(_t * 5.0), 10)
 	GemDraw.rounded(self, Rect2(Vector2(2, 4), size), Color(0, 0, 0, 0.45), 10)
 	if _tex != null:
 		draw_texture_rect(_tex, r, false)
-		GemDraw.rounded(self, r, Color(0, 0, 0, 0), 10, Color(0.85, 0.7, 0.35), 2)
+		GemDraw.rounded(self, r, Color(0, 0, 0, 0), 10, frame, 2)
 	else:
-		GemDraw.rounded(self, r, Color(0.20, 0.13, 0.22), 10, Color(0.85, 0.7, 0.35), 2)
-	# pontos que este filosofo daria (canto superior esquerdo)
-	GemDraw.text(self, points_text, Vector2(8, 27), 22 if points_text.length() <= 2 else 16,
+		GemDraw.rounded(self, r, bg, 10, frame, 2)
+	# pontos que daria agora
+	GemDraw.text(self, points_text, Vector2(6, 44) * k, int((32 if points_text.length() <= 2 else 22) * k),
 		Color(1.0, 0.88, 0.55), HORIZONTAL_ALIGNMENT_LEFT, -1, 3)
 	if noble < 0:
 		return
-	# nome do filosofo
-	var nm := L.t(Defs.PHILOSOPHERS[noble])
-	var fs := 13
+	# requisito: simbolos numa linha, numeros embaixo
+	var req: Array = Defs.patron_req(noble)
+	var cols: Array = []
+	for c in range(5):
+		if req[c] > 0:
+			cols.append(c)
+	var x0 := 30.0 * k
+	var cw := (size.x - x0 - 6.0 * k) / maxi(1, cols.size())
+	for i in range(cols.size()):
+		var cx := x0 + cw * i + cw / 2.0
+		GemDraw.draw_gem(self, cols[i], Vector2(cx, 20 * k), 8.5 * k)
+		GemDraw.ctext(self, str(req[cols[i]]), Vector2(cx, 43 * k), int(20 * k), Color.WHITE, 3)
+	if free_n > 0:
+		GemDraw.ctext(self, L.f("−{n} any", {"n": free_n}), Vector2(size.x / 2.0, 64 * k), int(13 * k), Color(1, 1, 1, 0.65))
+	# nome
+	var nm := L.t(Defs.patron_name(noble))
+	var fs := int(17 * k)
 	while fs > 9 and ThemeDB.fallback_font.get_string_size(nm, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > size.x - 8:
 		fs -= 1
-	GemDraw.ctext(self, nm, Vector2(size.x / 2.0, 44), fs, Color(1.0, 0.93, 0.78), 3)
-	if flexible:
-		GemDraw.ctext(self, L.t("−2 any"), Vector2(size.x / 2.0, 59), 10, Color(1, 1, 1, 0.6))
-	# requisito: simbolo e numero ao lado
-	var req: Array = Defs.NOBLES[noble]
-	var cols: Array = []
-	for col in range(5):
-		if req[col] > 0:
-			cols.append(col)
-	var slot := 30.0
-	var x0 := (size.x - cols.size() * slot) / 2.0 + 9.0
-	for i in range(cols.size()):
-		var col: int = cols[i]
-		var center := Vector2(x0 + i * slot, size.y - 13)
-		GemDraw.draw_gem(self, col, center, 8)
-		GemDraw.text(self, str(req[col]), center + Vector2(10, 5), 14, Color.WHITE, HORIZONTAL_ALIGNMENT_LEFT, -1, 3)
+	GemDraw.ctext(self, nm, Vector2(size.x / 2.0, 85 * k), fs, Color(1.0, 0.93, 0.78), 3)
 	if progress >= 0:
-		# cartas que faltam para o jogador observado
-		var pc := Vector2(size.x - 13, 13)
-		draw_circle(pc, 10, Color(0.12, 0.45, 0.25) if progress <= 2 else Color(0.18, 0.18, 0.24))
-		draw_arc(pc, 10, 0, TAU, 20, Color(1, 1, 1, 0.35), 1.0, true)
-		GemDraw.ctext(self, str(progress), pc, 12, Color.WHITE)
+		# bolha: quantas cartas ainda faltam (verde = ja atende)
+		var pc := Vector2(size.x - 2 * k, 2 * k)
+		var rad := 12.0 * k
+		draw_circle(pc, rad, Color(0.55, 0.88, 0.55) if progress == 0 else Color(1.0, 0.86, 0.45))
+		draw_arc(pc, rad, 0, TAU, 24, Color(0.4, 0.3, 0.1), 1.5, true)
+		GemDraw.ctext(self, str(progress), pc, int(15 * k), Color(0.15, 0.1, 0.0))

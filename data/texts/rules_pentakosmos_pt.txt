@@ -7,12 +7,12 @@ Cada elemento é um sólido de Platão: [b]ar[/b] (octaedro), [b]água[/b] (icos
 [font_size=22][color=#f0c96a]Preparação[/color][/font_size]
 • Fichas de elemento por pilha: 4 / 6 / 7 / 8 para 2 / 3 / 4 / 5 jogadores.
 • Esferas: 4 / 5 / 6 / 7 para 2 / 3 / 4 / 5 jogadores.
-• As cartas de elemento têm três níveis. O mercado mostra 4 cartas por nível (5 por nível com 5 jogadores).
+• As cartas de elemento vêm em três grupos: básicas, intermediárias e avançadas. O mercado mostra 4 cartas por grupo (5 por grupo com 5 jogadores).
 • Filósofos na mesa: número de jogadores + 1.
 
 [font_size=22][color=#f0c96a]Seu turno: faça uma destas ações[/color][/font_size]
 • [b]Pegar fichas:[/b] 1, 2 ou 3 fichas de elementos diferentes; ou 2 fichas do mesmo elemento, se a pilha tiver pelo menos 3.
-• [b]Reservar uma carta:[/b] leve uma carta do mercado (ou a do topo de um nível, às cegas) para as suas reservas e ganhe 1 esfera, se ainda houver. Você pode ter no máximo 3 cartas reservadas.
+• [b]Reservar uma carta:[/b] leve uma carta do mercado (ou a do topo de uma pilha, às cegas) para as suas reservas e ganhe 1 esfera, se ainda houver. Você pode ter no máximo 3 cartas reservadas.
 • [b]Comprar uma carta:[/b] do mercado ou das suas reservas. Cada carta que você tem é um desconto permanente de 1 no seu elemento: você paga o custo menos as suas cartas de cada elemento, e esferas substituem qualquer ficha que falte. As fichas pagas voltam para as pilhas.
 
 [font_size=22][color=#f0c96a]Limite de fichas[/color][/font_size]
@@ -23,13 +23,16 @@ No fim do seu turno, um filósofo entra na sua academia se as suas cartas atende
 • [b]−2 livre:[/b] o requisito total é 2 cartas menor, e essas 2 podem faltar em quaisquer elementos.
 • [b]Pontos 3·2·1:[/b] o seu primeiro filósofo vale 3 pontos, o segundo 2, e cada um dos seguintes 1. O número no alto, à esquerda, mostra quanto ele daria a você agora; o número no canto mostra quantas cartas ainda faltam.
 
+[font_size=22][color=#f0c96a]Tempo por jogada[/color][/font_size]
+Se quiser, cada jogada tem um tempo limite, escolhido separadamente para partidas contra IAs (sem limite, por padrão) e entre pessoas (60 segundos, por padrão). O anel acima do botão Menu mostra o tempo que resta. Quando ele acaba, a vez passa; se for preciso devolver fichas ou escolher um filósofo, o jogo decide por você.
+
 [font_size=22][color=#f0c96a]Fim de jogo[/color][/font_size]
 A última rodada começa quando alguém chega a [b]15 pontos[/b] ou cumpre a [b]vitória por especialização[/b]: 10 pontos de cartas de um único elemento (filósofos não contam). A rodada é completada para que todos joguem o mesmo número de turnos.
 • Quem cumpriu a especialização vence quem não cumpriu.
 • Depois, vence quem tem mais pontos; no empate, quem comprou menos cartas.
 
 [font_size=22][color=#f0c96a]O deck Pentakosmos[/color][/font_size]
-As 90 cartas são geradas por 18 fórmulas. Cada fórmula define o nível, os pontos e os custos de uma carta em relação ao seu elemento, seguindo o ciclo ar → água → éter → fogo → terra → ar; assim, cada fórmula produz a mesma carta para cada um dos cinco elementos, e nenhum elemento é favorecido. A página "Processo criativo" conta como ele foi pensado.
+As 90 cartas são geradas por 18 fórmulas. Cada fórmula define o grupo, os pontos e os custos de uma carta em relação ao seu elemento, seguindo o ciclo ar → água → éter → fogo → terra → ar; assim, cada fórmula produz a mesma carta para cada um dos cinco elementos, e nenhum elemento é favorecido. A página "Processo criativo" conta como ele foi pensado.
 
 [font_size=22][color=#f0c96a]Combine à vontade[/color][/font_size]
-Cada regra acima pode ser mudada separadamente no menu inicial (e salva como predefinição sua).
+Cada regra acima pode ser mudada separadamente no menu inicial (e salva como predefinição sua): por exemplo, os pontos para vencer (de 10 a 25), ou incluir na academia os escritores do modo Arcaico.

@@ -1,6 +1,6 @@
 class_name Defs
 extends RefCounted
-## Dados fixos do jogo: cores, cartas, nobres e o gerador do deck por formulas.
+## Dados fixos do jogo: cores, cartas, filosofos, escritores e o gerador dos decks por formulas.
 
 const GOLD := 5
 const NCOLORS := 5
@@ -42,14 +42,24 @@ static func set_visual(v: String) -> void:
 	COLORS = (COLORS_SOLIDOS if visual == "solidos" else COLORS_POLIGONAL).duplicate()
 	INK = INK_POLIGONAL.duplicate()
 
-# Deck oficial: nivel, bonus, pontos, custo (branco azul verde vermelho preto)
-const OFFICIAL_CODES := ""
-
-# Filosofos (requisito por cor)
+# Filosofos: requisito por cor (ar, agua, eter, fogo, terra). Pares de cores vizinhas no ciclo
+# (4 + 4) e trios de cores consecutivas (3 + 3 + 3).
 const NOBLES := [
 	[0, 0, 4, 4, 0], [0, 0, 0, 4, 4], [0, 4, 4, 0, 0], [4, 4, 0, 0, 0], [4, 0, 0, 0, 4],
 	[3, 0, 0, 3, 3], [0, 3, 3, 3, 0], [3, 3, 3, 0, 0], [0, 0, 3, 3, 3], [3, 3, 0, 0, 3],
 ]
+
+# Escritores gregos: as combinacoes que os filosofos nao usam. Pares de cores que "pulam uma"
+# no ciclo (3 + 3) e os trios complementares (2 + 2 + 2). Cada escritor vale WRITER_PTS.
+const WRITERS := [
+	[3, 0, 3, 0, 0], [0, 3, 0, 3, 0], [0, 0, 3, 0, 3], [3, 0, 0, 3, 0], [0, 3, 0, 0, 3],
+	[0, 2, 0, 2, 2], [2, 0, 2, 0, 2], [2, 2, 0, 2, 0], [0, 2, 2, 0, 2], [2, 0, 2, 2, 0],
+]
+const WRITER_NAMES := ["Sappho", "Homer", "Hesiod", "Pindar", "Herodotus",  # tr
+	"Aeschylus", "Sophocles", "Aristophanes", "Thucydides", "Euripides"]  # tr
+const WRITER_BASE := 100     # ids >= 100 na mesa sao escritores
+const WRITER_PTS := 1
+const WRITERS_ON_TABLE := 2
 
 # Adversarios da IA: personagens dos dialogos de Platao, do mais fraco ao mais forte.
 const PERSONAS := {"facil": "Lysis", "normal": "Crito", "intermediaria": "Phaedrus",  # tr
@@ -59,6 +69,24 @@ const PERSONAS := {"facil": "Lysis", "normal": "Crito", "intermediaria": "Phaedr
 const PHILOSOPHERS := ["Anaxagoras", "Parmenides", "Thales", "Anaximenes", "Democritus",  # tr
 	"Heraclitus", "Pythagoras", "Aristotle", "Plato", "Empedocles"]  # tr
 
+static func is_writer(id: int) -> bool:
+	return id >= WRITER_BASE
+
+
+static func patron_req(id: int) -> Array:
+	## Requisito de um filosofo (id 0..9) ou escritor (id 100..109).
+	return WRITERS[id - WRITER_BASE] if id >= WRITER_BASE else NOBLES[id]
+
+
+static func patron_name(id: int) -> String:
+	return WRITER_NAMES[id - WRITER_BASE] if id >= WRITER_BASE else PHILOSOPHERS[id]
+
+
+# Grupos de cartas (antes "niveis" 1, 2 e 3)
+const LEVEL_NAMES := ["", "Basic cards", "Intermediate cards", "Advanced cards"]  # tr
+const LEVEL_SHORT := ["", "Basic", "Intermediate", "Advanced"]  # tr
+
+
 # Deck do Caio: (nivel, pv, C4, C2, A, C1, C3). Cada formula gera uma carta por cor.
 const FORMULAS_CAIO := [
 	[1, 0, 1, 1, 0, 1, 1], [1, 0, 1, 2, 1, 0, 0], [1, 0, 0, 0, 1, 2, 1], [1, 0, 0, 2, 0, 2, 0],
@@ -67,11 +95,19 @@ const FORMULAS_CAIO := [
 	[2, 2, 0, 4, 1, 2, 0], [2, 3, 0, 0, 6, 0, 0],
 	[3, 3, 0, 5, 2, 2, 0], [3, 4, 0, 0, 5, 5, 0], [3, 4, 3, 6, 0, 0, 0], [3, 5, 0, 0, 0, 7, 3],
 ]
+# Deck Arcaico: mesmo formato. Custos mais altos e mais espalhados pelos outros elementos.
+const FORMULAS_ARCAICO := [
+	[1, 0, 1, 1, 0, 1, 1], [1, 0, 0, 0, 0, 2, 1], [1, 0, 1, 2, 0, 1, 1], [1, 0, 2, 0, 0, 0, 2],
+	[1, 0, 2, 0, 0, 1, 2], [1, 0, 0, 3, 0, 0, 0], [1, 0, 1, 1, 0, 0, 3], [1, 1, 0, 0, 0, 4, 0],
+	[2, 1, 3, 0, 0, 2, 2], [2, 1, 0, 0, 2, 3, 3], [2, 2, 0, 1, 0, 4, 2], [2, 2, 0, 0, 0, 0, 5],
+	[2, 2, 3, 0, 0, 5, 0], [2, 3, 0, 0, 6, 0, 0],
+	[3, 3, 3, 3, 0, 5, 3], [3, 4, 0, 3, 3, 0, 6], [3, 4, 0, 0, 0, 0, 7], [3, 5, 7, 0, 3, 0, 0],
+]
 const OFFSETS := [-2, -1, 0, 1, 2]  # C4, C2, A, C1, C3 relativos a A no ciclo
 
-const DECK_NAMES := {"oficial": "Legacy deck", "caio": "Pentakosmos deck"}  # tr
+const DECK_NAMES := {"arcaico": "Archaic deck", "caio": "Pentakosmos deck"}  # tr
 # pasta da arte de cada deck: assets/cards/<pasta>/
-const DECK_DIRS := {"oficial": "legacy", "caio": "pentakosmos"}
+const DECK_DIRS := {"arcaico": "arcaico", "caio": "pentakosmos"}
 
 
 class CardDef:
@@ -97,19 +133,13 @@ class CardDef:
 
 static func build_deck(name: String) -> Array:
 	var raw: Array = []  # [nivel, bonus, pontos, custo]
-	if name == "caio":
-		for f in FORMULAS_CAIO:
-			for a in range(5):
-				var cost := [0, 0, 0, 0, 0]
-				for k in range(5):
-					cost[posmod(a + OFFSETS[k], 5)] += f[2 + k]
-				raw.append([f[0], a, f[1], cost])
-	else:
-		for code in OFFICIAL_CODES.split(" "):
-			var d: Array = []
-			for ch in code:
-				d.append(int(ch))
-			raw.append([d[0], d[1], d[2], [d[3], d[4], d[5], d[6], d[7]]])
+	var formulas: Array = FORMULAS_CAIO if name == "caio" else FORMULAS_ARCAICO
+	for f in formulas:
+		for a in range(5):
+			var cost := [0, 0, 0, 0, 0]
+			for k in range(5):
+				cost[posmod(a + OFFSETS[k], 5)] += f[2 + k]
+			raw.append([f[0], a, f[1], cost])
 	var cards: Array = []
 	var counters := {}
 	for i in range(raw.size()):

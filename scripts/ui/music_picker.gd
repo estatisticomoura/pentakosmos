@@ -13,7 +13,7 @@ static func make() -> OptionButton:
 	o.custom_minimum_size = Vector2(120, 36)
 	o.fit_to_longest_item = false
 	o.clip_text = true
-	o.add_theme_font_size_override("font_size", 15)
+	o.add_theme_font_size_override("font_size", UITheme.fs(15))
 	var values: Array = []
 	for i in range(MODES.size()):
 		o.add_item(L.t(MODE_NAMES[i]))

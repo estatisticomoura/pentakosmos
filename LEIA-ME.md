@@ -11,7 +11,8 @@
 Cada jogador dirige uma academia. Ao reunir os cinco elementos — **ar, água, éter, fogo e terra**, cada um representado por um sólido de Platão — e comprar as cartas de elemento que os encarnam, você traça o seu próprio caminho pelo cosmos. Cada carta comprada barateia as próximas, e os grandes filósofos da Grécia Antiga vêm ensinar na academia cujas cartas melhor refletem as suas ideias. A primeira academia a chegar a 15 pontos (ou a dominar um único elemento) encerra a partida.
 
 - 2 a 5 jogadores, com amigos no mesmo aparelho ou contra adversários do computador.
-- Dois conjuntos de regras — **Pentakosmos** (o padrão) e **Legacy** — e cada regra pode ser mudada separadamente.
+- Dois conjuntos de regras — **Pentakosmos** (o padrão) e **Arcaico** — e cada regra pode ser mudada separadamente.
+- Estatísticas de cada partida, com exportação em JSON e CSV.
 - Adversários do computador treinados por algoritmo genético e ordenados por torneios.
 - 38 idiomas.
 - Livre e de código aberto (MIT). Linux, Windows e Android.
@@ -39,29 +40,36 @@ No celular (horizontal, 20:9):
 No seu turno, faça uma coisa:
 
 - **Pegar fichas:** 1, 2 ou 3 fichas de elementos diferentes, ou 2 do mesmo elemento de uma pilha grande o bastante.
-- **Reservar uma carta** do mercado (ou às cegas, do topo de um baralho) e ganhar uma **esfera**, o coringa.
+- **Reservar uma carta** do mercado (ou às cegas, do topo de uma pilha) e ganhar uma **esfera**, o coringa.
 - **Comprar uma carta.** Cada carta que você tem é um desconto permanente de 1 no seu elemento.
 
-No fim do turno, um **filósofo** entra na sua academia se as suas cartas atendem ao requisito dele. A última rodada começa quando alguém chega a 15 pontos ou, nas regras Pentakosmos, soma 10 pontos de cartas de um único elemento (a **vitória por especialização**).
+No fim do turno, um **filósofo** entra na sua academia se as suas cartas atendem ao requisito dele (no modo Arcaico, também um **escritor**). A última rodada começa quando alguém chega a 15 pontos ou, nas regras Pentakosmos, soma 10 pontos de cartas de um único elemento (a **vitória por especialização**).
 
-| Regra | Pentakosmos | Legacy |
+| Regra | Pentakosmos | Arcaico |
 |---|---|---|
 | Fichas de elemento por pilha (2/3/4/5 jogadores) | 4/6/7/8 | 4/5/7/8 |
 | Esferas (coringas) | 4/5/6/7 | 5 |
 | Pegar 2 do mesmo elemento de uma pilha com | 3 ou mais | 4 ou mais |
-| Mercado com 5 jogadores | 5 cartas por nível | 4 cartas por nível |
+| Mercado com 5 jogadores | 5 cartas por grupo | 4 cartas por grupo |
 | Requisito dos filósofos | total −2, elementos livres | exato |
 | Pontos dos filósofos | 3, depois 2, depois 1 | 3 cada |
-| Deck | Pentakosmos (fórmulas) | Legacy |
+| Escritores | não | 2 na mesa, requisito exato, 1 ponto cada |
+| Deck | Pentakosmos (fórmulas) | Arcaico (fórmulas) |
 | Vitória por especialização | 10 pontos num elemento | desligada |
 | Limite de fichas · pontos para vencer | 10 · 15 (ajustáveis) | 10 · 15 (ajustáveis) |
+| Tempo por jogada (contra IAs · entre pessoas) | sem limite · 60 s (ajustáveis) | sem limite · 60 s (ajustáveis) |
+
+As cartas vêm em três grupos — **básicas**, **intermediárias** e **avançadas** —, e o verso de cada uma mostra uma estrela com 1, 2 ou 3 planetas.
+
+**Escritores.** Os dez escritores (Safo, Homero, Hesíodo, Píndaro, Heródoto, Ésquilo, Sófocles, Aristófanes, Tucídides e Eurípides) pedem cartas nas combinações de elementos que os filósofos não usam: 3 + 3 de dois elementos, ou 2 + 2 + 2 de três. Cada um vale 1 ponto e não entra na sequência 3 / 2 / 1 dos filósofos; no mesmo turno podem chegar um filósofo e um escritor. A opção "Academia" escolhe filósofos e escritores, só filósofos, só escritores ou nenhum.
 
 ### Ajudas na mesa
 
 - **Cartas do mercado e suas reservas:** passe o mouse (ou toque) para ver quantas fichas faltam, elemento por elemento, só com os elementos e também contando as esferas que você tem.
 - **Baralhos:** quantas cartas restam e quantas já saíram.
 - **Filósofos:** o número no alto, à esquerda, é quanto aquele filósofo daria a você agora; o número no canto, quantas cartas ainda faltam. Passe o mouse para ver a explicação.
-- **Reservas e filósofos dos outros jogadores:** passe o mouse nas minicartas e nos selos do painel. Uma reserva do mercado fica visível até a próxima vez de quem reservou (no menu de pausa há a opção "Sempre visíveis"); reservas às cegas ficam ocultas.
+- **Reservas e academia dos outros jogadores:** passe o mouse (ou toque) nas minicartas e no louro (filósofos) ou na pena (escritores) do painel. Uma reserva do mercado fica visível até a próxima vez de quem reservou (em Opções e no menu de pausa, "Ver reservas" tem a opção "Sempre visíveis"); reservas às cegas ficam ocultas.
+- **Cronômetros:** acima do botão Menu, a rodada, o tempo da partida e, quando há limite, o anel com o tempo que resta da jogada.
 - **Pontos por elemento:** com a vitória por especialização ligada, cada elemento do painel mostra um selo com os pontos de cartas daquele elemento.
 
 ### Visual
@@ -70,7 +78,13 @@ Na tela inicial, em "Visual": **Sólidos platônicos** (o principal) — ar = oc
 
 ## O deck Pentakosmos
 
-As 90 cartas de elemento são geradas por **18 fórmulas**. Cada fórmula define o nível, os pontos e o custo de uma carta em relação ao seu próprio elemento, seguindo o ciclo ar → água → éter → fogo → terra → ar. Aplicada aos cinco elementos, cada fórmula gera cinco cartas espelhadas, e nenhum elemento é favorecido. As fórmulas estão em `scripts/core/defs.gd` (`FORMULAS_CAIO`) e explicadas em [docs/PROCESSO_CRIATIVO.md](docs/PROCESSO_CRIATIVO.md).
+As 90 cartas de elemento são geradas por **18 fórmulas**. Cada fórmula define o grupo, os pontos e o custo de uma carta em relação ao seu próprio elemento, seguindo o ciclo ar → água → éter → fogo → terra → ar. Aplicada aos cinco elementos, cada fórmula gera cinco cartas espelhadas, e nenhum elemento é favorecido. As fórmulas estão em `scripts/core/defs.gd` (`FORMULAS_CAIO`) e explicadas em [docs/PROCESSO_CRIATIVO.md](docs/PROCESSO_CRIATIVO.md).
+
+O **deck Arcaico** também tem 90 cartas geradas por 18 fórmulas (`FORMULAS_ARCAICO`), com os mesmos custos médios por grupo (4,12 / 6,83 / 10,75), mas com moldes próprios, em outras posições do ciclo.
+
+## Estatísticas
+
+Cada partida com pelo menos um jogador humano é registrada: as regras completas, o deck, a duração, as cartas compradas por grupo e elemento, os pontos por elemento, filósofos e escritores, e o tempo médio por jogada. A tela **Estatísticas** filtra por jogador, período (de 1 semana a todo o tempo) e regras, e exporta tudo em JSON (que pode ser importado em outro aparelho, sem duplicar partidas) ou em CSV, para planilhas.
 
 ## Adversários do computador
 
@@ -83,7 +97,7 @@ Têm nomes de personagens dos diálogos de Platão, do mais brando ao mais forte
   - *tático:* o estrategista com negação "cirúrgica" e uma busca no fim de jogo que simula o resto da partida sorteando as cartas ocultas (sem nunca espiar);
   - *misto:* o tático com os parâmetros do evoluído.
 
-Nos torneios atuais, Timeu é o misto, Teeteto o tático e Fedro o evoluído. Há treinos separados para as regras Pentakosmos, as regras Legacy e qualquer outra combinação.
+Nos torneios atuais, Timeu é o misto, Teeteto o tático e Fedro o evoluído. Há treinos separados para as regras Pentakosmos, as regras do modo Arcaico e qualquer outra combinação.
 
 ### Treinar de novo
 
@@ -94,12 +108,12 @@ python3 tools/evoluir.py              # algoritmo genético, treino geral (~40 m
 python3 tools/torneio.py              # torneio: decide quem é Fedro, Teeteto e Timeu
 python3 tools/evoluir.py --modo house     # treino especializado nas regras Pentakosmos
 python3 tools/torneio.py --modo house
-python3 tools/evoluir.py --modo classico  # treino especializado nas regras Legacy
+python3 tools/evoluir.py --modo classico  # treino especializado nas regras do modo Arcaico
 python3 tools/torneio.py --modo classico
 ```
 
 - O algoritmo genético usa 16 indivíduos por geração, 1.000 partidas por indivíduo e 30 gerações, com elitismo, seleção por torneio, cruzamento e mutação decrescente. As regras de cada partida são sorteadas (número de jogadores, variantes, limite de mão, meta), e o campeão é validado em partidas que nunca viu.
-- Os resultados vão para `data/ia_evoluida*.json` e `data/niveis*.json` (`house` = Pentakosmos, `classico` = Legacy). O jogo usa os arquivos especializados quando as regras são exatamente as de uma predefinição, e os gerais nos outros casos.
+- Os resultados vão para `data/ia_evoluida*.json` e `data/niveis*.json` (`house` = Pentakosmos, `classico` = Arcaico). O jogo usa os arquivos especializados quando as regras são exatamente as de uma predefinição, e os gerais nos outros casos.
 - `--continuar` retoma uma execução interrompida. Se o Godot foi instalado por Flatpak, acrescente `--godot "flatpak run org.godotengine.Godot"`.
 
 ## Gerar a partir do código
@@ -132,8 +146,8 @@ Na primeira vez, o jogo usa o idioma do aparelho, se o tiver, e senão o inglês
 
 Tudo é desenhado em código, e o jogo roda sem nenhuma imagem. Para usar arte própria, coloque PNGs em:
 
-- `assets/cards/pentakosmos/` e `assets/cards/legacy/` — um arquivo por carta (os nomes estão em `assets/cards/CARD_LIST.csv`) e `back_l1.png` … `back_l3.png` para os versos;
-- `assets/philosophers/philosopher_1.png` … `philosopher_10.png`.
+- `assets/cards/pentakosmos/` e `assets/cards/arcaico/` — um arquivo por carta (os nomes estão em `assets/cards/CARD_LIST.csv`) e `back_l1.png` … `back_l3.png` para os versos;
+- `assets/philosophers/philosopher_1.png` … `philosopher_10.png` e `assets/writers/writer_1.png` … `writer_10.png`.
 
 O ícone (um dodecaedro negro com arestas douradas) é gerado por `python3 tools/gerar_icone.py` em `assets/icon/`.
 
@@ -141,7 +155,7 @@ A faixa com o elemento, os pontos e os custos é desenhada por cima da arte; se 
 
 ### Música
 
-19 peças clássicas, criadas para o jogo a partir de composições em domínio público — nenhuma gravação comercial é usada. As partituras vêm do [Mutopia Project](https://www.mutopiaproject.org); as peças de piano são tocadas com o [Salamander Grand Piano](https://archive.org/details/SalamanderGrandPianoV3) (um piano de cauda real gravado nota a nota, de Alexander Holm, CC BY 3.0), e as orquestrais com o [VSCO 2 Community Edition](https://github.com/sgossner/VSCO-2-CE) (instrumentos de orquestra reais, da Versilian Studios, CC0). As partituras viraram interpretações com a melodia cantando sobre o acompanhamento, pedal natural, rubato suave e reverberação de sala; Grieg, Holst, Handel e Strauss ganharam arranjos para orquestra.
+19 peças clássicas, criadas para o jogo a partir de composições em domínio público — nenhuma gravação comercial é usada. As partituras vêm do [Mutopia Project](https://www.mutopiaproject.org); as peças de piano são tocadas com o [Salamander Grand Piano](https://archive.org/details/SalamanderGrandPianoV3) (um piano de cauda real gravado nota a nota, de Alexander Holm, CC BY 3.0), e as orquestrais com o [VSCO 2 Community Edition](https://github.com/sgossner/VSCO-2-CE) (instrumentos de orquestra reais, da Versilian Studios, CC0). As partituras viraram interpretações com a melodia cantando sobre o acompanhamento, pedal natural, rubato suave e reverberação de sala; Grieg, Holst e Handel ganharam arranjos para orquestra.
 
 No menu inicial (e no menu de pausa) o jogador escolhe a playlist — **Calma**, **Animada**, **Todas** ou uma peça só. Durante a partida, o pequeno tocador ao lado do botão Menu volta para a peça anterior, pausa ou pula para a próxima; o nome de cada peça aparece quando ela começa.
 

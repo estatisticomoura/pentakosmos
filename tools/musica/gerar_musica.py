@@ -93,3 +93,6 @@ if __name__ == "__main__":
     for pid in (ids or list(orquestra.PIECES)):
         if pid in orquestra.PIECES:
             orquestra.render(pid)
+    if not ids or "strauss_blue_danube" in ids:
+        import danubio
+        danubio.render("piano")

@@ -21,7 +21,11 @@ func _ready() -> void:
 			preset = a
 	var old_layout = Store.get_value("geral", "interface", "auto")
 	Store.set_value("geral", "interface", "toque" if args.has("toque") else "pc")
-	tree_exiting.connect(func(): Store.set_value("geral", "interface", old_layout))
+	var old_text = Store.get_value("geral", "texto", 0)
+	Store.set_value("geral", "texto", 2 if args.has("grande") else 0)
+	tree_exiting.connect(func():
+		Store.set_value("geral", "interface", old_layout)
+		Store.set_value("geral", "texto", old_text))
 	if shots:
 		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(out_dir))
 	main = load("res://scenes/main.tscn").instantiate()
@@ -62,6 +66,14 @@ func _ready() -> void:
 	Engine.time_scale = 1.0
 	await _wait(1.0)
 	await _shot("fim")
+	# estatisticas: grava esta partida como se o assento 1 fosse humano, e mostra a tela
+	if shots:
+		gs.g.players[0].kind = "humano"
+		gs.g.players[0].name = "Caio"
+		Stats.record_game(gs.g, 1534.0, {0: [410.0, 31]})
+		main.show_text("stats")
+		await _frames(10)
+		await _shot("estatisticas")
 	# 2) partida com humano no assento 1
 	players[0]["kind"] = "humano"
 	main._players = players

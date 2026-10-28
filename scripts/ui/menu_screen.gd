@@ -7,18 +7,25 @@ signal start_game(rules: RuleSet, players: Array)
 signal show_text(which: String)   # "rules" (como jogar) ou "story" (processo criativo)
 
 # Textos em ingles; L.t() traduz na hora de mostrar.
+# Rotulos "free" (exato, -1 ... -5 livre) e "time" (sem limite, 20 s ...) sao gerados na hora.
+# "num": campo numerico com - e + (minimo, maximo).
 const OPTIONS := [
-	["Solids per element", "gems_mode", ["classico", "house"], ["Legacy (4/5/7/8)", "Pentakosmos (4/6/7/8)"]],  # tr
-	["Spheres (jokers)", "gold_mode", ["classico", "house"], ["Legacy (5)", "Pentakosmos (4/5/6/7)"]],  # tr
+	["Deck", "deck", ["caio", "arcaico"], ["Pentakosmos", "Archaic"]],  # tr
+	["Solids per element", "gems_mode", ["classico", "house"], ["Archaic (4/5/7/8)", "Pentakosmos (4/6/7/8)"]],  # tr
+	["Spheres (jokers)", "gold_mode", ["classico", "house"], ["Archaic (5)", "Pentakosmos (4/5/6/7)"]],  # tr
 	["Take 2 of a kind", "take2_min", [4, 3], ["Pile of 4 or more", "Pile of 3 or more"]],  # tr
-	["Market with 5 players", "market5", [4, 5], ["4 cards per level", "5 cards per level"]],  # tr
-	["Philosopher requirement", "noble_mode", ["exato", "flexivel"], ["Exact", "Total −2, any elements"]],  # tr
+	["Market with 5 players", "market5", [4, 5], ["4 cards per group", "5 cards per group"]],  # tr
+	["Academy", "patrons", ["ambos", "filosofos", "escritores", "nenhum"],  # tr
+		["Philosophers and writers", "Philosophers only", "Writers only", "No bonus"]],  # tr
+	["Philosopher requirement", "noble_free", [0, 1, 2, 3, 4, 5], "free"],  # tr
 	["Philosopher points", "noble_points_mode", ["fixo", "decrescente"], ["3 each", "3 / 2 / 1"]],  # tr
-	["Deck", "deck", ["caio", "oficial"], ["Pentakosmos", "Legacy"]],  # tr
+	["Writer requirement", "writer_free", [0, 1, 2, 3, 4, 5], "free"],  # tr
 	["Token hand limit", "hand_limit", [9, 10, 11], ["9", "10", "11"]],  # tr
-	["Points to win", "target", [12, 13, 14, 15, 16, 17, 18], ["12", "13", "14", "15", "16", "17", "18"]],  # tr
+	["Points to win", "target", [10, 25], "num"],  # tr
 	["Specialization victory", "color_win", [0, 9, 10, 11, 12],  # tr
 		["Off", "9 pts in one element", "10 pts in one element", "11 pts in one element", "12 pts in one element"]],  # tr
+	["Time per move against AIs", "time_ai", [0, 20, 30, 45, 60, 90, 120], "time"],  # tr
+	["Time per move between humans", "time_humans", [0, 20, 30, 45, 60, 90, 120], "time"],  # tr
 ]
 const KINDS := ["humano", "facil", "normal", "intermediaria", "dificil", "muito_dificil"]
 # nomes no seletor: "Human" e os personagens da IA (Defs.PERSONAS), do mais fraco ao mais forte
@@ -133,8 +140,10 @@ func _back_button(target := "") -> Button:
 
 func _build_home() -> void:
 	var orbit := OrbitView.new()
-	orbit.position = Vector2(0, 0)
-	orbit.size = Vector2(780, 720)
+	# em telas mais largas que 16:9 (celulares) o sistema solar usa tambem a margem esquerda
+	var margin := maxf(0.0, (get_viewport_rect().size.x - 1280.0) / 2.0)
+	orbit.position = Vector2(-margin, 0)
+	orbit.size = Vector2(790 + margin, 720)
 	add_child(orbit)
 	var title := UITheme.label("PENTAKOSMOS", 60, UITheme.GOLD)
 	title.position = Vector2(780, 66)
@@ -144,24 +153,25 @@ func _build_home() -> void:
 	title.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.6))
 	add_child(title)
 	var col := VBoxContainer.new()
-	col.position = Vector2(815, 168)
+	col.position = Vector2(815, 158)
 	col.custom_minimum_size = Vector2(400, 0)
-	col.add_theme_constant_override("separation", 14)
+	col.add_theme_constant_override("separation", 11)
 	add_child(col)
-	var play := UITheme.button(L.t("Play"), 32, Vector2(400, 80))
+	var play := UITheme.button(L.t("Play"), 32, Vector2(400, 78))
 	play.add_theme_color_override("font_color", UITheme.GOLD)
 	play.pressed.connect(func(): show_page("setup"))
 	col.add_child(play)
 	for it in [["Customize rules", _open_rules_from_home],  # tr
+			["Statistics", func(): show_text.emit("stats")],  # tr
 			["How to play", func(): show_text.emit("rules")],  # tr
 			["Creative process", func(): show_text.emit("story")],  # tr
 			["Options", func(): show_page("opcoes")]]:  # tr
-		var b := UITheme.button(L.t(it[0]), 24, Vector2(400, 62))
+		var b := UITheme.button(L.t(it[0]), 23, Vector2(400, 56))
 		b.pressed.connect(it[1])
 		col.add_child(b)
 	# idioma e visual: um toque
 	var row := HBoxContainer.new()
-	row.position = Vector2(815, 590)
+	row.position = Vector2(815, 618)
 	row.add_theme_constant_override("separation", 12)
 	add_child(row)
 	var lang_cap := L.t("Language") if L.code == "en" else L.t("Language") + " · Language"
@@ -241,11 +251,11 @@ func _build_setup() -> void:
 		le.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		le.max_length = 16
 		le.custom_minimum_size = Vector2(0, 54)
-		le.add_theme_font_size_override("font_size", 22)
+		le.add_theme_font_size_override("font_size", UITheme.fs(22))
 		row.add_child(le)
 		var kind := UITheme.option(_kind_names(), 0)
 		kind.custom_minimum_size = Vector2(260, 54)
-		kind.add_theme_font_size_override("font_size", 22)
+		kind.add_theme_font_size_override("font_size", UITheme.fs(22))
 		kind.item_selected.connect(_on_kind_changed.bind(i))
 		row.add_child(kind)
 		lv.add_child(row)
@@ -265,14 +275,18 @@ func _build_setup() -> void:
 	rv.add_child(UITheme.label(L.t("Rules"), 26, UITheme.GOLD))
 	_preset_opt = UITheme.option([])
 	_preset_opt.custom_minimum_size = Vector2(0, 56)
-	_preset_opt.add_theme_font_size_override("font_size", 22)
+	_preset_opt.add_theme_font_size_override("font_size", UITheme.fs(22))
 	_preset_opt.item_selected.connect(_on_preset_selected)
 	rv.add_child(_preset_opt)
 	_summary = UITheme.label("", 17, UITheme.MUTED)
 	_summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_summary.custom_minimum_size = Vector2(360, 0)
-	_summary.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	rv.add_child(_summary)
+	_summary.custom_minimum_size = Vector2(350, 0)
+	var ssc := ScrollContainer.new()
+	ssc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	ssc.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	ssc.custom_minimum_size = Vector2(0, 120)
+	ssc.add_child(_summary)
+	rv.add_child(ssc)
 	var cust := UITheme.button(L.t("Customize rules"), 22, Vector2(0, 60))
 	cust.pressed.connect(func():
 		_rules_back = "setup"
@@ -301,27 +315,41 @@ func _build_rules() -> void:
 	_preset_opt = UITheme.option([])
 	_preset_opt.custom_minimum_size = Vector2(0, 52)
 	_preset_opt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_preset_opt.add_theme_font_size_override("font_size", 22)
+	_preset_opt.add_theme_font_size_override("font_size", UITheme.fs(22))
 	_preset_opt.item_selected.connect(_on_preset_selected)
 	ph.add_child(_preset_opt)
+	var scroll := ScrollContainer.new()
+	scroll.position = Vector2(40, 146)
+	scroll.size = Vector2(1200, 482)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	add_child(scroll)
 	var grid := GridContainer.new()
-	grid.columns = 2
-	grid.position = Vector2(60, 152)
-	grid.add_theme_constant_override("h_separation", 40)
-	grid.add_theme_constant_override("v_separation", 12)
-	add_child(grid)
+	grid.columns = 3
+	grid.add_theme_constant_override("h_separation", 26)
+	grid.add_theme_constant_override("v_separation", 10)
+	scroll.add_child(grid)
 	for i in range(OPTIONS.size()):
 		var o: Array = OPTIONS[i]
 		var cell := VBoxContainer.new()
 		cell.add_theme_constant_override("separation", 2)
-		cell.add_child(UITheme.label(L.t(o[0]), 19, UITheme.MUTED))
-		var ob := UITheme.option(o[3].map(func(x): return L.t(x)))
-		ob.custom_minimum_size = Vector2(560, 48)
-		ob.add_theme_font_size_override("font_size", 21)
-		ob.item_selected.connect(_on_option_changed.bind(i))
-		cell.add_child(ob)
+		var lab := UITheme.label(L.t(o[0]), 18, UITheme.MUTED)
+		lab.custom_minimum_size = Vector2(372, 0)
+		lab.clip_text = true
+		cell.add_child(lab)
+		if typeof(o[3]) == TYPE_STRING and o[3] == "num":
+			var nf := _number_field(i)
+			cell.add_child(nf)
+			_opt_controls.append(nf)
+		else:
+			var ob := UITheme.option(option_labels(o))
+			ob.custom_minimum_size = Vector2(372, 48)
+			ob.clip_text = true
+			ob.fit_to_longest_item = false
+			ob.add_theme_font_size_override("font_size", UITheme.fs(20))
+			ob.item_selected.connect(_on_option_changed.bind(i))
+			cell.add_child(ob)
+			_opt_controls.append(ob)
 		grid.add_child(cell)
-		_opt_controls.append(ob)
 	_summary = null
 	_back_button()
 	var sh := HBoxContainer.new()
@@ -331,7 +359,7 @@ func _build_rules() -> void:
 	_preset_name = LineEdit.new()
 	_preset_name.placeholder_text = L.t("Preset name")
 	_preset_name.custom_minimum_size = Vector2(500, 60)
-	_preset_name.add_theme_font_size_override("font_size", 20)
+	_preset_name.add_theme_font_size_override("font_size", UITheme.fs(20))
 	sh.add_child(_preset_name)
 	var save := UITheme.button(L.t("Save"), 20, Vector2(190, 60))
 	save.pressed.connect(_on_save_preset)
@@ -343,20 +371,55 @@ func _build_rules() -> void:
 	_sync_from_rules()
 
 
+func _number_field(opt_i: int) -> HBoxContainer:
+	## Campo numerico com - e +; tocar no numero abre o teclado (aceita do minimo ao maximo).
+	var o: Array = OPTIONS[opt_i]
+	var lo: int = o[2][0]
+	var hi: int = o[2][1]
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 8)
+	var minus := UITheme.button("−", 26, Vector2(64, 48))
+	var le := LineEdit.new()
+	le.name = "Num"
+	le.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	le.custom_minimum_size = Vector2(220, 48)
+	le.add_theme_font_size_override("font_size", UITheme.fs(24))
+	le.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER
+	le.max_length = 3
+	var plus := UITheme.button("+", 26, Vector2(64, 48))
+	var apply := func(v: int):
+		var c := clampi(v, lo, hi)
+		rules.set(o[1], c)
+		le.text = str(c)
+		_sync_from_rules()
+	minus.pressed.connect(func(): apply.call(int(rules.get(o[1])) - 1))
+	plus.pressed.connect(func(): apply.call(int(rules.get(o[1])) + 1))
+	le.text_submitted.connect(func(t: String): apply.call(int(t) if t.is_valid_int() else int(rules.get(o[1]))))
+	le.focus_exited.connect(func(): apply.call(int(le.text) if le.text.is_valid_int() else int(rules.get(o[1]))))
+	h.add_child(minus)
+	h.add_child(le)
+	h.add_child(plus)
+	return h
+
+
 func _build_options() -> void:
 	_title(L.t("Options"))
+	var scroll := ScrollContainer.new()
+	scroll.position = Vector2(200, 96)
+	scroll.size = Vector2(880, 530)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	add_child(scroll)
 	var panel := PanelContainer.new()
-	panel.position = Vector2(200, 100)
-	panel.size = Vector2(880, 510)
-	add_child(panel)
+	panel.custom_minimum_size = Vector2(864, 0)
+	scroll.add_child(panel)
 	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 14)
+	v.add_theme_constant_override("separation", 12)
 	panel.add_child(v)
 	v.add_child(UITheme.label(L.t("Audio"), 26, UITheme.GOLD))
 	v.add_child(_row(L.t("Music"), _slider("Music")))
 	var picker := MusicPicker.make()
 	picker.custom_minimum_size = Vector2(0, 52)
-	picker.add_theme_font_size_override("font_size", 20)
+	picker.add_theme_font_size_override("font_size", UITheme.fs(20))
 	v.add_child(_row(L.t("Playlist"), picker))
 	v.add_child(_row(L.t("Effects"), _slider("SFX")))
 	v.add_child(HSeparator.new())
@@ -366,13 +429,25 @@ func _build_options() -> void:
 	so.item_selected.connect(func(i): Store.set_value("game", "ai_delay", AI_DELAYS[i]))
 	v.add_child(_row(L.t("AI speed"), so))
 	var reveal := str(Store.get_value("game", "reserva_visivel", "rodada"))
-	var ro := _big_option([L.t("Until the player's next turn"), L.t("Always visible")], 1 if reveal == "sempre" else 0)
+	var ro := _big_option([L.t("From the last turn"), L.t("Always visible")], 1 if reveal == "sempre" else 0)
 	ro.item_selected.connect(func(i): Store.set_value("game", "reserva_visivel", ["rodada", "sempre"][i]))
-	v.add_child(_row(L.t("Opponents' reserves"), ro))
+	v.add_child(_row(L.t("See reserves"), ro))
 	var io := _big_option(UITheme.LAYOUT_NAMES.map(func(x): return L.t(x)),
 		maxi(0, UITheme.LAYOUTS.find(str(Store.get_value("geral", "interface", "auto")))))
 	io.item_selected.connect(func(i): Store.set_value("geral", "interface", UITheme.LAYOUTS[i]))
 	v.add_child(_row(L.t("Table layout"), io))
+	var ts := _big_option(UITheme.TEXT_SIZES.map(func(x): return L.t(x)), clampi(int(Store.get_value("geral", "texto", 0)), 0, 2))
+	ts.item_selected.connect(func(i):
+		Store.set_value("geral", "texto", i)
+		var n: Node = self
+		while n != null and not n.has_method("refresh_theme"):
+			n = n.get_parent()
+		if n != null:
+			n.refresh_theme()
+		else:
+			UITheme.update_touch()
+		show_page.call_deferred("opcoes"))
+	v.add_child(_row(L.t("Text size"), ts))
 	_back_button("home")
 
 
@@ -391,7 +466,7 @@ func _row(text: String, ctl: Control) -> HBoxContainer:
 func _big_option(items: Array, sel: int) -> OptionButton:
 	var o := UITheme.option(items, sel)
 	o.custom_minimum_size = Vector2(0, 52)
-	o.add_theme_font_size_override("font_size", 20)
+	o.add_theme_font_size_override("font_size", UITheme.fs(20))
 	o.item_selected.connect(func(_i): Audio.play("select"))
 	return o
 
@@ -433,6 +508,15 @@ func _build_language() -> void:
 # ---------------------------------------------------------------------------
 # Jogadores
 # ---------------------------------------------------------------------------
+static func option_labels(o: Array) -> Array:
+	match o[3]:
+		"free":
+			return o[2].map(func(k): return L.t("Exact") if k == 0 else L.f("Total −{n}, any elements", {"n": k}))
+		"time":
+			return o[2].map(func(t): return L.t("No limit") if t == 0 else L.f("{n} s", {"n": t}))
+	return o[3].map(func(x): return L.t(x))
+
+
 func _current_players() -> Array:
 	var out: Array = []
 	for i in range(5):
@@ -512,8 +596,8 @@ func _update_rows() -> void:
 	if _count == 5:
 		if rules.market5 == 4:
 			notes.append(L.t("With 5 players, a 5-card market per level is recommended."))
-		if rules.deck == "oficial":
-			notes.append(L.t("With the Legacy deck and 5 players, the level 1 deck often runs out."))
+		if rules.deck == "arcaico":
+			notes.append(L.t("With the Archaic deck and 5 players, the basic cards often run out."))
 	if _note:
 		_note.text = " ".join(notes)
 
@@ -581,8 +665,13 @@ func _sync_from_rules() -> void:
 	_updating = true
 	for i in range(_opt_controls.size()):
 		var o: Array = OPTIONS[i]
-		var idx: int = o[2].find(rules.get(o[1]))
-		_opt_controls[i].select(maxi(idx, 0))
+		if _opt_controls[i] is OptionButton:
+			var idx: int = o[2].find(rules.get(o[1]))
+			_opt_controls[i].select(maxi(idx, 0))
+		elif _opt_controls[i] != null:
+			var le: LineEdit = _opt_controls[i].get_node("Num")
+			if not le.has_focus():
+				le.text = str(rules.get(o[1]))
 	var match_i := _presets.size()
 	for i in range(_presets.size()):
 		if (_presets[i][1] as RuleSet).equals(rules):

@@ -30,6 +30,7 @@ class PlayerState:
 	var params: Dictionary = {}
 	var denial := -1.0
 	var endgame := false
+	var defend := false      # reserva defensiva (tira do mercado o que um adversario vai comprar)
 	var plan = null
 	var plan_round := -99
 	var replans := 0
@@ -56,6 +57,7 @@ class PlayerState:
 		q.params = params
 		q.denial = denial
 		q.endgame = endgame
+		q.defend = defend
 		q.plan = plan.duplicate(true) if plan != null else null
 		q.plan_round = plan_round
 		return q
@@ -84,7 +86,8 @@ var round_no := 1
 var end_triggered := false
 var finished := false
 var phase := "acao"             # "acao", "descarte", "nobre", "fim"
-var noble_options: Array = []
+var noble_options: Array = []   # filosofos (ou escritores) que o jogador pode escolher
+var _patron_stage := 0          # fim da vez: 0 = filosofos, 1 = escritores
 var events: Array = []
 var passes_in_round := 0
 var max_rounds := 150
@@ -115,9 +118,18 @@ func setup(p_rules: RuleSet, configs: Array, seed: int = 0) -> void:
 	for lv in [1, 2, 3]:
 		for i in range(m):
 			market[lv].append(decks[lv].pop_back() if not decks[lv].is_empty() else -1)
-	var pool := range(Defs.NOBLES.size())
-	_shuffle(pool)
-	nobles = pool.slice(0, mini(n + 1, pool.size()))
+	# na mesa: n+1 filosofos e/ou 2 escritores (ids de escritor comecam em Defs.WRITER_BASE)
+	nobles = []
+	if rules.uses_philosophers():
+		var pool := range(Defs.NOBLES.size())
+		_shuffle(pool)
+		nobles.append_array(pool.slice(0, mini(n + 1, pool.size())))
+	if rules.uses_writers():
+		var wpool: Array = []
+		for i in range(Defs.WRITERS.size()):
+			wpool.append(Defs.WRITER_BASE + i)
+		_shuffle(wpool)
+		nobles.append_array(wpool.slice(0, Defs.WRITERS_ON_TABLE))
 	players = []
 	for cfg in configs:
 		var p := PlayerState.new()
@@ -128,6 +140,7 @@ func setup(p_rules: RuleSet, configs: Array, seed: int = 0) -> void:
 		p.params = prof["params"]
 		p.denial = prof["denial"]
 		p.endgame = prof["endgame"]
+		p.defend = prof.get("defend", false)
 		players.append(p)
 	current = 0
 	round_no = 1
@@ -209,9 +222,31 @@ func meets_color(p: PlayerState) -> bool:
 	return rules.color_win > 0 and p.color_pts[best_color(p)] >= rules.color_win
 
 
-func noble_distance(bonus: Array, req: Array) -> int:
-	## Cartas que faltam para receber o nobre (considera a regra flexivel).
-	if rules.noble_discount() == 0:
+func patron_distance(bonus: Array, id: int) -> int:
+	## Cartas que faltam para receber o filosofo ou escritor `id`.
+	return noble_distance(bonus, Defs.patron_req(id), rules.writer_free if Defs.is_writer(id) else rules.noble_free)
+
+
+func patron_pts(p: PlayerState, id: int) -> int:
+	## Pontos que o filosofo/escritor daria agora a p (filosofos: 3 ou 3/2/1; escritores: 1).
+	if Defs.is_writer(id):
+		return Defs.WRITER_PTS
+	return rules.noble_pts(philosopher_count(p))
+
+
+static func philosopher_count(p: PlayerState) -> int:
+	var k := 0
+	for id in p.nobles:
+		if not Defs.is_writer(id):
+			k += 1
+	return k
+
+
+func noble_distance(bonus: Array, req: Array, free := -1) -> int:
+	## Cartas que faltam para cumprir o requisito, com `free` cartas livres
+	## (-1 = desconto dos filosofos).
+	var disc: int = rules.noble_discount() if free < 0 else free
+	if disc == 0:
 		var s := 0
 		for c in range(5):
 			if req[c] > bonus[c]:
@@ -222,7 +257,7 @@ func noble_distance(bonus: Array, req: Array) -> int:
 	for c in range(5):
 		total += req[c]
 		have += mini(bonus[c], req[c])
-	return maxi(0, total - rules.noble_discount() - have)
+	return maxi(0, total - disc - have)
 
 
 func available_colors() -> int:
@@ -384,8 +419,28 @@ func choose_noble(nb: int) -> bool:
 	_claim_noble(current, nb)
 	noble_options = []
 	phase = "acao"
-	_end_turn()
+	if not Defs.is_writer(nb):
+		_patron_stage = 1
+		_check_nobles()
+	else:
+		_patron_stage = 0
+		_end_turn()
 	return true
+
+
+func timeout() -> void:
+	## O tempo da vez acabou: passa a vez (no descarte e na escolha de filosofo/escritor,
+	## o jogo escolhe pelo jogador).
+	match phase:
+		"acao":
+			act_pass()
+		"descarte":
+			for c in AI.discard_choices(self, current):
+				discard(c)
+				if phase != "descarte":
+					break
+		"nobre":
+			choose_noble(AI.pick_noble(self, current, noble_options))
 
 
 func apply_ai_action(act: Array) -> void:
@@ -450,34 +505,36 @@ func _after_action() -> void:
 
 
 func _check_nobles() -> void:
+	## Fim da vez: pode chegar um filosofo e tambem um escritor.
 	var p := cur()
-	var ok: Array = []
-	for nb in nobles:
-		if noble_distance(p.bonus, Defs.NOBLES[nb]) == 0:
-			ok.append(nb)
-	if ok.is_empty():
-		_end_turn()
-		return
-	if ok.size() == 1:
-		_claim_noble(current, ok[0])
-		_end_turn()
-		return
-	if p.is_ai():
-		_claim_noble(current, AI.pick_noble(self, current, ok))
-		_end_turn()
-		return
-	phase = "nobre"
-	noble_options = ok
+	while _patron_stage <= 1:
+		var want_writer := _patron_stage == 1
+		var ok: Array = []
+		for nb in nobles:
+			if Defs.is_writer(nb) == want_writer and patron_distance(p.bonus, nb) == 0:
+				ok.append(nb)
+		if ok.size() == 1:
+			_claim_noble(current, ok[0])
+		elif ok.size() > 1:
+			if p.is_ai():
+				_claim_noble(current, AI.pick_noble(self, current, ok))
+			else:
+				phase = "nobre"
+				noble_options = ok
+				return
+		_patron_stage += 1
+	_patron_stage = 0
+	_end_turn()
 
 
 func _claim_noble(idx: int, nb: int) -> void:
 	var p: PlayerState = players[idx]
 	nobles.erase(nb)
-	var pts := rules.noble_pts(p.nobles.size())
+	var pts := patron_pts(p, nb)
 	p.nobles.append(nb)
 	p.points += pts
 	p.noble_points += pts
-	events.append({"t": "noble", "p": idx, "noble": nb, "pts": pts})
+	events.append({"t": "noble", "p": idx, "noble": nb, "pts": pts, "writer": Defs.is_writer(nb)})
 
 
 func _start_turn() -> void:
@@ -539,6 +596,7 @@ func clone_for_search(observer: int, seed: int) -> GameState:
 			q.kind = "normal"
 		q.endgame = false
 		q.denial = -1.0
+		q.defend = false
 		if q.params.is_empty():
 			q.params = normal["params"]
 		g.players.append(q)

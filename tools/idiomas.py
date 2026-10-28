@@ -20,10 +20,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LANG_DIR = os.path.join(ROOT, "data", "lang")
 # identificadores internos que aparecem nas linhas "# tr" mas nao sao texto
 IDS = {"classico", "opcoes", "house", "gems_mode", "gold_mode", "take2_min", "market5", "exato", "flexivel",
-       "noble_mode", "fixo", "decrescente", "noble_points_mode", "deck", "oficial", "caio", "hand_limit",
+       "noble_mode", "noble_free", "writer_free", "patrons", "ambos", "filosofos", "escritores", "nenhum", "time_ai", "time_humans", "arcaico", "fixo", "decrescente", "noble_points_mode", "deck", "oficial", "caio", "hand_limit",
        "target", "color_win", "humano", "facil", "normal", "intermediaria", "dificil", "tatica",
        "evoluida", "muito_dificil", "mista", "gemas", "solidos", "poligonal", "rules", "story", "rules_pentakosmos",
-       "rules_legacy", "opponents", "music", "Pentakosmos", "Legacy", ""}
+       "rules_arcaico", "opponents", "free", "num", "time", "stats", "music", "Pentakosmos", ""}
 LIT = r'"((?:[^"\\]|\\.)*)"'
 
 

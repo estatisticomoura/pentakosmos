@@ -303,8 +303,6 @@ PIECES = {
     'holst_thaxted': dict(midi=['HolstGT/Thaxted/Thaxted.midi'], arr=arr_thaxted, stretch=1.25, room='hall', repeat=2),
     'grieg_mountain_king': dict(midi=['GriegE/O46/Dans_l_antre_du_roi_de_la_montagne/Dans_l_antre_du_roi_de_la_montagne.midi'],
                                 arr=lambda n, t: arr_reduction(n, t, 'grieg'), stretch=1.15, room='hall', accel=1.55),
-    'strauss_blue_danube': dict(midi=['StraussJJ/O314/blue_danube/blue_danube.midi'],
-                                arr=lambda n, t: arr_reduction(n, t, 'valsa'), stretch=1.1, room='hall', repeat=2),
 }
 
 

@@ -12,11 +12,20 @@ const PANEL := Color(0.08, 0.09, 0.13, 0.94)
 const LAYOUTS := ["auto", "pc", "toque"]
 const LAYOUT_NAMES := ["Auto layout", "Computer layout", "Touch layout"]  # tr
 static var touch := false
+## Tamanho do texto (Opcoes): Normal, Grande, Muito grande.
+const TEXT_SIZES := ["Normal", "Large", "Extra large"]  # tr
+const TEXT_SCALES := [1.0, 1.12, 1.25]
+static var text_scale := 1.0
+
+
+static func fs(n: int) -> int:
+	return int(round(n * text_scale))
 
 
 static func update_touch() -> void:
 	var m := str(Store.get_value("geral", "interface", "auto"))
 	touch = OS.has_feature("mobile") if m == "auto" else m == "toque"
+	text_scale = TEXT_SCALES[clampi(int(Store.get_value("geral", "texto", 0)), 0, 2)]
 
 
 static func box(bg: Color, border: Color = Color(0, 0, 0, 0), bw := 0, radius := 8, pad := 10.0) -> StyleBoxFlat:
@@ -36,7 +45,7 @@ static func box(bg: Color, border: Color = Color(0, 0, 0, 0), bw := 0, radius :=
 
 static func build() -> Theme:
 	var t := Theme.new()
-	t.default_font_size = 18
+	t.default_font_size = fs(18)
 	# botoes
 	var normal := box(Color(0.16, 0.17, 0.23), Color(GOLD, 0.45), 1)
 	var hover := box(Color(0.22, 0.23, 0.30), GOLD, 2)
@@ -68,7 +77,7 @@ static func build() -> Theme:
 	t.set_stylebox("hover", "PopupMenu", box(Color(0.25, 0.22, 0.15), Color(0, 0, 0, 0), 0, 6, 4))
 	t.set_color("font_color", "PopupMenu", TEXT)
 	t.set_color("font_hover_color", "PopupMenu", Color(1, 0.95, 0.8))
-	t.set_font_size("font_size", "PopupMenu", 21)
+	t.set_font_size("font_size", "PopupMenu", fs(21))
 	t.set_constant("v_separation", "PopupMenu", 14)
 	t.set_constant("item_start_padding", "PopupMenu", 12)
 	t.set_constant("item_end_padding", "PopupMenu", 16)
@@ -88,7 +97,7 @@ static func build() -> Theme:
 static func label(text: String, size := 18, color := TEXT) -> Label:
 	var l := Label.new()
 	l.text = text
-	l.add_theme_font_size_override("font_size", size)
+	l.add_theme_font_size_override("font_size", fs(size))
 	l.add_theme_color_override("font_color", color)
 	return l
 
@@ -96,7 +105,7 @@ static func label(text: String, size := 18, color := TEXT) -> Label:
 static func button(text: String, size := 18, min_size := Vector2(0, 44)) -> Button:
 	var b := Button.new()
 	b.text = text
-	b.add_theme_font_size_override("font_size", size)
+	b.add_theme_font_size_override("font_size", fs(size))
 	b.custom_minimum_size = min_size
 	b.focus_mode = Control.FOCUS_NONE
 	b.pressed.connect(func(): Audio.play("click"))

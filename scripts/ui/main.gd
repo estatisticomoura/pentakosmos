@@ -15,8 +15,8 @@ func _ready() -> void:
 	var vis := str(Store.get_value("visual", "tema", "solidos"))
 	Defs.set_visual("poligonal" if vis == "gemas" else vis)
 	L.set_lang(_initial_language())
-	theme = UITheme.build()
 	UITheme.update_touch()
+	theme = UITheme.build()
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_build_background()
 	stage = Control.new()
@@ -139,6 +139,12 @@ func _on_track_started(info: Dictionary) -> void:
 	_np_tween.tween_property(_np, "modulate:a", 0.0, 1.2)
 
 
+func refresh_theme() -> void:
+	## Depois de mudar o tamanho do texto.
+	UITheme.update_touch()
+	theme = UITheme.build()
+
+
 func show_menu() -> void:
 	var m := MenuScreen.new()
 	m.start_game.connect(func(r, p):
@@ -150,6 +156,11 @@ func show_menu() -> void:
 
 
 func show_text(which: String) -> void:
+	if which == "stats":
+		var st := StatsScreen.new()
+		st.back.connect(show_menu)
+		_set_screen(st)
+		return
 	var t := TextScreen.new()
 	t.which = which
 	t.back.connect(show_menu)

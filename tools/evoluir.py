@@ -20,7 +20,7 @@ Configuracoes das partidas (sorteadas a cada partida, "randomizacao de dominio")
   - 2 a 5 jogadores, com o individuo girando de assento;
   - metade das partidas nos dois modos principais (house completa e classico);
   - a outra metade com variantes aleatorias: cada house rule ligada ou desligada,
-    deck oficial ou do Caio, limite de mao 9/10/11 e meta de 12 a 18 pontos.
+    deck Arcaico ou Pentakosmos, limite de mao 9/10/11 e meta de 12 a 18 pontos.
 Assim os parametros precisam funcionar bem em media em todas as variantes.
 
 No fim ha uma FINAL: os 5 melhores da ultima geracao jogam 3000 partidas novas
@@ -105,14 +105,15 @@ def profile(ind):
 
 
 CLASSICO = {"gems_mode": "classico", "gold_mode": "classico", "take2_min": 4, "market5": 4,
-            "noble_mode": "exato", "noble_points_mode": "fixo", "deck": "oficial",
+            "patrons": "ambos", "noble_free": 0, "noble_points_mode": "fixo", "writer_free": 0, "deck": "arcaico",
             "hand_limit": 10, "target": 15, "color_win": 0}
 HOUSE = {"gems_mode": "house", "gold_mode": "house", "take2_min": 3, "market5": 5,
-         "noble_mode": "flexivel", "noble_points_mode": "decrescente", "deck": "caio",
+         "patrons": "filosofos", "noble_free": 2, "noble_points_mode": "decrescente", "writer_free": 0, "deck": "caio",
          "hand_limit": 10, "target": 15, "color_win": 10}
 CHOICES = {"gems_mode": ["classico", "house"], "gold_mode": ["classico", "house"], "take2_min": [4, 3],
-           "market5": [4, 5], "noble_mode": ["exato", "flexivel"], "noble_points_mode": ["fixo", "decrescente"],
-           "deck": ["oficial", "caio"], "hand_limit": [9, 10, 11], "target": list(range(12, 19)),
+           "market5": [4, 5], "patrons": ["ambos", "filosofos", "escritores"], "noble_free": [0, 1, 2],
+           "noble_points_mode": ["fixo", "decrescente"], "writer_free": [0, 1],
+           "deck": ["arcaico", "caio"], "hand_limit": [9, 10, 11], "target": list(range(12, 19)),
            "color_win": [0, 0, 9, 10, 11, 12]}
 
 
@@ -179,7 +180,7 @@ def generalization(per, scen, train_mode="geral"):
         yield "deck", lambda r, n, m: "deck " + r["deck"]
         yield "meta", lambda r, n, m: "meta 12-13" if r["target"] <= 13 else ("meta 17-18" if r["target"] >= 17 else "meta 14-16")
         yield "mao", lambda r, n, m: "mao %d" % r["hand_limit"]
-        yield "nobres", lambda r, n, m: "nobres " + ("-2 flexivel" if r["noble_mode"] == "flexivel" else "exatos")
+        yield "nobres", lambda r, n, m: "filosofos -%d" % r["noble_free"]
         yield "pegar2", lambda r, n, m: "pegar 2 com %d+" % r["take2_min"]
         yield "especializacao", lambda r, n, m: "especializacao %s" % (r.get("color_win", 0) or "desligada")
     out = {}
@@ -228,7 +229,7 @@ def main():
         g = json.load(open(general_file))
         if g.get("params"):
             general = g["params"]
-    print("Modo de treino: %s" % {"geral": "geral (todas as variantes)", "classico": "so regras classicas (deck oficial)",
+    print("Modo de treino: %s" % {"geral": "geral (todas as variantes)", "classico": "so regras arcaicas (deck Arcaico)",
                                   "house": "so house completa (deck do Caio)"}[args.modo])
 
     space = Space(*load_space(args.godot))
