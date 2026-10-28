@@ -107,11 +107,13 @@ python3 tools/torneio.py --modo classico
 
 1. Install **Godot 4.7.2** ([godotengine.org](https://godotengine.org), or `flatpak install flathub org.godotengine.Godot`).
 2. Open the editor, click **Import** and choose `project.godot`. Press F5 to play.
-3. To export: *Editor → Manage Export Templates → Download and Install*, then *Project → Export* and choose **Linux**, **Windows** or **Android**. From the command line:
+3. To export: *Editor → Manage Export Templates → Download and Install*, then *Project → Export* and choose **Linux**, **Windows**, **macOS** or **Android**. From the command line:
    ```
    godot --headless --path . --export-release "Linux" build/linux/pentakosmos.x86_64
    godot --headless --path . --export-release "Windows" build/windows/Pentakosmos.exe
+   godot --headless --path . --export-release "macOS" build/mac/Pentakosmos.zip
    ```
+   The macOS build is a universal app (Intel and Apple Silicon) with an ad-hoc signature, not notarized: on the Mac, unzip it, then right-click *Pentakosmos.app* → *Open* the first time (or allow it in *System Settings → Privacy & Security*).
 4. Android also needs JDK 17 and the Android SDK (Platform-Tools, Build-Tools and Command-line Tools), configured in *Editor → Editor Settings → Export → Android*. The preset exports an unsigned APK; sign it with your own key (keep the same key for every version, or phones will refuse to update):
    ```
    godot --headless --path . --export-release "Android" build/android/unsigned.apk
