@@ -18,7 +18,7 @@ const SURG_MIN_VALUE := 3
 const SURG_RESERVE_VALUE := 4
 # reserva defensiva: pontos minimos (carta + filosofo/escritor que ela traria) de uma carta
 # que um adversario pode comprar na proxima vez, para valer tira-la do mercado
-const DEFEND_VALUE := 4
+const DEFEND_VALUE := 3
 # com a reserva defensiva, a coleta so e escolhida para negar fichas se bloquear isto
 const DEFEND_TOKEN_BLOCK := 2.0
 # busca no fim de jogo

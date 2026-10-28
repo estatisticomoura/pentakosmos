@@ -80,8 +80,10 @@ static func rules_mode(rules: RuleSet) -> String:
 	return "geral"
 
 
-# reserva defensiva nos perfis tatico e misto (Teeteto e Timeu)
-const DEFEND := true
+# reserva defensiva nos perfis tatico e misto (Teeteto e Timeu): ganhou no torneio com as regras
+# Pentakosmos (43,6% contra 36,1% sem ela) e nao mudou nada no modo Arcaico; so vale no Pentakosmos.
+static func defend_for(mode: String) -> bool:
+	return mode == "house"
 
 
 static func profile(name: String, rules: RuleSet = null) -> Dictionary:
@@ -93,11 +95,11 @@ static func profile(name: String, rules: RuleSet = null) -> Dictionary:
 		"normal", "estrategista":
 			return {"policy": "plano", "params": DEFAULTS, "denial": -1.0, "endgame": false}
 		"tatica":
-			return {"policy": "plano", "params": DEFAULTS, "denial": 1.0, "endgame": true, "defend": DEFEND}
+			return {"policy": "plano", "params": DEFAULTS, "denial": 1.0, "endgame": true, "defend": defend_for(mode)}
 		"evoluida":
 			return {"policy": "plano", "params": evolved_params(mode), "denial": -1.0, "endgame": false}
 		"mista":
-			return {"policy": "plano", "params": evolved_params(mode), "denial": 1.0, "endgame": true, "defend": DEFEND}
+			return {"policy": "plano", "params": evolved_params(mode), "denial": 1.0, "endgame": true, "defend": defend_for(mode)}
 		"intermediaria", "dificil", "muito_dificil":
 			var target: String = level_map(mode).get(name, LEVEL_DEFAULTS[name])
 			if target in LEVEL_DEFAULTS:
