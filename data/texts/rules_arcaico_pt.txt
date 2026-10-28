@@ -6,7 +6,7 @@ O modo Arcaico mantém o ritmo tradicional deste tipo de jogo de cartas e acresc
 • [b]Pegar 2 do mesmo elemento:[/b] só de uma pilha com pelo menos 4 fichas.
 • [b]Mercado:[/b] 4 cartas por grupo, também com 5 jogadores.
 • [b]Filósofos:[/b] o requisito precisa ser atendido exatamente, e cada filósofo vale 3 pontos.
-• [b]Escritores:[/b] também ficam 2 escritores na mesa. Cada um pede cartas nas combinações de elementos que os filósofos não usam (3 + 3 de dois elementos, ou 2 + 2 + 2 de três), precisa ser atendido exatamente e vale 1 ponto. No mesmo turno você pode receber um filósofo e um escritor.
+• [b]Escritores:[/b] também ficam 2 escritores na mesa (o jogo base traz Homero e Sófocles; a expansão, os 10). Cada um pede cartas nas combinações de elementos que os filósofos não usam (3 + 3 de dois elementos, ou 2 + 2 + 2 de três), precisa ser atendido exatamente e vale 1 ponto. No mesmo turno você pode receber um filósofo e um escritor.
 • [b]Sem vitória por especialização:[/b] só a meta de 15 pontos encerra a partida.
 
 [font_size=22][color=#f0c96a]O deck Arcaico[/color][/font_size]

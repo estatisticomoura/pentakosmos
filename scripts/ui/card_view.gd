@@ -178,10 +178,11 @@ func _draw_back(r: Rect2) -> void:
 
 
 func _draw_face(r: Rect2) -> void:
-	var bc: Color = Defs.COLORS[card.bonus]
-	var ink: Color = Defs.INK[card.bonus]
+	var dc := card.display_color()
+	var bc: Color = Defs.COLORS[dc] if dc >= 0 else (Color(0.62, 0.55, 0.40) if card.kind == "joker" else Color(0.42, 0.43, 0.48))
+	var ink: Color = Defs.INK[dc] if dc >= 0 else Color(1, 1, 1)
 	var border := Color(0.25, 0.9, 0.45) if affordable else bc.lightened(0.15)
-	if card.bonus == 4 and not affordable:
+	if dc == 4 and not affordable:
 		border = Color(0.6, 0.6, 0.65)
 	# corpo
 	GemDraw.rounded(self, r, Color(0.11, 0.12, 0.16), 12, border, 3 if affordable else 2)
@@ -213,15 +214,53 @@ func _draw_face(r: Rect2) -> void:
 	# pontos
 	if card.points > 0:
 		GemDraw.text(self, str(card.points), Vector2(10, 36), 32, ink, HORIZONTAL_ALIGNMENT_LEFT, -1,
-			3 if card.bonus != 0 else 0, Color(0, 0, 0, 0.5))
-	# gema do bonus
-	if Defs.visual == "solidos":
-		draw_circle(Vector2(r.size.x - 24, 24), 17, Color(0.07, 0.08, 0.11, 0.85))
-	GemDraw.draw_gem(self, card.bonus, Vector2(r.size.x - 24, 24), 15)
+			3 if dc != 0 else 0, Color(0, 0, 0, 0.5))
+	elif card.points < 0:
+		GemDraw.text(self, "−%d" % -card.points, Vector2(8, 34), 26, Color(1.0, 0.55, 0.5), HORIZONTAL_ALIGNMENT_LEFT, -1,
+			4, Color(0, 0, 0, 0.8))
+	# bonus: um solido, varios, nenhum ou coringa
+	var gc := Vector2(r.size.x - 24, 24)
+	if Defs.visual == "solidos" or card.kind != "single":
+		draw_circle(gc, 17, Color(0.07, 0.08, 0.11, 0.85))
+	match card.kind:
+		"single":
+			GemDraw.draw_gem(self, card.bonus, gc, 15)
+		"none":
+			draw_arc(gc, 11, 0, TAU, 24, Color(1, 1, 1, 0.45), 2.0, true)
+			draw_line(gc + Vector2(-7, 7), gc + Vector2(7, -7), Color(1, 1, 1, 0.45), 2.0, true)
+		"joker":
+			for c in range(5):
+				var a0 := -PI / 2.0 + c * TAU / 5.0
+				draw_arc(gc, 12, a0 + 0.08, a0 + TAU / 5.0 - 0.08, 8, Defs.COLORS[c].lightened(0.2), 4.0, true)
+			GemDraw.ctext(self, "?", gc, 15, Color(1, 1, 1, 0.95), 3)
+		"multi":
+			var gems: Array = []
+			for c in range(5):
+				for k in range(card.bonus_vec[c]):
+					gems.append(c)
+			for i in range(gems.size()):
+				var ang := -PI / 2.0 + i * TAU / gems.size()
+				GemDraw.draw_gem(self, gems[i], gc + Vector2(cos(ang), sin(ang)) * 8.0, 7)
+	# efeito ao comprar
+	if card.effect != "":
+		var ec := Vector2(r.size.x - 17, 62)
+		draw_circle(ec, 12, Color(0.10, 0.10, 0.14, 0.92))
+		draw_arc(ec, 12, 0, TAU, 24, Color(0.93, 0.76, 0.40), 1.5, true)
+		match card.effect:
+			"token":
+				GemDraw.ctext(self, "+1", ec, 13, Color(1, 1, 1), 2)
+			"two_tokens":
+				GemDraw.ctext(self, "+2", ec, 13, Color(1, 1, 1), 2)
+			"sphere":
+				GemDraw.draw_gem(self, Defs.GOLD, ec, 8)
+			"extra_turn":
+				draw_arc(ec, 6.5, 0.4, TAU - 0.5, 16, Color(1, 1, 1), 2.0, true)
+				draw_colored_polygon(PackedVector2Array([ec + Vector2(6.0, -4.0), ec + Vector2(9.5, 2.0),
+					ec + Vector2(2.5, 1.5)]), Color(1, 1, 1))
 	# custos embaixo, na ordem fixa (ar, agua, eter, fogo, terra): 1 coluna ate 2 cores,
 	# 2 colunas com 3 ou 4 cores (a primeira coluna enche primeiro)
 	var cols: Array = []
-	for c in range(5):
+	for c in range(6):
 		if card.cost[c] > 0:
 			cols.append(c)
 	var ncol := 1 if cols.size() <= 2 else 2

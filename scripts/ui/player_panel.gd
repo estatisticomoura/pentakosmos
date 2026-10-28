@@ -5,18 +5,18 @@ extends Control
 ## por elemento: as cartas compradas em cima (com a bolha dos pontos daquela cor) e as
 ## fichas embaixo; a ultima coluna e a das esferas.
 
-signal zone_hover(panel: PlayerPanel, zone: String)   # "reservas", "nobres" ou "" (saiu)
+signal zone_hover(panel: PlayerPanel, zone: String)   # "reservas", "nobres", "governante" ou "" (saiu)
 signal zone_tap(panel: PlayerPanel, zone: String)
 
 var g: GameState
 var idx := 0
 var is_current := false
 var viewer := 0                 # jogador que esta olhando a mesa
-var reveal_mode := "rodada"     # visibilidade das reservas dos adversarios
 var _t := 0.0
 var _zone := ""
 var _res_zone := Rect2()
 var _noble_zone := Rect2()
+var _gov_zone := Rect2()
 var _pulses := {}               # "b<c>" / "t<c>" / "r" -> tempo restante
 
 const KIND_LABEL := {"tatica": "Tactical AI", "evoluida": "Evolved AI", "mista": "Mixed AI"}  # tr
@@ -54,6 +54,8 @@ func _zone_at(pos: Vector2) -> String:
 		return "reservas"
 	if _noble_zone.has_area() and _noble_zone.grow(5).has_point(pos):
 		return "nobres"
+	if _gov_zone.has_area() and _gov_zone.grow(5).has_point(pos):
+		return "governante"
 	return ""
 
 
@@ -104,7 +106,7 @@ func token_pos(c: int) -> Vector2:
 
 
 func bonus_pos(c: int) -> Vector2:
-	return _card_rect(mini(c, 4)).get_center()
+	return _card_rect(clampi(c, 0, 4) if c >= 0 else 2).get_center()
 
 
 func reserve_rect(i: int) -> Rect2:
@@ -173,6 +175,18 @@ static func draw_laurel(ci: CanvasItem, c: Vector2, h: float) -> void:
 		_leaf(ci, _bez(P, 1.0), _dbez(P, 1.0).normalized(), h * 0.30, h * 0.085, col, edge, lw)
 
 
+static func draw_column(ci: CanvasItem, c: Vector2, h: float) -> void:
+	## Coluna grega (governante): capitel, fuste com caneluras e base.
+	var w := h * 0.62
+	var col := Color(0.93, 0.80, 0.52)
+	var top := c.y - h * 0.5
+	ci.draw_rect(Rect2(c.x - w / 2.0, top, w, h * 0.13), col)
+	ci.draw_rect(Rect2(c.x - w * 0.36, top + h * 0.15, w * 0.72, h * 0.66), col.darkened(0.08))
+	for k in [-0.18, 0.0, 0.18]:
+		ci.draw_line(Vector2(c.x + w * k, top + h * 0.18), Vector2(c.x + w * k, top + h * 0.78), col.darkened(0.45), 1.0)
+	ci.draw_rect(Rect2(c.x - w / 2.0, top + h * 0.83, w, h * 0.15), col)
+
+
 static func draw_quill(ci: CanvasItem, c: Vector2, h: float) -> void:
 	## Pena de escrever (escritores).
 	var col := Color(0.80, 0.90, 1.0)
@@ -219,6 +233,8 @@ func _draw_strip(p: GameState.PlayerState, sw: float, ky: float) -> void:
 		icons_w += icon_h + (14 if phil > 1 else 0) + 6
 	if wri > 0:
 		icons_w += icon_h + (14 if wri > 1 else 0) + 6
+	if p.governor >= 0:
+		icons_w += icon_h + 6
 	var name_col := Color(1.0, 0.92, 0.7) if is_current else Color(0.92, 0.92, 0.96)
 	var fs := _f(21)
 	var font := ThemeDB.fallback_font
@@ -233,8 +249,9 @@ func _draw_strip(p: GameState.PlayerState, sw: float, ky: float) -> void:
 		var cid: int = p.reserved[i]
 		var cd: Defs.CardDef = g.cards[cid]
 		var rr := reserve_rect(i)
-		if g.reserve_visible(idx, cid, viewer, reveal_mode):
-			GemDraw.rounded(self, rr, Defs.COLORS[cd.bonus], 3, Color(1, 0.9, 0.5, 0.9), 1)
+		if g.reserve_visible(idx, cid, viewer):
+			var dc := cd.display_color()
+			GemDraw.rounded(self, rr, Defs.COLORS[dc] if dc >= 0 else Color(0.5, 0.5, 0.55), 3, Color(1, 0.9, 0.5, 0.9), 1)
 		else:
 			GemDraw.rounded(self, rr, Color(0.035, 0.04, 0.07), 3, Color(CardView.BACK_COLORS[cd.level], 0.9), 1)
 	_pulse_ring(_res_zone, "r", Color(1, 0.85, 0.4))
@@ -259,6 +276,16 @@ func _draw_strip(p: GameState.PlayerState, sw: float, ky: float) -> void:
 	_noble_zone = Rect2(nz_start - 2, y1 - 18 * ky, ix - nz_start + 4, 22 * ky) if (phil + wri) > 0 else Rect2()
 	if _zone == "nobres":
 		GemDraw.rounded(self, _noble_zone.grow(2), Color(0, 0, 0, 0), 5, Color(1, 0.85, 0.4), 1)
+	# governante: uma coluna grega
+	if p.governor >= 0:
+		ix += 6
+		draw_column(self, Vector2(ix + icon_h * 0.4, y1 - 7 * ky), icon_h)
+		_gov_zone = Rect2(ix - 2, y1 - 18 * ky, icon_h * 0.8 + 4, 22 * ky)
+		ix += icon_h * 0.8 + 4
+		if _zone == "governante":
+			GemDraw.rounded(self, _gov_zone.grow(2), Color(0, 0, 0, 0), 5, Color(1, 0.85, 0.4), 1)
+	else:
+		_gov_zone = Rect2()
 	# IA
 	var y := y1
 	var tag := ""
@@ -282,15 +309,18 @@ func _draw_strip(p: GameState.PlayerState, sw: float, ky: float) -> void:
 	var pfs := _f(36)
 	GemDraw.text(self, pts_s, Vector2(x, by), pfs, Color(1.0, 0.88, 0.55), HORIZONTAL_ALIGNMENT_LEFT, -1, 3)
 	var pw := font.get_string_size(pts_s, HORIZONTAL_ALIGNMENT_LEFT, -1, pfs).x
-	GemDraw.text(self, "/%d" % g.rules.target, Vector2(x + pw + 2, by - 2), _f(17), Color(0.65, 0.68, 0.76))
-	if g.rules.color_win > 0:
+	var tgt := g.target_of(p)
+	GemDraw.text(self, "/%d" % tgt, Vector2(x + pw + 2, by - 2), _f(17),
+		GOLDC if p.governor >= 0 else Color(0.65, 0.68, 0.76))
+	var cw := g.spec_threshold(p)
+	if cw > 0:
 		var bc := g.best_color(p)
 		var cp: int = p.color_pts[bc]
 		if cp > 0:
-			var sx := x + pw + 2 + font.get_string_size("/%d" % g.rules.target, HORIZONTAL_ALIGNMENT_LEFT, -1, _f(17)).x + 10
+			var sx := x + pw + 2 + font.get_string_size("/%d" % tgt, HORIZONTAL_ALIGNMENT_LEFT, -1, _f(17)).x + 10
 			GemDraw.draw_gem(self, bc, Vector2(sx + 8, by - 8 * ky), 8 * ky)
-			GemDraw.text(self, "%d/%d" % [cp, g.rules.color_win], Vector2(sx + 19, by - 2), _f(16),
-				GOLDC if cp >= g.rules.color_win - 3 else Color(0.88, 0.88, 0.92))
+			GemDraw.text(self, "%d/%d" % [cp, cw], Vector2(sx + 19, by - 2), _f(16),
+				GOLDC if cp >= cw - 3 else Color(0.88, 0.88, 0.92))
 
 
 func _draw_columns(p: GameState.PlayerState) -> void:
@@ -309,7 +339,7 @@ func _draw_columns(p: GameState.PlayerState) -> void:
 					# bolha: pontos das cartas desta cor
 					var bc := cr.position + Vector2(cr.size.x, 0)
 					var rad := 11.0 * k
-					var hot: bool = g.rules.color_win > 0 and p.color_pts[c] >= g.rules.color_win - 3
+					var hot: bool = g.spec_threshold(p) > 0 and p.color_pts[c] >= g.spec_threshold(p) - 3
 					draw_circle(bc, rad, Color(1.0, 0.72, 0.25) if hot else Color(1.0, 0.86, 0.45))
 					draw_arc(bc, rad, 0, TAU, 24, Color(0.4, 0.3, 0.1), 1.5, true)
 					GemDraw.ctext(self, str(p.color_pts[c]), bc, int(14 * k), Color(0.15, 0.1, 0.0))

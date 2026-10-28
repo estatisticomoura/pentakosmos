@@ -34,5 +34,12 @@ A última rodada começa quando alguém chega a [b]15 pontos[/b] ou cumpre a [b]
 [font_size=22][color=#f0c96a]O deck Pentakosmos[/color][/font_size]
 As 90 cartas são geradas por 18 fórmulas. Cada fórmula define o grupo, os pontos e os custos de uma carta em relação ao seu elemento, seguindo o ciclo ar → água → éter → fogo → terra → ar; assim, cada fórmula produz a mesma carta para cada um dos cinco elementos, e nenhum elemento é favorecido. A página "Processo criativo" conta como ele foi pensado.
 
+[font_size=22][color=#f0c96a]Governantes (opcional)[/color][/font_size]
+Com os governantes ligados, a meta de quem não tem governante sobe (19 pontos, por padrão). No começo, cada jogador escolhe um governante em 30 segundos (ou o jogo sorteia), e os escolhidos ficam na mesa, ao lado das reservas. Escolher não dá exclusividade: no fim da vez, quem cumprir a condição de um governante primeiro pode recebê-lo — ou recusar. Cada governante tem uma condição, às vezes um custo, às vezes uma vantagem, e muda a meta de quem o recebe: Péricles, por exemplo, pede 2 cartas avançadas e faz você vencer com 15 pontos. Cada jogador pode ter um só. Um governante recusado pode ser pedido depois, tocando nele na sua vez. No fim, quem chegou à própria meta vence quem não chegou.
+O jogo base traz Péricles, Leônidas e Alexandre; a expansão traz mais 14.
+
+[font_size=22][color=#f0c96a]Cartas especiais[/color][/font_size]
+Decks personalizados (expansão) podem ter cartas com custo em esferas (pago só com esferas), pontos negativos, bônus de vários elementos, sem bônus, ou coringa (ao comprar, você escolhe o elemento de uma das suas cartas). Algumas cartas têm efeito ao serem compradas: pegar 1 ou 2 fichas, pegar 1 esfera ou jogar mais uma vez — o símbolo fica no canto da carta.
+
 [font_size=22][color=#f0c96a]Combine à vontade[/color][/font_size]
-Cada regra acima pode ser mudada separadamente no menu inicial (e salva como predefinição sua): por exemplo, os pontos para vencer (de 10 a 25), ou incluir na academia os escritores do modo Arcaico.
+Cada regra acima pode ser mudada separadamente no menu inicial (e salva como predefinição sua): por exemplo, os pontos para vencer (de 1 a 100), ou incluir na academia os escritores do modo Arcaico.

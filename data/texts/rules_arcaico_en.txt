@@ -6,7 +6,7 @@ The Archaic mode keeps the traditional rhythm of this kind of card game and adds
 • [b]Take 2 of the same element:[/b] only from a pile with at least 4 tokens.
 • [b]Market:[/b] 4 cards per group, also with 5 players.
 • [b]Philosophers:[/b] the requirement must be met exactly, and each philosopher is worth 3 points.
-• [b]Writers:[/b] 2 writers are on the table as well. Each one asks for cards in the element combinations the philosophers do not use (3 + 3 of two elements, or 2 + 2 + 2 of three), must be met exactly and is worth 1 point. In the same turn you can receive one philosopher and one writer.
+• [b]Writers:[/b] 2 writers are on the table as well (the base game brings Homer and Sophocles; the expansion, all 10). Each one asks for cards in the element combinations the philosophers do not use (3 + 3 of two elements, or 2 + 2 + 2 of three), must be met exactly and is worth 1 point. In the same turn you can receive one philosopher and one writer.
 • [b]No specialization victory:[/b] only the 15-point goal ends the game.
 
 [font_size=22][color=#f0c96a]The Archaic deck[/color][/font_size]

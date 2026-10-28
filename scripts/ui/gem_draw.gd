@@ -74,7 +74,7 @@ static func draw_chip(ci: CanvasItem, c: int, center: Vector2, r: float) -> void
 		var p := center + Vector2(cos(a), sin(a)) * r * 0.93
 		ci.draw_circle(p, r * 0.09, Color(1, 1, 1, 0.65) if c != 0 else Color(0, 0, 0, 0.22))
 	var ink: Color = Defs.INK[c]
-	ink.a = 0.55
+	ink.a = 0.72 if c == Defs.GOLD else 0.55
 	ci.draw_colored_polygon(shape_points(c, center, r * 0.5), ink)
 	ci.draw_arc(center, r * 0.86, PI * 1.1, PI * 1.6, 12, Color(1, 1, 1, 0.5), 2.0, true)
 

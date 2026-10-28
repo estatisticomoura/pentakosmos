@@ -60,26 +60,27 @@ static func record_game(g: GameState, secs: float, act_times: Dictionary) -> voi
 		for lv in [1, 2, 3]:
 			bought[str(lv)] = [0, 0, 0, 0, 0]
 		for cid in p.owned:
-			var cd: Defs.CardDef = g.cards[cid]
-			bought[str(cd.level)][cd.bonus] += 1
+			var sc := g.spec_color_for(p, cid, int(p.joker.get(cid, -1)))
+			if sc >= 0:
+				bought[str(g.cards[cid].level)][sc] += 1
 		var phil_pts := 0
 		var wri_pts := 0
 		var nphil := 0
 		var nwri := 0
-		var kphil := 0
 		for id in p.nobles:
 			if Defs.is_writer(id):
 				nwri += 1
-				wri_pts += Defs.WRITER_PTS
+				wri_pts += int(p.patron_pts.get(id, 0))
 			else:
 				nphil += 1
-				phil_pts += g.rules.noble_pts(kphil)
-				kphil += 1
+				phil_pts += int(p.patron_pts.get(id, 0))
 		var at: Array = act_times.get(i, [0.0, 0])
 		players.append({
 			"name": p.name, "kind": p.kind, "human": not p.is_ai(),
 			"points": p.points, "cards": p.cards, "place": rank.find(i) + 1, "winner": winners.has(i),
 			"win_type": ("especializacao" if g.meets_color(p) else "pontos") if winners.has(i) else "",
+			"governor": g.governors[p.governor]["name"] if p.governor >= 0 else "",
+			"target": g.target_of(p),
 			"bought": bought, "color_pts": p.color_pts.duplicate(),
 			"philosophers": nphil, "philosopher_pts": phil_pts, "writers": nwri, "writer_pts": wri_pts,
 			"actions": int(at[1]), "action_secs": snappedf(float(at[0]), 0.1),

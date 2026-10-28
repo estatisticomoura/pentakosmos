@@ -44,7 +44,13 @@ var _fx: Control
 var _overlay: Control = null
 var _peek: Control = null
 var _peek_src := []            # [painel, zona]
-var reveal_mode := "rodada"    # reservas dos adversarios: "rodada" ou "sempre"
+var _gov_box: Control = null
+var _gov_views: Array = []
+var _gain_sel: Array = []
+const EFFECT_INFO := {"token": "When bought: take 1 token",  # tr
+	"two_tokens": "When bought: take 2 tokens of different elements",  # tr
+	"sphere": "When bought: take 1 sphere", "extra_turn": "When bought: play an extra turn"}  # tr
+const WAIT_PHASES := ["descarte", "ganho", "nobre", "governante", "cega", "escolha_gov"]
 var _overlay_kind := ""
 var _info: Control = null      # dica de carta, baralho ou nobre
 var _info_src: Control = null
@@ -83,8 +89,8 @@ func _exit_tree() -> void:
 func start(rules: RuleSet, players: Array) -> void:
 	g = GameState.new()
 	g.setup(rules, players)
+	NobleView.source = g
 	ai_delay = Store.get_value("game", "ai_delay", 0.6)
-	reveal_mode = Store.get_value("game", "reserva_visivel", "rodada")
 	viewer = 0
 	for i in range(g.n):
 		if not g.players[i].is_ai():
@@ -200,6 +206,7 @@ func _build() -> void:
 	meta.size = Vector2(1272 - (PANEL_X + 8 + 3 * (rw + 10) + 4), res_h)
 	meta.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(meta)
+	_build_gov_box(meta.position - Vector2(0, 8), Vector2(meta.size.x, res_h))
 
 	# acoes (a antiga dica de texto saiu: as regras ficam em "Como jogar")
 	_hint = Label.new()
@@ -399,6 +406,7 @@ func _build_touch() -> void:
 	# sem espaco, some (a meta e o limite ja aparecem nos paineis: "/15" e "x/10")
 	meta.visible = meta.size.x >= 100.0
 	add_child(meta)
+	_build_gov_box(Vector2(meta.position.x - 2, res_y), Vector2(maxf(56.0, W - meta.position.x - 4), res_h))
 	var ph_total := res_y - 32.0 - top_y
 	var each := minf((ph_total - 6.0 * (g.n - 1)) / g.n, 118.0 * _s)
 	_ps = clampf(minf(minf(_s, each / 84.0), avail_w / 448.0), 0.7, 1.35)
@@ -414,6 +422,35 @@ func _build_touch() -> void:
 		add_child(pp)
 		_panels.append(pp)
 	_build_fx()
+
+
+func _build_gov_box(pos: Vector2, sz: Vector2) -> void:
+	## Governantes em jogo: barras horizontais ao lado das reservas.
+	_gov_views = []
+	if g.gov_table.is_empty():
+		return
+	var meta := get_node_or_null("Meta")
+	if meta != null:
+		meta.visible = false
+	_gov_box = Control.new()
+	_gov_box.position = pos
+	_gov_box.size = sz
+	add_child(_gov_box)
+	var k := g.gov_table.size()
+	var bh := clampf((sz.y - 4.0 * (k - 1)) / k, 18.0, 34.0)
+	for i in range(k):
+		var gview := GovernorView.new()
+		gview.position = Vector2(0, i * (bh + 4.0))
+		gview.size = Vector2(sz.x, bh)
+		gview.pressed.connect(_on_gov_pressed)
+		if not UITheme.touch:
+			gview.hover_changed.connect(func(v: GovernorView, on: bool):
+				if on:
+					_show_gov_info(v)
+				elif _info_src == v:
+					_hide_info())
+		_gov_box.add_child(gview)
+		_gov_views.append(gview)
 
 
 func _scale_card(cv: CardView, k := 1.0) -> void:
@@ -499,8 +536,14 @@ func refresh() -> void:
 	for i in range(g.n):
 		_panels[i].is_current = (i == g.current and not g.finished)
 		_panels[i].viewer = viewer
-		_panels[i].reveal_mode = reveal_mode
 		_panels[i].queue_redraw()
+	# governantes
+	for i in range(_gov_views.size()):
+		var gi: int = g.gov_table[i]
+		var gv: Dictionary = g.governors[gi]
+		var hn: String = g.players[g.gov_holder[gi]].name if g.gov_holder.has(gi) else ""
+		_gov_views[i].setup(gi, gv, maxi(1, g.rules.base_target() + int(gv["target"])), hn,
+			human and g.can_claim_governor(gi))
 	if _peek != null and not _peek_src.is_empty():
 		_show_peek(_peek_src[0], _peek_src[1])
 	if _info != null and is_instance_valid(_info_src) and not (_info_src is NobleView):
@@ -517,7 +560,7 @@ func refresh() -> void:
 			rv.affordable = false
 		rv.set_selected(sel_card.get("src", "") == "r" and sel_card.get("idx", -1) == i)
 	var meta: Label = get_node("Meta")
-	meta.text = L.f("Goal {pts} pts · hand {n} tokens", {"pts": g.rules.target, "n": g.rules.hand_limit})
+	meta.text = L.f("Goal {pts} pts · hand {n} tokens", {"pts": g.rules.base_target(), "n": g.rules.hand_limit})
 	_update_buttons()
 	_tray.queue_redraw()
 
@@ -672,12 +715,18 @@ func _process(delta: float) -> void:
 		_timer.left = _turn_left
 		_timer.limit = _turn_limit
 		_timer.queue_redraw()
+	if _overlay_kind == "GovPick" and _overlay != null:
+		var cdl := _overlay.find_child("Countdown", true, false)
+		if cdl != null and _turn_left >= 0.0:
+			cdl.text = L.f("{n} s", {"n": int(ceil(_turn_left))})
 
 
 func _start_human_clock() -> void:
 	## Comeca a contagem da vez do humano (se houver limite nas regras).
 	_act_start = _game_secs
 	_turn_limit = g.rules.turn_time(_humans_count())
+	if g.phase == "escolha_gov":
+		_turn_limit = RuleSet.GOV_PICK_SECONDS
 	_turn_left = float(_turn_limit) if _turn_limit > 0 else -1.0
 
 
@@ -717,14 +766,27 @@ func _on_take() -> void:
 		Audio.play("error")
 
 
-func _on_buy() -> void:
+func _on_buy(joker := -2) -> void:
 	_hide_info()
+	var vp: GameState.PlayerState = g.players[viewer]
+	var cid := -1
+	if sel_card.get("src", "") == "m":
+		cid = g.market[sel_card["lv"]][sel_card["slot"]]
+	elif sel_card.get("src", "") == "r" and sel_card["idx"] < vp.reserved.size():
+		cid = vp.reserved[sel_card["idx"]]
+	if joker == -2 and cid >= 0 and g.cards[cid].kind == "joker":
+		var cols := g.joker_colors(vp)
+		if cols.size() > 1:
+			_show_joker_choice(cols)
+			return
+		joker = cols[0] if not cols.is_empty() else -1
+	joker = maxi(joker, -1)
 	_note_action()
 	var ok := false
 	if sel_card.get("src", "") == "m":
-		ok = g.act_buy_market(sel_card["lv"], sel_card["slot"])
+		ok = g.act_buy_market(sel_card["lv"], sel_card["slot"], joker)
 	elif sel_card.get("src", "") == "r":
-		ok = g.act_buy_reserved(sel_card["idx"])
+		ok = g.act_buy_reserved(sel_card["idx"], joker)
 	if ok:
 		_clear_selection()
 		_continue()
@@ -795,10 +857,8 @@ func _continue() -> void:
 		viewer = g.current
 		refresh()
 		_start_human_clock()
-		if g.phase == "descarte":
-			_show_discard()
-		elif g.phase == "nobre":
-			_show_noble_choice()
+		if g.phase != "acao":
+			_show_phase()
 		else:
 			Audio.play("turn")
 		break
@@ -840,9 +900,12 @@ func _animate_event(e: Dictionary) -> float:
 				from = _rect_of(_reserve_views[e["idx"]])
 			else:
 				from = Rect2(_panel_point(panel, Vector2(_pw / 2.0, 20)) - CardView.BASE_SIZE / 2.0, CardView.BASE_SIZE)
-			var bc: int = cd.bonus
+			var bp: GameState.PlayerState = g.players[pi]
+			var bc: int = g.spec_color_for(bp, e["card"], int(bp.joker.get(e["card"], -1)))
+			if bc < 0:
+				bc = cd.display_color()
 			_fly_card(cd, from, _panel_point(panel, panel.bonus_pos(bc)), 1,
-				func(): _land_card(panel, bc))
+				func(): _land_card(panel, maxi(bc, 0)))
 			var paid: Array = e["paid"]
 			var k2 := 0
 			for c in range(6):
@@ -852,7 +915,7 @@ func _animate_event(e: Dictionary) -> float:
 						func(): Audio.play("chip", 0.1, -12.0))
 					k2 += 1
 			_log(L.f("{name} bought a card ({group} · {color}){pts}.", {"name": pname, "group": L.t(Defs.LEVEL_SHORT[cd.level]),
-				"color": L.color(cd.bonus), "pts": (" +%d" % cd.points) if cd.points > 0 else ""}), pi)
+				"color": _bonus_name(cd, bc), "pts": (" %+d" % cd.points) if cd.points != 0 else ""}), pi)
 			Audio.play("buy", 0.04, -3.0)
 			return 0.9
 		"reserve":
@@ -870,17 +933,59 @@ func _animate_event(e: Dictionary) -> float:
 				var rfmt := "{name} reserved a card ({group} · {color}){pts}."  # tr
 				if not UITheme.touch:
 					rfmt = "{name} reserved a card ({group} · {color}){pts}. Hover over their reserves to see it again."  # tr
-				_log(L.f(rfmt, {"name": pname, "group": L.t(Defs.LEVEL_SHORT[cd2.level]), "color": L.color(cd2.bonus),
-					"pts": (" +%d" % cd2.points) if cd2.points > 0 else ""}), pi)
+				_log(L.f(rfmt, {"name": pname, "group": L.t(Defs.LEVEL_SHORT[cd2.level]), "color": _bonus_name(cd2, cd2.display_color()),
+					"pts": (" %+d" % cd2.points) if cd2.points != 0 else ""}), pi)
 			Audio.play("reserve", 0.04, -4.0)
 			return 0.85
 		"discard":
 			var c3: int = e["color"]
-			_fly_chip(c3, _panel_point(panel, panel.token_pos(c3)), _center_of(_token_views[c3]), 0.0)
+			if e.has("to"):
+				var tp: PlayerPanel = _panels[e["to"]]
+				_fly_chip(c3, _panel_point(panel, panel.token_pos(c3)), _panel_point(tp, tp.token_pos(c3)), 0.0,
+					func(): _land_token(tp, c3))
+			else:
+				_fly_chip(c3, _panel_point(panel, panel.token_pos(c3)), _center_of(_token_views[c3]), 0.0)
 			Audio.play("discard", 0.06, -6.0)
 			return 0.12
+		"gain":
+			for k in range(e["colors"].size()):
+				var c4: int = e["colors"][k]
+				_fly_chip(c4, _center_of(_token_views[c4]), _panel_point(panel, panel.token_pos(c4)), k * 0.09,
+					func(): _land_token(panel, c4))
+			_log(L.f("{name} gained {colors}.", {"name": pname, "colors": L.colors(e["colors"])}), pi)
+			Audio.play("token", 0.06, -4.0)
+			return 0.6
+		"effect":
+			if e["effect"] == "sphere":
+				_fly_chip(Defs.GOLD, _center_of(_token_views[Defs.GOLD]), _panel_point(panel, panel.token_pos(Defs.GOLD)), 0.2,
+					func(): _land_token(panel, Defs.GOLD))
+				_log(L.f("{name} gained a sphere.", {"name": pname}), pi)
+			return 0.4
+		"extra_turn":
+			_show_banner(L.f("{name} plays again!", {"name": pname}))
+			_log(L.f("{name} plays again!", {"name": pname}), pi)
+			Audio.play("turn")
+			return 0.8
+		"extra_round":
+			_show_banner(L.t("One more round!"))
+			_log(L.f("{name}: one more round!", {"name": pname}), pi)
+			Audio.play("turn")
+			return 1.0
+		"governor":
+			var gname := L.t(g.governors[e["gov"]]["name"])
+			_show_banner(L.f("{name}: {gov} governs your academy!", {"name": pname, "gov": gname}))
+			_log(L.f("{name} receives {gov}: goal {pts} points.", {"name": pname, "gov": gname,
+				"pts": g.target_of(g.players[pi])}), pi)
+			Audio.play("noble")
+			return 1.0
+		"gov_pick":
+			_log(L.f("{name} chose {gov}.", {"name": pname, "gov": L.t(g.governors[e["gov"]]["name"])}), pi)
+			return 0.3
+		"noble_back":
+			_log(L.f("{phil} returns to the table ({pts}).", {"phil": L.t(g.patron_name(e["noble"])), "pts": -int(e["pts"])}), pi)
+			return 0.5
 		"noble":
-			var phil := L.t(Defs.patron_name(e["noble"]))
+			var phil := L.t(g.patron_name(e["noble"]))
 			_log(L.f("{name}: {phil} joins the academy (+{pts})!", {"name": pname, "phil": phil, "pts": e["pts"]}), pi)
 			_show_banner(L.f("{name}: {phil} joins the academy (+{pts})!", {"name": pname, "phil": phil, "pts": e["pts"]}))
 			for nv in _noble_views:
@@ -908,6 +1013,19 @@ func _animate_event(e: Dictionary) -> float:
 			_log(L.f("{name} passed.", {"name": pname}), pi)
 			return 0.2
 	return 0.0
+
+
+func _bonus_name(cd: Defs.CardDef, c: int) -> String:
+	match cd.kind:
+		"none":
+			return L.t("no bonus")
+		"multi":
+			var cols: Array = []
+			for k in range(5):
+				for j in range(cd.bonus_vec[k]):
+					cols.append(k)
+			return L.colors(cols)
+	return L.color(c) if c >= 0 else L.t("joker")
 
 
 func _log(s: String, pi := -1) -> void:
@@ -1067,7 +1185,7 @@ func _show_peek(panel: PlayerPanel, zone: String) -> void:
 			var cv := CardView.new()
 			cv.interactive = false
 			cv.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			if g.reserve_visible(panel.idx, cid, viewer, reveal_mode):
+			if g.reserve_visible(panel.idx, cid, viewer):
 				cv.set_card(g.cards[cid], g.rules.deck)
 				cv.affordable = panel.idx == viewer and g.can_afford(p, cid)
 			else:
@@ -1081,21 +1199,20 @@ func _show_peek(panel: PlayerPanel, zone: String) -> void:
 				note = L.t("Face-down reserves stay hidden.")
 			elif any_hidden:
 				note = L.t("Older reserves are hidden (they are visible only until the player's next turn).")
-			elif reveal_mode == "rodada":
+			elif g.rules.see_reserves == "rodada":
 				note = L.f("Visible until {name}'s next turn.", {"name": p.name})
 		if note != "":
 			v.add_child(UITheme.label(note, 12, UITheme.MUTED))
+	elif zone == "governante":
+		if p.governor >= 0:
+			v.add_child(_gov_card(p.governor, "held"))
 	else:
 		v.add_child(UITheme.label(L.f("Academy: {name}", {"name": p.name}), 18, UITheme.GOLD))
-		var kphil := 0
 		for k in range(p.nobles.size()):
 			var id: int = p.nobles[k]
 			var nv := NobleView.new()
 			nv.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			var pts: int = Defs.WRITER_PTS if Defs.is_writer(id) else g.rules.noble_pts(kphil)
-			if not Defs.is_writer(id):
-				kphil += 1
-			nv.setup(id, "+%d" % pts, 0)
+			nv.setup(id, "+%d" % int(p.patron_pts.get(id, 0)), 0)
 			h.add_child(nv)
 		v.add_child(h)
 		v.add_child(UITheme.label(L.f("{n} points from the academy", {"n": p.noble_points}), 15, UITheme.MUTED))
@@ -1223,20 +1340,35 @@ func _show_card_info(cv: CardView) -> void:
 	var short := 0
 	for c in range(5):
 		short += need[c]
-	var gold: int = vp.tokens[Defs.GOLD]
+	var gold: int = vp.tokens[Defs.GOLD] - cd.cost[5]
 	var lines: Array = []
-	if short == 0:
+	if short == 0 and gold >= 0:
 		lines.append([L.t("You can buy it"), Color(0.55, 0.9, 0.6)])
-		lines.append(L.t("without using spheres"))
+		lines.append(L.t("without using spheres") if cd.cost[5] == 0 else L.f("paying {n} spheres", {"n": cd.cost[5]}))
 	else:
-		lines.append(L.f("{n} missing", {"n": short}))
+		lines.append(L.f("{n} missing", {"n": short + maxi(0, -gold)}))
+		if cd.cost[5] > 0:
+			need.append(maxi(0, -gold))
 		lines.append(_gem_row(need))
-		if gold > 0:
+		if gold > 0 and short > 0:
 			lines.append(L.f("With {g} spheres: you can buy it", {"g": gold}) if short <= gold
 				else L.f("With {g} spheres: {n} missing", {"g": gold, "n": short - gold}))
-	if g.rules.color_win > 0 and cd.points > 0:
-		lines.append([L.f("{color}: {a} → {b} of {cw}", {"color": L.color(cd.bonus), "a": vp.color_pts[cd.bonus],
-			"b": vp.color_pts[cd.bonus] + cd.points, "cw": g.rules.color_win}), UITheme.MUTED])
+	if cd.cost[5] > 0:
+		lines.append([L.f("Costs {n} spheres (only spheres pay this part)", {"n": cd.cost[5]}), UITheme.MUTED])
+	match cd.kind:
+		"none":
+			lines.append([L.t("No bonus: it gives points, but no discount"), UITheme.MUTED])
+		"multi":
+			lines.append([L.t("Bonus of several elements"), UITheme.MUTED])
+		"joker":
+			lines.append([L.t("Joker: when you buy it, choose the element of one of your cards"), UITheme.MUTED])
+	if cd.effect != "":
+		lines.append([L.t(EFFECT_INFO[cd.effect]), UITheme.GOLD])
+	var sc := g.spec_color_for(vp, cid)
+	var cw := g.spec_threshold(vp)
+	if cw > 0 and cd.points > 0 and sc >= 0:
+		lines.append([L.f("{color}: {a} → {b} of {cw}", {"color": L.color(sc), "a": vp.color_pts[sc],
+			"b": vp.color_pts[sc] + cd.points, "cw": cw}), UITheme.MUTED])
 	_info_box(cv, lines)
 
 
@@ -1245,13 +1377,13 @@ func _show_noble_info(nv: NobleView) -> void:
 		return
 	var vp: GameState.PlayerState = g.players[viewer]
 	var id := nv.noble
-	var lines: Array = [L.f("{name} · {n} points", {"name": L.t(Defs.patron_name(id)), "n": g.patron_pts(vp, id)})]
+	var lines: Array = [L.f("{name} · {n} points", {"name": L.t(g.patron_name(id)), "n": g.patron_pts(vp, id)})]
 	var d := g.patron_distance(vp.bonus, id)
 	if d == 0:
 		lines.append([L.t("Already met: arrives at the end of your turn"), Color(0.55, 0.9, 0.6)])
 	else:
 		lines.append(L.f("{n} more cards", {"n": d}))
-		var req: Array = Defs.patron_req(id)
+		var req: Array = g.patron_req(id)
 		var miss := [0, 0, 0, 0, 0]
 		for c in range(5):
 			miss[c] = maxi(0, req[c] - vp.bonus[c])
@@ -1313,7 +1445,8 @@ func _hotseat(idx: int) -> void:
 
 func _show_discard() -> void:
 	var p := g.cur()
-	var v := _open_overlay(L.f("Limit of {n} tokens", {"n": g.rules.hand_limit}))
+	var over_limit := g.discard_to == g.rules.hand_limit
+	var v := _open_overlay(L.f("Limit of {n} tokens", {"n": g.rules.hand_limit}) if over_limit else L.t("Return tokens"))
 	var info := UITheme.label("", 18)
 	info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(info)
@@ -1323,7 +1456,7 @@ func _show_discard() -> void:
 	v.add_child(h)
 	var views: Array = []
 	var upd := func():
-		info.text = L.f("You have {n} tokens. Tap to return {k}.", {"n": p.token_count(), "k": p.token_count() - g.rules.hand_limit})
+		info.text = L.f("You have {n} tokens. Tap to return {k}.", {"n": p.token_count(), "k": p.token_count() - g.discard_to})
 		for tv in views:
 			tv.setup(tv.color_idx, p.tokens[tv.color_idx], 0, p.tokens[tv.color_idx] > 0)
 	for c in range(6):
@@ -1334,11 +1467,7 @@ func _show_discard() -> void:
 				Audio.play("discard")
 				if g.phase != "descarte":
 					_close_overlay()
-					if g.phase == "nobre":
-						_show_noble_choice()
-					else:
-						_note_action()
-						_continue()
+					_after_choice()
 				else:
 					upd.call()
 					refresh())
@@ -1365,12 +1494,292 @@ func _show_noble_choice() -> void:
 		nv.pressed.connect(func(x: NobleView):
 			if g.choose_noble(x.noble):
 				_close_overlay()
-				if g.phase == "nobre":
-					_show_noble_choice()
-				else:
-					_note_action()
-					_continue())
+				_after_choice())
 		h.add_child(nv)
+
+
+func _show_phase() -> void:
+	## Abre a janela da decisao que o jogo esta esperando do jogador da vez.
+	match g.phase:
+		"descarte":
+			_show_discard()
+		"nobre":
+			_show_noble_choice()
+		"ganho":
+			_show_gain()
+		"governante":
+			_show_governor_offer(g.gov_options, false)
+		"cega":
+			_show_blind_choice()
+		"escolha_gov":
+			_show_gov_pick()
+
+
+func _after_choice() -> void:
+	## Depois de uma escolha numa janela: outra decisao do mesmo jogador, ou segue o jogo.
+	refresh()
+	if g.phase in WAIT_PHASES and not g.cur().is_ai() and g.current == viewer:
+		_show_phase()
+		return
+	if g.phase != "escolha_gov":
+		_note_action()
+	_continue()
+
+
+func _show_gain() -> void:
+	_gain_sel = []
+	var v := _open_overlay(L.f("Take {n} tokens", {"n": g.gain_n}) if g.gain_n > 1 else L.t("Take 1 token"))
+	v.add_child(UITheme.label(L.t("Choose tokens of different elements from the piles."), 18))
+	var h := HBoxContainer.new()
+	h.alignment = BoxContainer.ALIGNMENT_CENTER
+	h.add_theme_constant_override("separation", 10)
+	v.add_child(h)
+	var ok := UITheme.button(L.t("Take"), 20, Vector2(200, 52))
+	var views: Array = []
+	var upd := func():
+		for tv in views:
+			tv.setup(tv.color_idx, g.bank[tv.color_idx], 1 if _gain_sel.has(tv.color_idx) else 0, g.bank[tv.color_idx] > 0)
+		ok.disabled = _gain_sel.is_empty()
+	for c in range(5):
+		var tv := TokenView.new()
+		tv.color_idx = c
+		tv.pressed.connect(func(x: TokenView):
+			if _gain_sel.has(x.color_idx):
+				_gain_sel.erase(x.color_idx)
+			elif _gain_sel.size() < g.gain_n and g.bank[x.color_idx] > 0:
+				_gain_sel.append(x.color_idx)
+			else:
+				Audio.play("error")
+				return
+			Audio.play("select")
+			upd.call())
+		h.add_child(tv)
+		views.append(tv)
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 12)
+	ok.pressed.connect(func():
+		if g.gain(_gain_sel.duplicate()):
+			_close_overlay()
+			_after_choice())
+	row.add_child(ok)
+	var skip := UITheme.button(L.t("Skip"), 18, Vector2(160, 52))
+	skip.pressed.connect(func():
+		if g.gain([]):
+			_close_overlay()
+			_after_choice())
+	row.add_child(skip)
+	v.add_child(row)
+	upd.call()
+
+
+func _gov_card(gi: int, state := "", width := 300.0) -> Control:
+	## Cartao de um governante: nome, titulo, condicao, custo, vantagem e meta.
+	var gv: Dictionary = g.governors[gi]
+	var p := PanelContainer.new()
+	p.custom_minimum_size = Vector2(width, 0)
+	var sb := UITheme.box(Color(GovernorView.GROUP_COLORS.get(gv["group"], Color(0.4, 0.35, 0.3)).darkened(0.62), 0.97),
+		UITheme.GOLD if state in ["", "offer"] else Color(1, 1, 1, 0.2), 2)
+	p.add_theme_stylebox_override("panel", sb)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 2)
+	p.add_child(v)
+	var nm := UITheme.label(L.t(gv["name"]), 22, UITheme.GOLD)
+	nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	v.add_child(nm)
+	if str(gv["title"]) != "":
+		v.add_child(UITheme.label(L.t(gv["title"]), 14, UITheme.MUTED))
+	var lines: Array = [[L.t("Condition") + ": " + Governors.cond_text(gv), UITheme.TEXT]]
+	if gv["cost"] != "none":
+		lines.append([L.t("Cost") + ": " + Governors.cost_text(gv), Color(1.0, 0.6, 0.5)])
+	if gv["adv"] != "none":
+		lines.append([L.t("Advantage") + ": " + Governors.adv_text(gv), Color(0.6, 0.9, 0.65)])
+	lines.append([Governors.target_text(gv, g.rules.base_target()), UITheme.GOLD])
+	for ln in lines:
+		var l := UITheme.label(ln[0], 16, ln[1])
+		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		l.custom_minimum_size = Vector2(width - 24, 0)
+		v.add_child(l)
+	if state == "taken" or state == "held":
+		var who := ""
+		for q in g.players:
+			if q.gov_choice == gi and state == "taken":
+				who = q.name
+		if g.gov_holder.has(gi):
+			who = g.players[g.gov_holder[gi]].name
+			v.add_child(UITheme.label(L.f("Governs {name}'s academy", {"name": who}), 14, UITheme.MUTED))
+		elif who != "":
+			v.add_child(UITheme.label(L.f("Chosen by {name}", {"name": who}), 14, UITheme.MUTED))
+	return p
+
+
+func _show_gov_info(view: GovernorView) -> void:
+	var gi := view.gi
+	var lines: Array = [_gov_card(gi, "held", 320.0)]
+	if not g.gov_holder.has(gi):
+		var chooser := ""
+		for q in g.players:
+			if q.gov_choice == gi:
+				chooser = q.name
+		if chooser != "":
+			lines.append([L.f("Chosen by {name} · anyone who meets the condition first may receive it", {"name": chooser}), UITheme.MUTED])
+		if _human_turn() and g.can_claim_governor(gi):
+			lines.append([L.t("Tap to receive it now"), Color(0.55, 0.9, 0.6)])
+	_info_box(view, lines)
+
+
+func _on_gov_pressed(view: GovernorView) -> void:
+	if _human_turn() and g.can_claim_governor(view.gi):
+		_hide_info()
+		_show_governor_offer([view.gi], true)
+		return
+	if _info_src == view:
+		_hide_info()
+	else:
+		_show_gov_info(view)
+
+
+func _show_governor_offer(opts: Array, manual: bool) -> void:
+	var v := _open_overlay(L.t("A governor for your academy?"))
+	var sub := UITheme.label(L.t("You meet the condition. Receiving one is optional; you can only have one governor."), 17)
+	sub.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	sub.custom_minimum_size = Vector2(minf(760.0, size.x - 120.0), 0)
+	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(sub)
+	var h := HBoxContainer.new()
+	h.alignment = BoxContainer.ALIGNMENT_CENTER
+	h.add_theme_constant_override("separation", 16)
+	v.add_child(h)
+	for gi in opts:
+		var col := VBoxContainer.new()
+		col.add_child(_gov_card(gi, "offer", 300.0))
+		var b := UITheme.button(L.t("Receive"), 20, Vector2(300, 52))
+		var gidx: int = gi
+		b.pressed.connect(func():
+			var ok: bool = g.claim_governor_now(gidx) if manual else g.choose_governor(gidx)
+			if ok:
+				_close_overlay()
+				if manual:
+					refresh()
+					_drain_events()
+					if g.phase in WAIT_PHASES:
+						_show_phase()
+				else:
+					_after_choice())
+		col.add_child(b)
+		h.add_child(col)
+	var no := UITheme.button(L.t("Not now") if manual else L.t("Refuse"), 18, Vector2(220, 48))
+	no.pressed.connect(func():
+		_close_overlay()
+		if not manual and g.choose_governor(-1):
+			_after_choice())
+	v.add_child(no)
+	if not manual:
+		v.add_child(UITheme.label(L.t("A refused governor can still be received later: tap it on the table."), 14, UITheme.MUTED))
+
+
+func _show_blind_choice() -> void:
+	var v := _open_overlay(L.t("Choose the card to reserve"))
+	v.add_child(UITheme.label(L.t("The others go back to the top of the pile."), 17))
+	var h := HBoxContainer.new()
+	h.alignment = BoxContainer.ALIGNMENT_CENTER
+	h.add_theme_constant_override("separation", 16)
+	v.add_child(h)
+	for cid in g.blind_options:
+		var cv := CardView.new()
+		cv.set_card(g.cards[cid], g.rules.deck)
+		var c: int = cid
+		cv.pressed.connect(func(_x):
+			if g.choose_blind(c):
+				_close_overlay()
+				_after_choice())
+		h.add_child(cv)
+
+
+func _show_joker_choice(cols: Array) -> void:
+	var v := _open_overlay(L.t("Joker: which element?"))
+	v.add_child(UITheme.label(L.t("The card counts as one more card of the element you choose."), 17))
+	var h := HBoxContainer.new()
+	h.alignment = BoxContainer.ALIGNMENT_CENTER
+	h.add_theme_constant_override("separation", 14)
+	v.add_child(h)
+	for c in cols:
+		var b := Button.new()
+		b.custom_minimum_size = Vector2(110, 110)
+		b.focus_mode = Control.FOCUS_NONE
+		var cc: int = c
+		var icon := Control.new()
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		icon.custom_minimum_size = Vector2(110, 110)
+		icon.draw.connect(func():
+			GemDraw.draw_gem(icon, cc, Vector2(55, 46), 26)
+			GemDraw.ctext(icon, L.color(cc), Vector2(55, 92), 16, UITheme.TEXT))
+		b.add_child(icon)
+		b.pressed.connect(func():
+			_close_overlay()
+			_on_buy(cc))
+		h.add_child(b)
+	var cancel := UITheme.button(L.t("Cancel"), 18, Vector2(180, 46))
+	cancel.pressed.connect(_close_overlay)
+	v.add_child(cancel)
+
+
+func _show_gov_pick() -> void:
+	var p := g.cur()
+	var v := _open_overlay(L.f("{name}, choose your governor", {"name": p.name}), "GovPick")
+	var sub := UITheme.label(L.t("Your choice goes to the table. Whoever meets its condition first may receive it."), 16, UITheme.MUTED)
+	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(sub)
+	var sc := ScrollContainer.new()
+	sc.custom_minimum_size = Vector2(minf(1180.0, size.x - 60.0), minf(470.0, size.y - 230.0))
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	v.add_child(sc)
+	var body := VBoxContainer.new()
+	body.add_theme_constant_override("separation", 10)
+	sc.add_child(body)
+	var avail := g.gov_available()
+	var cw := (sc.custom_minimum_size.x - 40.0) / 3.0
+	for grp in Governors.GROUPS:
+		var items: Array = []
+		for i in range(g.governors.size()):
+			if g.governors[i]["group"] == grp:
+				items.append(i)
+		if items.is_empty():
+			continue
+		body.add_child(UITheme.label(L.t(Governors.GROUP_NAMES[grp]), 18, UITheme.GOLD))
+		var grid := GridContainer.new()
+		grid.columns = 3
+		grid.add_theme_constant_override("h_separation", 10)
+		grid.add_theme_constant_override("v_separation", 10)
+		body.add_child(grid)
+		for gi in items:
+			var free: bool = avail.has(gi)
+			var card := _gov_card(gi, "" if free else "taken", cw)
+			if not free:
+				card.modulate = Color(1, 1, 1, 0.45)
+			else:
+				card.mouse_filter = Control.MOUSE_FILTER_STOP
+				var gidx: int = gi
+				card.gui_input.connect(func(ev: InputEvent):
+					if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
+						if g.pick_governor(gidx):
+							Audio.play("select")
+							_close_overlay()
+							_after_choice())
+			grid.add_child(card)
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 16)
+	var rnd := UITheme.button(L.t("Choose at random"), 20, Vector2(280, 52))
+	rnd.pressed.connect(func():
+		if g.pick_governor(-1):
+			_close_overlay()
+			_after_choice())
+	row.add_child(rnd)
+	var cd := UITheme.label("", 18, UITheme.MUTED)
+	cd.name = "Countdown"
+	row.add_child(cd)
+	v.add_child(row)
 
 
 func _show_pause() -> void:
@@ -1393,15 +1802,30 @@ func _show_pause() -> void:
 		Store.set_value("game", "ai_delay", ai_delay))
 	speed.add_child(so)
 	v.add_child(speed)
-	var rv := HBoxContainer.new()
-	rv.add_child(UITheme.label(L.t("See reserves"), 16, UITheme.MUTED))
-	var ro := UITheme.option([L.t("From the last turn"), L.t("Always visible")], 1 if reveal_mode == "sempre" else 0)
-	ro.item_selected.connect(func(i):
-		reveal_mode = ["rodada", "sempre"][i]
-		Store.set_value("game", "reserva_visivel", reveal_mode)
-		refresh())
-	rv.add_child(ro)
-	v.add_child(rv)
+	var ts := HBoxContainer.new()
+	ts.add_child(UITheme.label(L.t("Text size"), 16, UITheme.MUTED))
+	var tso := UITheme.option(UITheme.TEXT_SIZES.map(func(x): return L.t(x)), clampi(int(Store.get_value("geral", "texto", 0)), 0, 2))
+	tso.item_selected.connect(func(i):
+		Store.set_value("geral", "texto", i)
+		var n := get_parent()
+		while n != null and not n.has_method("refresh_theme"):
+			n = n.get_parent()
+		if n != null:
+			n.refresh_theme()
+		_rebuild()
+		_show_pause())
+	ts.add_child(tso)
+	v.add_child(ts)
+	var vs := HBoxContainer.new()
+	vs.add_child(UITheme.label(L.t("Visual"), 16, UITheme.MUTED))
+	var vso := UITheme.option(Defs.VISUAL_NAMES.map(func(x): return L.t(x)), maxi(0, Defs.VISUALS.find(Defs.visual)))
+	vso.item_selected.connect(func(i):
+		Defs.set_visual(Defs.VISUALS[i])
+		Store.set_value("visual", "tema", Defs.VISUALS[i])
+		_rebuild()
+		_show_pause())
+	vs.add_child(vso)
+	v.add_child(vs)
 	for pair in [[L.t("Music"), "Music"], [L.t("Effects"), "SFX"]]:
 		var h := HBoxContainer.new()
 		var l := UITheme.label(pair[0], 16, UITheme.MUTED)
@@ -1477,11 +1901,8 @@ func _rebuild() -> void:
 	refresh()
 	if g.finished:
 		_show_game_over()
-	elif not g.cur().is_ai() and g.current == viewer:
-		if g.phase == "descarte":
-			_show_discard()
-		elif g.phase == "nobre":
-			_show_noble_choice()
+	elif not g.cur().is_ai() and g.current == viewer and g.phase != "acao":
+		_show_phase()
 
 
 func _show_game_over() -> void:
@@ -1494,12 +1915,15 @@ func _show_game_over() -> void:
 	var v := _open_overlay(title, "Fim")
 	var grid := GridContainer.new()
 	var wr := g.rules.uses_writers()
-	grid.columns = 6 if wr else 5
+	var gov := not g.gov_table.is_empty()
+	grid.columns = 5 + (1 if wr else 0) + (1 if gov else 0)
 	grid.add_theme_constant_override("h_separation", 22)
 	v.add_child(grid)
 	var heads := ["", L.t("Player"), L.t("Points"), L.t("Cards"), L.t("Philosophers")]
 	if wr:
 		heads.append(L.t("Writers"))
+	if gov:
+		heads.append(L.t("Governor"))
 	for hd in heads:
 		grid.add_child(UITheme.label(hd, 16, UITheme.MUTED))
 	var pos := 1
@@ -1514,6 +1938,9 @@ func _show_game_over() -> void:
 		grid.add_child(UITheme.label(str(nphil), 18, col))
 		if wr:
 			grid.add_child(UITheme.label(str(p.nobles.size() - nphil), 18, col))
+		if gov:
+			grid.add_child(UITheme.label(("%s (%d)" % [L.t(g.governors[p.governor]["name"]), g.target_of(p)])
+				if p.governor >= 0 else "—", 18, col))
 		pos += 1
 	var wp: GameState.PlayerState = g.players[w[0]]
 	if g.meets_color(wp):

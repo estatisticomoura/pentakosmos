@@ -14,8 +14,11 @@ Cada jogador dirige uma academia. Ao reunir os cinco elementos — **ar, água, 
 - Dois conjuntos de regras — **Pentakosmos** (o padrão) e **Arcaico** — e cada regra pode ser mudada separadamente.
 - Estatísticas de cada partida, com exportação em JSON e CSV.
 - Adversários do computador treinados por algoritmo genético e ordenados por torneios.
+- **Governantes** opcionais: cada jogador escolhe um no começo, e quem cumprir a condição primeiro leva.
+- Regras em abas, com predefinições suas, e um modo de economia de bateria.
+- **Expansão:** mais 14 governantes, mais 8 escritores e decks, conjuntos e predefinições editáveis em planilha (CSV) e compartilháveis.
 - 38 idiomas.
-- Livre e de código aberto (MIT). Linux, Windows e Android.
+- Livre e de código aberto (MIT). Linux, Windows, macOS e Android.
 
 ## Baixar e jogar
 
@@ -61,20 +64,30 @@ No fim do turno, um **filósofo** entra na sua academia se as suas cartas atende
 
 As cartas vêm em três grupos — **básicas**, **intermediárias** e **avançadas** —, e o verso de cada uma mostra uma estrela com 1, 2 ou 3 planetas.
 
-**Escritores.** Os dez escritores (Safo, Homero, Hesíodo, Píndaro, Heródoto, Ésquilo, Sófocles, Aristófanes, Tucídides e Eurípides) pedem cartas nas combinações de elementos que os filósofos não usam: 3 + 3 de dois elementos, ou 2 + 2 + 2 de três. Cada um vale 1 ponto e não entra na sequência 3 / 2 / 1 dos filósofos; no mesmo turno podem chegar um filósofo e um escritor. A opção "Academia" escolhe filósofos e escritores, só filósofos, só escritores ou nenhum.
+**Escritores.** Os escritores (Homero e Sófocles no jogo base; a expansão traz Safo, Hesíodo, Píndaro, Heródoto, Ésquilo, Aristófanes, Tucídides e Eurípides) pedem cartas nas combinações de elementos que os filósofos não usam: 3 + 3 de dois elementos, ou 2 + 2 + 2 de três. Cada um vale 1 ponto e não entra na sequência 3 / 2 / 1 dos filósofos; no mesmo turno podem chegar um filósofo e um escritor. Nas regras, caixas de seleção ligam ou desligam filósofos, escritores e governantes.
+
+**Governantes (opcional).** Com eles ligados, a meta de quem não tem governante sobe (19 pontos, por padrão). No começo, cada jogador escolhe um governante em 30 segundos (há um botão de escolha aleatória, e o tempo esgotado sorteia), ou a regra manda sortear. Escolher não dá exclusividade: no fim da vez, quem cumprir primeiro a condição de um governante da mesa pode recebê-lo ou recusar. Cada governante tem uma condição, às vezes um custo, às vezes uma vantagem, e muda a meta de quem o recebe — Péricles pede 2 cartas avançadas e faz você vencer com 15. Cada jogador tem no máximo um, e quem chegou à própria meta vence quem não chegou. O jogo base traz Péricles, Leônidas e Alexandre.
+
+**Menu de regras.** As regras ficam em abas. Cada opção fora do padrão da predefinição ganha um degradê vermelho, e há botões para restaurar a aba ou tudo. Os pontos para vencer vão de 1 a 100, e "Ver reservas" agora é uma regra.
 
 ### Ajudas na mesa
 
 - **Cartas do mercado e suas reservas:** passe o mouse (ou toque) para ver quantas fichas faltam, elemento por elemento, só com os elementos e também contando as esferas que você tem.
 - **Baralhos:** quantas cartas restam e quantas já saíram.
 - **Filósofos:** o número no alto, à esquerda, é quanto aquele filósofo daria a você agora; o número no canto, quantas cartas ainda faltam. Passe o mouse para ver a explicação.
-- **Reservas e academia dos outros jogadores:** passe o mouse (ou toque) nas minicartas e no louro (filósofos) ou na pena (escritores) do painel. Uma reserva do mercado fica visível até a próxima vez de quem reservou (em Opções e no menu de pausa, "Ver reservas" tem a opção "Sempre visíveis"); reservas às cegas ficam ocultas.
+- **Reservas e academia dos outros jogadores:** passe o mouse (ou toque) nas minicartas e no louro (filósofos) ou na pena (escritores) do painel. Uma reserva do mercado fica visível até a próxima vez de quem reservou (a regra "Ver reservas" tem a opção "Sempre visíveis"); reservas às cegas ficam ocultas.
 - **Cronômetros:** acima do botão Menu, a rodada, o tempo da partida e, quando há limite, o anel com o tempo que resta da jogada.
 - **Pontos por elemento:** com a vitória por especialização ligada, cada elemento do painel mostra um selo com os pontos de cartas daquele elemento.
 
-### Visual
+### Visual e bateria
 
-Na tela inicial, em "Visual": **Sólidos platônicos** (o principal) — ar = octaedro, água = icosaedro, éter = dodecaedro, fogo = tetraedro, terra = cubo e a esfera dourada como coringa; nas fichas, os sólidos giram devagar, com uma luz que passa sobre eles — ou **Poligonal**, o primeiro visual do jogo, com polígonos coloridos.
+Em Opções e no menu de pausa ficam o tamanho do texto e o visual: **Sólidos platônicos** (o principal) — ar = octaedro, água = icosaedro, éter = dodecaedro, fogo = tetraedro, terra = cubo e a esfera dourada como coringa; nas fichas, os sólidos giram devagar, com uma luz que passa sobre eles — ou **Poligonal**, o primeiro visual do jogo, com polígonos coloridos. O Poligonal também é o **modo de economia de bateria**: o jogo passa a 30 quadros por segundo.
+
+## Jogo base e expansão
+
+O jogo base é completo: os decks Pentakosmos e Arcaico, os filósofos, 2 escritores e 3 governantes, e todas as regras. A **expansão** acrescenta 14 governantes e 8 escritores e libera a tela **Personalizar**: decks, conjuntos de filósofos, escritores e governantes e predefinições de regras viram arquivos CSV, que se editam numa planilha, se duplicam, se exportam e se importam. Os decks e conjuntos que vêm com o jogo ficam travados; para mudá-los, duplique. O formato está em [docs/CONTEUDO_PERSONALIZADO.md](docs/CONTEUDO_PERSONALIZADO.md).
+
+Os dados da expansão não ficam neste repositório: o jogo os procura na pasta `expansao/` (com o arquivo `expansao.txt`). Sem ela, o jogo funciona normalmente como jogo base.
 
 ## O deck Pentakosmos
 
@@ -120,14 +133,15 @@ python3 tools/torneio.py --modo classico
 
 1. Instale o **Godot 4.7.2** ([godotengine.org](https://godotengine.org), ou `flatpak install flathub org.godotengine.Godot`).
 2. Abra o editor, clique em **Importar** e escolha o `project.godot`. Aperte F5 para jogar.
-3. Para exportar: *Editor → Gerenciar modelos de exportação → Baixar e instalar*; depois *Projeto → Exportar* e escolha **Linux**, **Windows**, **macOS** ou **Android**. Pela linha de comando:
+3. Para incluir a expansão, copie a pasta `expansao/` para a raiz do projeto antes de exportar (sem ela, sai o jogo base).
+4. Para exportar: *Editor → Gerenciar modelos de exportação → Baixar e instalar*; depois *Projeto → Exportar* e escolha **Linux**, **Windows**, **macOS** ou **Android**. Pela linha de comando:
    ```
    godot --headless --path . --export-release "Linux" build/linux/pentakosmos.x86_64
    godot --headless --path . --export-release "Windows" build/windows/Pentakosmos.exe
    godot --headless --path . --export-release "macOS" build/mac/Pentakosmos.zip
    ```
    O build de macOS é um app universal (Intel e Apple Silicon) com assinatura ad-hoc, sem notarização: no Mac, descompacte e, na primeira vez, clique com o botão direito em *Pentakosmos.app* → *Abrir* (ou permita em *Ajustes do Sistema → Privacidade e Segurança*).
-4. O Android precisa também do JDK 17 (`sudo apt install openjdk-17-jdk`) e do Android SDK (Platform-Tools, Build-Tools e Command-line Tools), indicado em *Editor → Configurações do editor → Exportar → Android*. O preset exporta um APK sem assinatura; assine com a sua chave (use sempre a mesma, senão o celular recusa a atualização):
+5. O Android precisa também do JDK 17 (`sudo apt install openjdk-17-jdk`) e do Android SDK (Platform-Tools, Build-Tools e Command-line Tools), indicado em *Editor → Configurações do editor → Exportar → Android*. O preset exporta um APK sem assinatura; assine com a sua chave (use sempre a mesma, senão o celular recusa a atualização):
    ```
    godot --headless --path . --export-release "Android" build/android/unsigned.apk
    python3 tools/assinar_apk.py nova-chave ~/pentakosmos-chave.pem    # só uma vez
@@ -181,7 +195,7 @@ data/           resultados do treino das IAs, traduções (lang/) e textos longo
 assets/         arte, sons e música opcionais
 tools/          algoritmo genético, torneio, conferência de traduções, gerador de sons
 tests/          simulações sem interface e testes da interface
-docs/           processo criativo e imagens
+docs/           processo criativo, formato do conteúdo personalizado, imagens
 ```
 
 Testes, a partir da pasta do projeto:

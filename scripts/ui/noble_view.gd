@@ -8,7 +8,11 @@ extends Control
 signal pressed(view: NobleView)
 signal hover_changed(view: NobleView, on: bool)
 
+static var source: GameState = null   # partida de onde vem o requisito, o nome e a arte
+
 var noble := -1
+var req := [0, 0, 0, 0, 0]
+var pname := ""
 var points_text := "3"
 var free_n := 0          # cartas livres no requisito (0 = exato)
 var selectable := false
@@ -32,11 +36,12 @@ func setup(nb: int, pts: String, p_free: int, prog: int = -1) -> void:
 	free_n = p_free
 	progress = prog
 	var path := ""
-	if nb >= 0:
-		if Defs.is_writer(nb):
-			path = "res://assets/writers/writer_%d.png" % (nb - Defs.WRITER_BASE + 1)
-		else:
-			path = "res://assets/philosophers/philosopher_%d.png" % (nb + 1)
+	if nb >= 0 and source != null:
+		req = source.patron_req(nb)
+		pname = source.patron_name(nb)
+		var art := source.patron_art(nb)
+		if art > 0:
+			path = ("res://assets/writers/writer_%d.png" if Defs.is_writer(nb) else "res://assets/philosophers/philosopher_%d.png") % art
 	_tex = load(path) if path != "" and ResourceLoader.exists(path) else null
 	queue_redraw()
 
@@ -77,7 +82,6 @@ func _draw() -> void:
 	if noble < 0:
 		return
 	# requisito: simbolos numa linha, numeros embaixo
-	var req: Array = Defs.patron_req(noble)
 	var cols: Array = []
 	for c in range(5):
 		if req[c] > 0:
@@ -91,7 +95,7 @@ func _draw() -> void:
 	if free_n > 0:
 		GemDraw.ctext(self, L.f("−{n} any", {"n": free_n}), Vector2(size.x / 2.0, 64 * k), int(13 * k), Color(1, 1, 1, 0.65))
 	# nome
-	var nm := L.t(Defs.patron_name(noble))
+	var nm := L.t(pname)
 	var fs := int(17 * k)
 	while fs > 9 and ThemeDB.fallback_font.get_string_size(nm, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > size.x - 8:
 		fs -= 1

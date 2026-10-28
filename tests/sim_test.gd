@@ -12,6 +12,14 @@ func _init() -> void:
 	if preset == "house_arcaico":
 		rules = RuleSet.house_full()
 		rules.deck = "arcaico"
+	if preset.begins_with("gov"):
+		rules = RuleSet.house_governors()
+		if preset == "gov_sorteio":
+			rules.gov_pick = "sorteio"
+	if args.size() > 4:
+		rules.deck = args[4]  # deck (ex.: user:Teste)
+	var gov_held := {}
+	var gov_won := {}
 	var rounds: Array = []
 	var nob := 0.0
 	var seat := []
@@ -41,6 +49,13 @@ func _init() -> void:
 		var w := g.winners()
 		for i in w:
 			seat[i] += 1.0 / w.size()
+		for i in range(n):
+			var p: GameState.PlayerState = g.players[i]
+			if p.governor >= 0:
+				var nm: String = g.governors[p.governor]["name"]
+				gov_held[nm] = gov_held.get(nm, 0) + 1
+				if w.has(i):
+					gov_won[nm] = gov_won.get(nm, 0.0) + 1.0 / w.size()
 	var m := 0.0
 	for r in rounds:
 		m += r
@@ -55,4 +70,6 @@ func _init() -> void:
 	for i in range(n):
 		s += "%.1f%% " % (100.0 * seat[i] / games)
 	print("  vitoria por assento: ", s)
+	for nm in gov_held:
+		print("  governante %-22s recebido %4d  venceu %.0f%%" % [nm, gov_held[nm], 100.0 * gov_won.get(nm, 0.0) / gov_held[nm]])
 	quit()

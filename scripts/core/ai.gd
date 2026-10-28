@@ -38,6 +38,8 @@ static func turns_estimate(g: GameState, p: GameState.PlayerState, cost: Array) 
 		if s > 0:
 			short[c] = s
 			total += s
+	if cost.size() > 5:
+		total += cost[5]
 	total -= p.tokens[GOLD]
 	if total <= 0:
 		return 0.0
@@ -52,7 +54,7 @@ static func turns_estimate(g: GameState, p: GameState.PlayerState, cost: Array) 
 		worst = maxf(worst, s / rate)
 		if s > g.bank[c]:
 			penalty += pen * (s - g.bank[c])
-	worst = maxf(0.0, worst - p.tokens[GOLD])
+	worst = maxf(0.0, worst - maxi(0, p.tokens[GOLD] - (cost[5] if cost.size() > 5 else 0)))
 	return maxf(ceil(total / 3.0), ceil(worst)) + penalty
 
 
@@ -76,15 +78,15 @@ static func color_demand(g: GameState, p: GameState.PlayerState) -> Array:
 static func card_value(g: GameState, p: GameState.PlayerState, cid: int, demand: Array, maxdemand: float) -> float:
 	var P: Dictionary = p.params
 	var cd: Defs.CardDef = g.cards[cid]
+	var vec := g.card_gain(p, cid)
 	var v := float(cd.points)
-	var phase := maxf(0.0, 1.0 - float(p.points) / g.rules.target)
+	var phase := maxf(0.0, 1.0 - float(p.points) / g.target_of(p))
 	if maxdemand > 0:
-		v += P["engine_w"] * phase * (P["demand_base"] + demand[cd.bonus] / maxdemand)
+		v += P["engine_w"] * phase * (P["demand_base"] * _sum(vec) + _dot(demand, vec) / maxdemand)
 	var best := 0.0
 	var rest := 0.0
 	for nb in g.nobles:
-		var req: Array = Defs.patron_req(nb)
-		if req[cd.bonus] <= p.bonus[cd.bonus]:
+		if not _helps(g.patron_req(nb), p.bonus, vec):
 			continue
 		var d := g.patron_distance(p.bonus, nb)
 		if d <= 0:
@@ -98,18 +100,44 @@ static func card_value(g: GameState, p: GameState.PlayerState, cid: int, demand:
 	return v + best + P["noble_rest"] * rest + color_bonus(g, p, cd)
 
 
+static func _sum(v: Array) -> int:
+	return v[0] + v[1] + v[2] + v[3] + v[4]
+
+
+static func _dot(a: Array, v: Array) -> float:
+	var s := 0.0
+	for c in range(5):
+		s += a[c] * v[c]
+	return s
+
+
+static func _helps(req: Array, bonus: Array, vec: Array) -> bool:
+	## A carta (bonus vec) ajuda a cumprir o requisito?
+	for c in range(5):
+		if vec[c] > 0 and req[c] > bonus[c]:
+			return true
+	return false
+
+
+static func can_res(p: GameState.PlayerState) -> bool:
+	return p.reserved.size() < 3 and not p.no_reserve
+
+
 static func color_bonus(g: GameState, p: GameState.PlayerState, cd: Defs.CardDef) -> float:
 	## Vitoria por especializacao: valor extra de uma carta com pontos, maior
 	## quanto mais perto do limite ela deixa a cor dela.
-	var cw := g.rules.color_win
-	if cw <= 0 or cd.points <= 0:
+	var cw := g.spec_threshold(p)
+	var sc := g.spec_color_for(p, cd.id)
+	if cw <= 0 or cd.points <= 0 or sc < 0:
 		return 0.0
-	var r := minf(1.0, float(p.color_pts[cd.bonus] + cd.points) / cw)
+	var r := minf(1.0, float(p.color_pts[sc] + cd.points) / cw)
 	return p.params["color_w"] * cd.points * r * r
 
 
 static func wins_by_color(g: GameState, p: GameState.PlayerState, cd: Defs.CardDef) -> bool:
-	return g.rules.color_win > 0 and p.color_pts[cd.bonus] + cd.points >= g.rules.color_win
+	var cw := g.spec_threshold(p)
+	var sc := g.spec_color_for(p, cd.id)
+	return cw > 0 and sc >= 0 and p.color_pts[sc] + cd.points >= cw
 
 
 static func _candidates(g: GameState, p: GameState.PlayerState) -> Array:
@@ -135,7 +163,7 @@ static func scored_cards(g: GameState, p: GameState.PlayerState) -> Array:
 		var cd: Defs.CardDef = g.cards[c[3]]
 		var v := card_value(g, p, c[3], demand, md) * (1.0 + g.rng.randfn(0.0, noise))
 		var t := turns_estimate(g, p, cd.cost)
-		var afford := GameState.shortfall_of(p, cd.cost) <= 0
+		var afford := g.can_afford(p, c[3])
 		out.append([v / (t + 1.0), v, c[0], c[1], c[2], c[3], afford])
 	out.sort_custom(_sort_scored)
 	return out
@@ -166,19 +194,21 @@ static func token_utility(g: GameState, p: GameState.PlayerState, targets: Array
 	return u + P["hoard"] * (tokens[0] + tokens[1] + tokens[2] + tokens[3] + tokens[4])
 
 
-static func immediate_noble_pts(g: GameState, p: GameState.PlayerState, color: int) -> int:
-	## Pontos de filosofo e de escritor que chegariam com mais uma carta desta cor
+static func immediate_noble_pts(g: GameState, p: GameState.PlayerState, vec: Array) -> int:
+	## Pontos de filosofo e de escritor que chegariam com o bonus `vec` a mais
 	## (no maximo um de cada por vez).
-	p.bonus[color] += 1
+	for c in range(5):
+		p.bonus[c] += vec[c]
 	var phil := 0
 	var wri := 0
 	for nb in g.nobles:
 		if g.patron_distance(p.bonus, nb) == 0:
 			if Defs.is_writer(nb):
-				wri = Defs.WRITER_PTS
+				wri = g.patron_pts(p, nb)
 			else:
 				phil = g.patron_pts(p, nb)
-	p.bonus[color] -= 1
+	for c in range(5):
+		p.bonus[c] -= vec[c]
 	return phil + wri
 
 
@@ -189,8 +219,8 @@ static func opponent_threat(g: GameState, idx: int) -> Array:
 		var q: GameState.PlayerState = g.players[j]
 		for e in g.market_cards():
 			var cd: Defs.CardDef = g.cards[e[2]]
-			if GameState.shortfall_of(q, cd.cost) <= 0:
-				if q.points + cd.points + immediate_noble_pts(g, q, cd.bonus) >= g.rules.target \
+			if g.can_afford(q, e[2]):
+				if q.points + cd.points + immediate_noble_pts(g, q, g.card_gain(q, e[2])) >= g.target_of(q) \
 						or wins_by_color(g, q, cd):
 					return [e[0], e[1]]
 	return []
@@ -218,10 +248,10 @@ static func choose_action(g: GameState, idx: int) -> Array:
 	for s in sc:
 		if s[6]:
 			var cd: Defs.CardDef = g.cards[s[5]]
-			var total: int = p.points + cd.points + immediate_noble_pts(g, p, cd.bonus)
+			var total: int = p.points + cd.points + immediate_noble_pts(g, p, g.card_gain(p, s[5]))
 			if wins_by_color(g, p, cd):
 				total += 100  # vitoria por especializacao tem prioridade
-			if total >= rules.target and total > best_total:
+			if total >= g.target_of(p) and total > best_total:
 				best_total = total
 				best_s = s
 	if best_s != null:
@@ -232,11 +262,11 @@ static func choose_action(g: GameState, idx: int) -> Array:
 		return search_action(g, idx, sc)
 
 	# 2) bloquear vitoria iminente de adversario
-	if p.reserved.size() < 3:
+	if can_res(p):
 		var th := opponent_threat(g, idx)
 		if not th.is_empty():
 			var cid: int = g.market[th[0]][th[1]]
-			if GameState.shortfall_of(p, g.cards[cid].cost) <= 0:
+			if g.can_afford(p, cid):
 				return ["buy", "m", th[0], th[1]]
 			return ["reserve", th[0], th[1]]
 
@@ -245,11 +275,12 @@ static func choose_action(g: GameState, idx: int) -> Array:
 		return a0[0] if not a0[0].is_empty() else ["pass"]
 
 	# 2b) estrategista: reserva cedo o alvo principal
-	if planner and plan != null and p.turns <= int(P["plan_reserve_turns"]) and p.reserved.is_empty() and g.bank[GOLD] > 0:
+	if planner and plan != null and p.turns <= int(P["plan_reserve_turns"]) and p.reserved.is_empty() and g.bank[GOLD] > 0 \
+			and not p.no_reserve:
 		var goal: int = plan["goals"][0]
 		var gc: Defs.CardDef = g.cards[goal]
 		for e in g.market_cards():
-			if e[2] == goal and (gc.level == 3 or gc.points >= 2) and GameState.shortfall_of(p, gc.cost) > 0:
+			if e[2] == goal and (gc.level == 3 or gc.points >= 2) and not g.can_afford(p, goal):
 				return ["reserve", e[0], e[1]]
 
 	var top_score: float = sc[0][0]
@@ -271,7 +302,7 @@ static func choose_action(g: GameState, idx: int) -> Array:
 	var blocked: float = bt[2]
 	if p.denial >= 0.0:
 		# 4b) reserva para tirar do mercado uma carta valiosa que um adversario ja pode comprar
-		if p.reserved.size() < 3:
+		if can_res(p):
 			if p.defend:
 				var dr := defend_target(g, idx, targets)
 				if not dr.is_empty() and (gain < 1.5 + p.denial or targets.has(dr[2]) or dr[3] >= 6):
@@ -289,7 +320,7 @@ static func choose_action(g: GameState, idx: int) -> Array:
 		if not s[6]:
 			T = s
 			break
-	if T != null and T[2] == "m" and p.reserved.size() < 3:
+	if T != null and T[2] == "m" and can_res(p):
 		var gold_ok: bool = g.bank[GOLD] > 0 and p.token_count() < rules.hand_limit
 		if gold_ok and (act.is_empty() or gain < P["gold_gain"]):
 			return ["reserve", T[3], T[4]]
@@ -299,7 +330,7 @@ static func choose_action(g: GameState, idx: int) -> Array:
 		return _buy(affordable[0])
 	if not act.is_empty():
 		return act
-	if T != null and T[2] == "m" and p.reserved.size() < 3:
+	if T != null and T[2] == "m" and can_res(p):
 		return ["reserve", T[3], T[4]]
 	return ["pass"]
 
@@ -403,15 +434,16 @@ static func _comb_rec(items: Array, k: int, start: int, cur: Array, out: Array) 
 		cur.pop_back()
 
 
-static func discard_choices(g: GameState, idx: int) -> Array:
-	## Cores a devolver para voltar ao limite de mao (sem alterar o estado).
+static func discard_choices(g: GameState, idx: int, k := -1) -> Array:
+	## Cores a devolver (k fichas; -1 = o que passar do limite da mao), sem alterar o estado.
 	var p: GameState.PlayerState = g.players[idx]
 	var t: Array = p.tokens.duplicate()
 	var out: Array = []
 	var tot := 0
 	for x in t:
 		tot += x
-	while tot > g.rules.hand_limit:
+	var goal: int = g.rules.hand_limit if k < 0 else tot - k
+	while tot > goal and tot > 0:
 		var targets := pick_targets(g, p, 3)
 		var best_c := -1
 		var best_u := -1e9
@@ -426,10 +458,60 @@ static func discard_choices(g: GameState, idx: int) -> Array:
 				best_c = c
 		if best_c < 0:
 			best_c = GOLD
+			if t[GOLD] <= 0:
+				break
 		t[best_c] -= 1
 		out.append(best_c)
 		tot -= 1
 	return out
+
+
+static func gain_choice(g: GameState, idx: int, k: int) -> Array:
+	## k fichas de elementos diferentes que mais ajudam (efeito de carta ou governante).
+	var p: GameState.PlayerState = g.players[idx]
+	var avail: Array = []
+	for c in range(5):
+		if g.bank[c] > 0:
+			avail.append(c)
+	k = mini(k, mini(avail.size(), g.gain_room(p)))
+	if k <= 0:
+		return []
+	var targets := pick_targets(g, p, 3)
+	var best: Array = []
+	var best_u := -1e18
+	for combo in _combinations(avail, k):
+		var t: Array = p.tokens.duplicate()
+		for c in combo:
+			t[c] += 1
+		var u := token_utility(g, p, targets, t) + g.rng.randf() * 1e-6
+		if u > best_u:
+			best_u = u
+			best = combo
+	return best
+
+
+static func pick_governor(g: GameState, idx: int, options: Array) -> int:
+	## Aceita o governante que vale mais (em pontos aproximados), se valer a pena; -1 = recusa.
+	var best := -1
+	var best_v := 0.0
+	for gi in options:
+		var v := Governors.value_for(g, idx, g.governors[gi])
+		if v > best_v:
+			best_v = v
+			best = gi
+	return best
+
+
+static func pick_blind(g: GameState, idx: int, options: Array) -> int:
+	var p: GameState.PlayerState = g.players[idx]
+	var best: int = options[0]
+	var best_v := -1e18
+	for cid in options:
+		var v := goal_score(g, p, cid)
+		if v > best_v:
+			best_v = v
+			best = cid
+	return best
 
 
 static func pick_noble(g: GameState, idx: int, options: Array) -> int:
@@ -451,7 +533,7 @@ static func pick_noble(g: GameState, idx: int, options: Array) -> int:
 # Estrategista
 # ---------------------------------------------------------------------------
 static func effort(p: GameState.PlayerState, cost: Array) -> int:
-	var s := 0
+	var s: int = cost[5] if cost.size() > 5 else 0
 	for c in range(5):
 		if cost[c] > p.bonus[c]:
 			s += cost[c] - p.bonus[c]
@@ -500,7 +582,7 @@ static func build_plan(g: GameState, p: GameState.PlayerState, goals = null):
 	var best_nb := -1
 	var best_ns := 0.0
 	for nb in g.nobles:
-		var req: Array = Defs.patron_req(nb)
+		var req: Array = g.patron_req(nb)
 		var d := g.patron_distance(p.bonus, nb)
 		var nxt := g.patron_pts(p, nb)
 		var overlap := 0.0
@@ -513,7 +595,7 @@ static func build_plan(g: GameState, p: GameState.PlayerState, goals = null):
 			best_ns = ns
 			best_nb = nb
 	if best_nb >= 0:
-		var req2: Array = Defs.patron_req(best_nb)
+		var req2: Array = g.patron_req(best_nb)
 		var nw: float = P["plan_noble_w"]
 		for c in range(5):
 			if req2[c] > p.bonus[c]:
@@ -561,17 +643,17 @@ static func update_plan(g: GameState, p: GameState.PlayerState):
 static func card_value_plan(g: GameState, p: GameState.PlayerState, cid: int, plan, demand: Array, maxdemand: float) -> float:
 	var P: Dictionary = p.params
 	var cd: Defs.CardDef = g.cards[cid]
+	var vec := g.card_gain(p, cid)
 	var v := float(cd.points)
-	var phase := maxf(0.0, 1.0 - float(p.points) / g.rules.target)
+	var phase := maxf(0.0, 1.0 - float(p.points) / g.target_of(p))
 	var w: Array = plan["w"] if plan != null else [0.2, 0.2, 0.2, 0.2, 0.2]
 	var ew: float = P["engine_w"]
-	v += ew * phase * (P["plan_base_engine"] + P["plan_color_w"] * w[cd.bonus])
+	v += ew * phase * (P["plan_base_engine"] * _sum(vec) + P["plan_color_w"] * _dot(w, vec))
 	if maxdemand > 0:
-		v += P["plan_demand_w"] * ew * phase * demand[cd.bonus] / maxdemand
+		v += P["plan_demand_w"] * ew * phase * _dot(demand, vec) / maxdemand
 	var other: float = P["plan_noble_other"]
 	for nb in g.nobles:
-		var req: Array = Defs.patron_req(nb)
-		if req[cd.bonus] <= p.bonus[cd.bonus]:
+		if not _helps(g.patron_req(nb), p.bonus, vec):
 			continue
 		var d := g.patron_distance(p.bonus, nb)
 		if d <= 0:
@@ -592,7 +674,7 @@ static func scored_cards_plan(g: GameState, p: GameState.PlayerState, plan) -> A
 		var cd: Defs.CardDef = g.cards[c[3]]
 		var v := card_value_plan(g, p, c[3], plan, demand, md) * (1.0 + g.rng.randfn(0.0, noise))
 		var t := turns_estimate(g, p, cd.cost)
-		var afford := GameState.shortfall_of(p, cd.cost) <= 0
+		var afford := g.can_afford(p, c[3])
 		out.append([v / (t + 1.0), v, c[0], c[1], c[2], c[3], afford])
 	out.sort_custom(_sort_scored)
 	return out
@@ -603,8 +685,8 @@ static func scored_cards_plan(g: GameState, p: GameState.PlayerState, plan) -> A
 # ---------------------------------------------------------------------------
 static func threat_value(g: GameState, q: GameState.PlayerState, cid: int) -> int:
 	var cd: Defs.CardDef = g.cards[cid]
-	var v: int = cd.points + immediate_noble_pts(g, q, cd.bonus)
-	if q.points + v >= g.rules.target or wins_by_color(g, q, cd):
+	var v: int = cd.points + immediate_noble_pts(g, q, g.card_gain(q, cid))
+	if q.points + v >= g.target_of(q) or wins_by_color(g, q, cd):
 		v += 10
 	return v
 
@@ -617,6 +699,8 @@ static func reach(g: GameState, q: GameState.PlayerState, cost: Array, bank: Arr
 		d[c] = maxi(0, cost[c] - q.bonus[c] - q.tokens[c])
 		tot += d[c]
 	var gold: int = q.tokens[GOLD]
+	if cost.size() > 5:
+		gold -= cost[5]
 	if tot <= gold:
 		return 0
 	var k := 0
@@ -691,7 +775,7 @@ static func defend_target(g: GameState, idx: int, my_targets: Array) -> Array:
 			continue
 		var q: GameState.PlayerState = g.players[j]
 		for e in g.market_cards():
-			if GameState.shortfall_of(q, g.cards[e[2]].cost) <= 0:
+			if g.can_afford(q, e[2]):
 				var v := threat_value(g, q, e[2])
 				if v < DEFEND_VALUE:
 					continue
@@ -710,7 +794,7 @@ static func hate_reserve_target(g: GameState, idx: int) -> Array:
 			continue
 		var q: GameState.PlayerState = g.players[j]
 		for e in g.market_cards():
-			if GameState.shortfall_of(q, g.cards[e[2]].cost) <= 0:
+			if g.can_afford(q, e[2]):
 				var v := threat_value(g, q, e[2])
 				if v >= SURG_RESERVE_VALUE and v > best_v:
 					best_v = v
@@ -722,14 +806,13 @@ static func hate_reserve_target(g: GameState, idx: int) -> Array:
 # Busca no fim de jogo (Monte Carlo com amostragem das cartas ocultas)
 # ---------------------------------------------------------------------------
 static func endgame_active(g: GameState) -> bool:
-	var mx := 0
-	var mc := 0
+	var mx := -999
 	for q in g.players:
-		mx = maxi(mx, q.points)
-		mc = maxi(mc, q.color_pts.max())
-	if g.rules.color_win > 0 and mc >= g.rules.color_win - 4:
-		return true
-	return mx >= g.rules.target - ENDGAME_MARGIN
+		mx = maxi(mx, q.points - g.target_of(q))
+		var t := g.spec_threshold(q)
+		if t > 0 and q.color_pts.max() >= t - 4:
+			return true
+	return mx >= -ENDGAME_MARGIN
 
 
 static func candidate_actions(g: GameState, idx: int, sc: Array) -> Array:
@@ -756,7 +839,7 @@ static func candidate_actions(g: GameState, idx: int, sc: Array) -> Array:
 	scored_takes.sort_custom(func(a, b): return a[0] > b[0])
 	for i in range(mini(3, scored_takes.size())):
 		out.append(["take", scored_takes[i][1]])
-	if p.reserved.size() < 3:
+	if can_res(p):
 		out.append_array(res_cands)
 		var th := opponent_threat(g, idx)
 		if not th.is_empty():

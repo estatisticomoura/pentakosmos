@@ -43,6 +43,12 @@ static func set_lang(c: String) -> void:
 	var data = JSON.parse_string(FileAccess.get_file_as_string(path))
 	if data is Dictionary:
 		_d = data
+	# textos da expansao (nomes e titulos de governantes e escritores)
+	var ex := "res://expansao/lang/%s.json" % code
+	if FileAccess.file_exists(ex):
+		var data2 = JSON.parse_string(FileAccess.get_file_as_string(ex))
+		if data2 is Dictionary:
+			_d.merge(data2, true)
 
 
 static func index() -> int:

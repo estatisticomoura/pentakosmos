@@ -7,26 +7,44 @@ signal start_game(rules: RuleSet, players: Array)
 signal show_text(which: String)   # "rules" (como jogar) ou "story" (processo criativo)
 
 # Textos em ingles; L.t() traduz na hora de mostrar.
-# Rotulos "free" (exato, -1 ... -5 livre) e "time" (sem limite, 20 s ...) sao gerados na hora.
-# "num": campo numerico com - e + (minimo, maximo).
-const OPTIONS := [
-	["Deck", "deck", ["caio", "arcaico"], ["Pentakosmos", "Archaic"]],  # tr
-	["Solids per element", "gems_mode", ["classico", "house"], ["Archaic (4/5/7/8)", "Pentakosmos (4/6/7/8)"]],  # tr
-	["Spheres (jokers)", "gold_mode", ["classico", "house"], ["Archaic (5)", "Pentakosmos (4/5/6/7)"]],  # tr
-	["Take 2 of a kind", "take2_min", [4, 3], ["Pile of 4 or more", "Pile of 3 or more"]],  # tr
-	["Market with 5 players", "market5", [4, 5], ["4 cards per group", "5 cards per group"]],  # tr
-	["Academy", "patrons", ["ambos", "filosofos", "escritores", "nenhum"],  # tr
-		["Philosophers and writers", "Philosophers only", "Writers only", "No bonus"]],  # tr
-	["Philosopher requirement", "noble_free", [0, 1, 2, 3, 4, 5], "free"],  # tr
-	["Philosopher points", "noble_points_mode", ["fixo", "decrescente"], ["3 each", "3 / 2 / 1"]],  # tr
-	["Writer requirement", "writer_free", [0, 1, 2, 3, 4, 5], "free"],  # tr
-	["Token hand limit", "hand_limit", [9, 10, 11], ["9", "10", "11"]],  # tr
-	["Points to win", "target", [10, 25], "num"],  # tr
-	["Specialization victory", "color_win", [0, 9, 10, 11, 12],  # tr
+# Cada regra: [rotulo, valores, rotulos] ou [rotulo, valores, "free"/"time"/"num"], ou
+# [rotulo, "check"] (caixa de selecao) ou [rotulo, "content:<tipo>"] (deck ou conjunto).
+const OPT := {
+	"target": ["Points to win", [1, 100], "num"],  # tr
+	"color_win": ["Specialization victory", [0, 9, 10, 11, 12],  # tr
 		["Off", "9 pts in one element", "10 pts in one element", "11 pts in one element", "12 pts in one element"]],  # tr
-	["Time per move against AIs", "time_ai", [0, 20, 30, 45, 60, 90, 120], "time"],  # tr
-	["Time per move between humans", "time_humans", [0, 20, 30, 45, 60, 90, 120], "time"],  # tr
+	"hand_limit": ["Token hand limit", [9, 10, 11], ["9", "10", "11"]],  # tr
+	"see_reserves": ["Opponents' reserves", ["rodada", "sempre"], ["Visible until their next turn", "Always visible"]],  # tr
+	"gems_mode": ["Solids per element", ["classico", "house"], ["Archaic (4/5/7/8)", "Pentakosmos (4/6/7/8)"]],  # tr
+	"gold_mode": ["Spheres (jokers)", ["classico", "house"], ["Archaic (5)", "Pentakosmos (4/5/6/7)"]],  # tr
+	"take2_min": ["Take 2 of a kind", [4, 3], ["Pile of 4 or more", "Pile of 3 or more"]],  # tr
+	"deck": ["Deck", "content:decks"],  # tr
+	"market5": ["Market with 5 players", [4, 5], ["4 cards per group", "5 cards per group"]],  # tr
+	"philosophers": ["Philosophers", "check"],  # tr
+	"phil_set": ["Set of philosophers", "content:philosophers"],  # tr
+	"noble_free": ["Philosopher requirement", [0, 1, 2, 3, 4, 5], "free"],  # tr
+	"noble_points_mode": ["Philosopher points", ["fixo", "decrescente"], ["3 each", "3 / 2 / 1"]],  # tr
+	"writers": ["Writers", "check"],  # tr
+	"writer_set": ["Set of writers", "content:writers"],  # tr
+	"writer_free": ["Writer requirement", [0, 1, 2, 3, 4, 5], "free"],  # tr
+	"governors": ["Governors", "check"],  # tr
+	"gov_set": ["Set of governors", "content:governors"],  # tr
+	"gov_pick": ["How governors reach the table", ["escolha", "sorteio"], ["Each player chooses one (30 s)", "Drawn at random"]],  # tr
+	"gov_target": ["Goal for players without a governor", [1, 100], "num"],  # tr
+	"time_ai": ["Time per move against AIs", [0, 20, 30, 45, 60, 90, 120], "time"],  # tr
+	"time_humans": ["Time per move between humans", [0, 20, 30, 45, 60, 90, 120], "time"],  # tr
+}
+const TABS := [
+	["Game", ["target", "color_win", "hand_limit", "see_reserves"]],  # tr
+	["Tokens", ["gems_mode", "gold_mode", "take2_min"]],  # tr
+	["Cards", ["deck", "market5"]],  # tr
+	["Academy", ["philosophers", "phil_set", "noble_free", "noble_points_mode", "writers", "writer_set", "writer_free"]],  # tr
+	["Governors", ["governors", "gov_set", "gov_pick", "gov_target"]],  # tr
+	["Time", ["time_ai", "time_humans"]],  # tr
 ]
+const DEPENDS := {"phil_set": "philosophers", "noble_free": "philosophers", "noble_points_mode": "philosophers",
+	"writer_set": "writers", "writer_free": "writers", "gov_set": "governors", "gov_pick": "governors",
+	"gov_target": "governors"}
 const KINDS := ["humano", "facil", "normal", "intermediaria", "dificil", "muito_dificil"]
 # nomes no seletor: "Human" e os personagens da IA (Defs.PERSONAS), do mais fraco ao mais forte
 const OLD_DEFAULTS := ["Você", "Lívia", "Otávio", "Júlia", "Marco"]   # nomes padrao de versoes antigas
@@ -41,7 +59,13 @@ var _players: Array = []      # [{name, kind}] (ate 5)
 var _count := 3
 var _presets: Array = []      # [nome, RuleSet, custom:bool]
 var _preset_opt: OptionButton
-var _opt_controls: Array = []
+var _ctl := {}                # chave da regra -> controle
+var _row_bg := {}             # chave da regra -> fundo (degrade vermelho quando foge do habitual)
+var _row_box := {}            # chave da regra -> linha inteira
+var _tab_btns: Array = []
+var _status: Label
+var _msg: Label
+static var _tab := 0
 var _summary: Label
 var _preset_name: LineEdit
 var _del_btn: Button
@@ -94,7 +118,10 @@ func show_page(p: String) -> void:
 	page = p
 	for ch in get_children():
 		ch.queue_free()
-	_opt_controls = []
+	_ctl = {}
+	_row_bg = {}
+	_row_box = {}
+	_tab_btns = []
 	_rows = []
 	_count_btns = []
 	_preset_opt = null
@@ -155,18 +182,19 @@ func _build_home() -> void:
 	var col := VBoxContainer.new()
 	col.position = Vector2(815, 158)
 	col.custom_minimum_size = Vector2(400, 0)
-	col.add_theme_constant_override("separation", 11)
+	col.add_theme_constant_override("separation", 9)
 	add_child(col)
 	var play := UITheme.button(L.t("Play"), 32, Vector2(400, 78))
 	play.add_theme_color_override("font_color", UITheme.GOLD)
 	play.pressed.connect(func(): show_page("setup"))
 	col.add_child(play)
 	for it in [["Customize rules", _open_rules_from_home],  # tr
+			["Customize", func(): show_text.emit("custom")],  # tr
 			["Statistics", func(): show_text.emit("stats")],  # tr
 			["How to play", func(): show_text.emit("rules")],  # tr
 			["Creative process", func(): show_text.emit("story")],  # tr
 			["Options", func(): show_page("opcoes")]]:  # tr
-		var b := UITheme.button(L.t(it[0]), 23, Vector2(400, 56))
+		var b := UITheme.button(L.t(it[0]), 23, Vector2(400, 50))
 		b.pressed.connect(it[1])
 		col.add_child(b)
 	# idioma e visual: um toque
@@ -305,97 +333,215 @@ func _build_setup() -> void:
 
 
 func _build_rules() -> void:
-	_title(L.t("Customize rules"), 18, 36)
+	_title(L.t("Customize rules"), 12, 34)
+	# predefinicao, situacao e "restaurar tudo"
 	var ph := HBoxContainer.new()
-	ph.position = Vector2(60, 84)
-	ph.custom_minimum_size = Vector2(1160, 0)
+	ph.position = Vector2(40, 62)
+	ph.custom_minimum_size = Vector2(1200, 0)
 	ph.add_theme_constant_override("separation", 14)
 	add_child(ph)
 	ph.add_child(UITheme.label(L.t("Preset"), 22, UITheme.GOLD))
 	_preset_opt = UITheme.option([])
-	_preset_opt.custom_minimum_size = Vector2(0, 52)
-	_preset_opt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_preset_opt.add_theme_font_size_override("font_size", UITheme.fs(22))
+	_preset_opt.custom_minimum_size = Vector2(440, 50)
+	_preset_opt.add_theme_font_size_override("font_size", UITheme.fs(21))
 	_preset_opt.item_selected.connect(_on_preset_selected)
 	ph.add_child(_preset_opt)
-	var scroll := ScrollContainer.new()
-	scroll.position = Vector2(40, 146)
-	scroll.size = Vector2(1200, 482)
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	add_child(scroll)
-	var grid := GridContainer.new()
-	grid.columns = 3
-	grid.add_theme_constant_override("h_separation", 26)
-	grid.add_theme_constant_override("v_separation", 10)
-	scroll.add_child(grid)
-	for i in range(OPTIONS.size()):
-		var o: Array = OPTIONS[i]
-		var cell := VBoxContainer.new()
-		cell.add_theme_constant_override("separation", 2)
-		var lab := UITheme.label(L.t(o[0]), 18, UITheme.MUTED)
-		lab.custom_minimum_size = Vector2(372, 0)
-		lab.clip_text = true
-		cell.add_child(lab)
-		if typeof(o[3]) == TYPE_STRING and o[3] == "num":
-			var nf := _number_field(i)
-			cell.add_child(nf)
-			_opt_controls.append(nf)
-		else:
-			var ob := UITheme.option(option_labels(o))
-			ob.custom_minimum_size = Vector2(372, 48)
-			ob.clip_text = true
-			ob.fit_to_longest_item = false
-			ob.add_theme_font_size_override("font_size", UITheme.fs(20))
-			ob.item_selected.connect(_on_option_changed.bind(i))
-			cell.add_child(ob)
-			_opt_controls.append(ob)
-		grid.add_child(cell)
-	_summary = null
+	_status = UITheme.label("", 17, UITheme.MUTED)
+	_status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	ph.add_child(_status)
+	var reset := UITheme.button(L.t("Restore defaults"), 18, Vector2(230, 50))
+	reset.pressed.connect(func():
+		rules = RuleSet.house_full()
+		Audio.play("select")
+		_sync_from_rules())
+	ph.add_child(reset)
+	# abas
+	var tabs := HBoxContainer.new()
+	tabs.position = Vector2(40, 124)
+	tabs.add_theme_constant_override("separation", 6)
+	add_child(tabs)
+	for i in range(TABS.size()):
+		var b := UITheme.button(L.t(TABS[i][0]), 19, Vector2(194, 50))
+		b.clip_text = true
+		var k := i
+		b.pressed.connect(func():
+			_tab = k
+			Audio.play("select")
+			show_page("rules"))
+		tabs.add_child(b)
+		_tab_btns.append(b)
+	# conteudo da aba
+	var panel := PanelContainer.new()
+	panel.position = Vector2(40, 182)
+	panel.size = Vector2(1200, 446)
+	add_child(panel)
+	var sc := ScrollContainer.new()
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	panel.add_child(sc)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 6)
+	v.custom_minimum_size = Vector2(1160, 0)
+	sc.add_child(v)
+	_tab = clampi(_tab, 0, TABS.size() - 1)
+	for key in TABS[_tab][1]:
+		v.add_child(_rule_row(key))
+	if TABS[_tab][0] == "Game":
+		var note := UITheme.label(L.t("With governors, the goal of each player is set in the Governors tab."), 15, UITheme.MUTED)
+		note.name = "GovNote"
+		v.add_child(note)
+	var tab_reset := UITheme.button(L.t("Restore this tab"), 17, Vector2(240, 44))
+	tab_reset.pressed.connect(func():
+		var base := RuleSet.house_full()
+		for key in TABS[_tab][1]:
+			rules.set(key, base.get(key))
+		Audio.play("select")
+		_sync_from_rules())
+	var tr := HBoxContainer.new()
+	tr.alignment = BoxContainer.ALIGNMENT_END
+	tr.add_child(tab_reset)
+	v.add_child(tr)
+	# rodape: voltar, salvar/apagar predefinicao, exportar/importar
 	_back_button()
 	var sh := HBoxContainer.new()
-	sh.position = Vector2(300, 640)
-	sh.add_theme_constant_override("separation", 12)
+	sh.position = Vector2(256, 640)
+	sh.add_theme_constant_override("separation", 10)
 	add_child(sh)
 	_preset_name = LineEdit.new()
 	_preset_name.placeholder_text = L.t("Preset name")
-	_preset_name.custom_minimum_size = Vector2(500, 60)
+	_preset_name.custom_minimum_size = Vector2(330, 60)
 	_preset_name.add_theme_font_size_override("font_size", UITheme.fs(20))
 	sh.add_child(_preset_name)
-	var save := UITheme.button(L.t("Save"), 20, Vector2(190, 60))
+	var save := UITheme.button(L.t("Save"), 19, Vector2(140, 60))
 	save.pressed.connect(_on_save_preset)
 	sh.add_child(save)
-	_del_btn = UITheme.button(L.t("Delete"), 20, Vector2(190, 60))
+	_del_btn = UITheme.button(L.t("Delete"), 19, Vector2(140, 60))
 	_del_btn.pressed.connect(_on_delete_preset)
 	sh.add_child(_del_btn)
+	var ex := UITheme.button(L.t("Export"), 19, Vector2(140, 60))
+	ex.pressed.connect(_on_export_preset)
+	sh.add_child(ex)
+	var im := UITheme.button(L.t("Import"), 19, Vector2(140, 60))
+	im.pressed.connect(_on_import_preset)
+	sh.add_child(im)
+	if not Content.can_customize():
+		for b in [ex, im]:
+			b.disabled = true
+			b.tooltip_text = L.t("Part of the expansion")
+	_msg = UITheme.label("", 14, UITheme.MUTED)
+	_msg.position = Vector2(256, 702)
+	_msg.size = Vector2(980, 18)
+	add_child(_msg)
 	_reload_presets()
 	_sync_from_rules()
 
 
-func _number_field(opt_i: int) -> HBoxContainer:
+func _rule_row(key: String) -> Control:
+	## Uma regra: rotulo e controle, com um fundo que fica vermelho quando ela foge do habitual.
+	var o: Array = OPT[key]
+	var box := Control.new()
+	box.custom_minimum_size = Vector2(1150, 58)
+	var bg := TextureRect.new()
+	var gt := GradientTexture2D.new()
+	var gr := Gradient.new()
+	gr.set_color(0, Color(0.85, 0.18, 0.15, 1.0))
+	gr.set_color(1, Color(0.85, 0.18, 0.15, 0.0))
+	gt.gradient = gr
+	gt.width = 256
+	gt.height = 4
+	bg.texture = gt
+	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	bg.stretch_mode = TextureRect.STRETCH_SCALE
+	bg.size = Vector2(760, 58)
+	bg.modulate.a = 0.0
+	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(bg)
+	_row_bg[key] = bg
+	_row_box[key] = box
+	var dep := DEPENDS.has(key)
+	var ctl: Control
+	if typeof(o[1]) == TYPE_STRING and o[1] == "check":
+		var cb := CheckBox.new()
+		cb.text = L.t(o[0])
+		cb.add_theme_font_size_override("font_size", UITheme.fs(23))
+		cb.add_theme_color_override("font_color", UITheme.GOLD)
+		cb.add_theme_color_override("font_pressed_color", UITheme.GOLD)
+		cb.position = Vector2(14, 6)
+		cb.custom_minimum_size = Vector2(700, 46)
+		cb.focus_mode = Control.FOCUS_NONE
+		cb.toggled.connect(func(on: bool):
+			if _updating:
+				return
+			rules.set(key, on)
+			Audio.play("select")
+			_sync_from_rules())
+		box.add_child(cb)
+		ctl = cb
+	else:
+		var lab := UITheme.label(L.t(o[0]), 20, UITheme.TEXT)
+		lab.position = Vector2(56 if dep else 16, 12)
+		lab.size = Vector2(500, 34)
+		lab.clip_text = true
+		box.add_child(lab)
+		if typeof(o[1]) == TYPE_STRING and str(o[1]).begins_with("content:"):
+			var kind: String = str(o[1]).trim_prefix("content:")
+			var items := Content.list(kind)
+			var ob := UITheme.option(items.map(func(it): return it["name"] if it["builtin"] else it["name"] + " ★"))
+			ob.set_meta("ids", items.map(func(it): return it["id"]))
+			ob.item_selected.connect(func(i):
+				if _updating:
+					return
+				rules.set(key, ob.get_meta("ids")[i])
+				Audio.play("select")
+				_sync_from_rules())
+			ctl = ob
+		elif typeof(o[2]) == TYPE_STRING and o[2] == "num":
+			ctl = _number_field(key)
+		else:
+			var ob2 := UITheme.option(option_labels(o))
+			ob2.item_selected.connect(func(i):
+				if _updating:
+					return
+				rules.set(key, o[1][i])
+				Audio.play("select")
+				_sync_from_rules())
+			ctl = ob2
+		if ctl is OptionButton:
+			ctl.custom_minimum_size = Vector2(560, 48)
+			ctl.clip_text = true
+			ctl.fit_to_longest_item = false
+			ctl.add_theme_font_size_override("font_size", UITheme.fs(19))
+		ctl.position = Vector2(580, 5)
+		box.add_child(ctl)
+	_ctl[key] = ctl
+	return box
+
+
+func _number_field(key: String) -> HBoxContainer:
 	## Campo numerico com - e +; tocar no numero abre o teclado (aceita do minimo ao maximo).
-	var o: Array = OPTIONS[opt_i]
-	var lo: int = o[2][0]
-	var hi: int = o[2][1]
+	var o: Array = OPT[key]
+	var lo: int = o[1][0]
+	var hi: int = o[1][1]
 	var h := HBoxContainer.new()
 	h.add_theme_constant_override("separation", 8)
 	var minus := UITheme.button("−", 26, Vector2(64, 48))
 	var le := LineEdit.new()
 	le.name = "Num"
 	le.alignment = HORIZONTAL_ALIGNMENT_CENTER
-	le.custom_minimum_size = Vector2(220, 48)
+	le.custom_minimum_size = Vector2(200, 48)
 	le.add_theme_font_size_override("font_size", UITheme.fs(24))
 	le.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER
 	le.max_length = 3
 	var plus := UITheme.button("+", 26, Vector2(64, 48))
-	var apply := func(v: int):
-		var c := clampi(v, lo, hi)
-		rules.set(o[1], c)
+	var apply := func(val: int):
+		var c := clampi(val, lo, hi)
+		rules.set(key, c)
 		le.text = str(c)
 		_sync_from_rules()
-	minus.pressed.connect(func(): apply.call(int(rules.get(o[1])) - 1))
-	plus.pressed.connect(func(): apply.call(int(rules.get(o[1])) + 1))
-	le.text_submitted.connect(func(t: String): apply.call(int(t) if t.is_valid_int() else int(rules.get(o[1]))))
-	le.focus_exited.connect(func(): apply.call(int(le.text) if le.text.is_valid_int() else int(rules.get(o[1]))))
+	minus.pressed.connect(func(): apply.call(int(rules.get(key)) - 1))
+	plus.pressed.connect(func(): apply.call(int(rules.get(key)) + 1))
+	le.text_submitted.connect(func(t: String): apply.call(int(t) if t.is_valid_int() else int(rules.get(key))))
+	le.focus_exited.connect(func(): apply.call(int(le.text) if le.text.is_valid_int() else int(rules.get(key))))
 	h.add_child(minus)
 	h.add_child(le)
 	h.add_child(plus)
@@ -428,10 +574,13 @@ func _build_options() -> void:
 	var so := _big_option([L.t("Slow"), L.t("Normal"), L.t("Fast")], maxi(0, AI_DELAYS.find(delay)) if AI_DELAYS.has(delay) else 1)
 	so.item_selected.connect(func(i): Store.set_value("game", "ai_delay", AI_DELAYS[i]))
 	v.add_child(_row(L.t("AI speed"), so))
-	var reveal := str(Store.get_value("game", "reserva_visivel", "rodada"))
-	var ro := _big_option([L.t("From the last turn"), L.t("Always visible")], 1 if reveal == "sempre" else 0)
-	ro.item_selected.connect(func(i): Store.set_value("game", "reserva_visivel", ["rodada", "sempre"][i]))
-	v.add_child(_row(L.t("See reserves"), ro))
+	var vo := _big_option(Defs.VISUAL_NAMES.map(func(x): return L.t(x)), maxi(0, Defs.VISUALS.find(Defs.visual)))
+	vo.item_selected.connect(func(i):
+		Defs.set_visual(Defs.VISUALS[i])
+		Store.set_value("visual", "tema", Defs.VISUALS[i]))
+	v.add_child(_row(L.t("Visual"), vo))
+	var vnote := UITheme.label(L.t("Polygonal also saves battery (30 frames per second)."), 15, UITheme.MUTED)
+	v.add_child(vnote)
 	var io := _big_option(UITheme.LAYOUT_NAMES.map(func(x): return L.t(x)),
 		maxi(0, UITheme.LAYOUTS.find(str(Store.get_value("geral", "interface", "auto")))))
 	io.item_selected.connect(func(i): Store.set_value("geral", "interface", UITheme.LAYOUTS[i]))
@@ -509,12 +658,12 @@ func _build_language() -> void:
 # Jogadores
 # ---------------------------------------------------------------------------
 static func option_labels(o: Array) -> Array:
-	match o[3]:
+	match o[2]:
 		"free":
-			return o[2].map(func(k): return L.t("Exact") if k == 0 else L.f("Total −{n}, any elements", {"n": k}))
+			return o[1].map(func(k): return L.t("Exact") if k == 0 else L.f("Total −{n}, any elements", {"n": k}))
 		"time":
-			return o[2].map(func(t): return L.t("No limit") if t == 0 else L.f("{n} s", {"n": t}))
-	return o[3].map(func(x): return L.t(x))
+			return o[1].map(func(t): return L.t("No limit") if t == 0 else L.f("{n} s", {"n": t}))
+	return o[2].map(func(x): return L.t(x))
 
 
 func _current_players() -> Array:
@@ -632,12 +781,12 @@ func _on_play() -> void:
 # Predefinicoes de regras
 # ---------------------------------------------------------------------------
 func _reload_presets() -> void:
+	Content.migrate_presets()
 	_presets = []
 	for p in RuleSet.builtin_presets():
-		_presets.append([p[0], p[1], false])
-	var custom := Store.custom_presets()
-	for name in custom:
-		_presets.append([name, RuleSet.from_dict(custom[name]), true])
+		_presets.append([p[0], p[1], false, ""])
+	for it in Content.list("presets"):
+		_presets.append([it["name"], RuleSet.from_dict(Content.load_preset(it["id"])), true, it["id"]])
 	_preset_opt.clear()
 	for p in _presets:
 		_preset_opt.add_item((p[0] + " ★") if p[2] else L.t(p[0]))
@@ -652,26 +801,49 @@ func _on_preset_selected(i: int) -> void:
 	Audio.play("select")
 
 
-func _on_option_changed(sel: int, opt_i: int) -> void:
-	if _updating:
-		return
-	var o: Array = OPTIONS[opt_i]
-	rules.set(o[1], o[2][sel])
-	Audio.play("select")
-	_sync_from_rules()
-
-
 func _sync_from_rules() -> void:
 	_updating = true
-	for i in range(_opt_controls.size()):
-		var o: Array = OPTIONS[i]
-		if _opt_controls[i] is OptionButton:
-			var idx: int = o[2].find(rules.get(o[1]))
-			_opt_controls[i].select(maxi(idx, 0))
-		elif _opt_controls[i] != null:
-			var le: LineEdit = _opt_controls[i].get_node("Num")
+	for key in _ctl:
+		var c: Control = _ctl[key]
+		var o: Array = OPT[key]
+		var val = rules.get(key)
+		if c is CheckBox:
+			c.button_pressed = bool(val)
+		elif c is OptionButton:
+			var idx := -1
+			if c.has_meta("ids"):
+				idx = c.get_meta("ids").find(val)
+			else:
+				idx = o[1].find(val)
+			c.select(maxi(idx, 0))
+		else:
+			var le: LineEdit = c.get_node("Num")
 			if not le.has_focus():
-				le.text = str(rules.get(o[1]))
+				le.text = str(val)
+		var on := not DEPENDS.has(key) or bool(rules.get(DEPENDS[key]))
+		_set_enabled(c, on)
+		if _row_box.has(key):
+			_row_box[key].modulate.a = 1.0 if on else 0.45
+		if _row_bg.has(key):
+			_row_bg[key].modulate.a = 0.55 * rules.deviation(key) if on else 0.0
+	# abas com regras fora do habitual ganham um ponto vermelho
+	for i in range(_tab_btns.size()):
+		var dev := 0.0
+		for key in TABS[i][1]:
+			if not DEPENDS.has(key) or bool(rules.get(DEPENDS[key])):
+				dev = maxf(dev, rules.deviation(key))
+		var b: Button = _tab_btns[i]
+		b.text = L.t(TABS[i][0]) + ("  •" if dev > 0.0 else "")
+		b.add_theme_color_override("font_color", UITheme.GOLD if i == _tab else (Color(1.0, 0.55, 0.5) if dev > 0.0 else UITheme.TEXT))
+		b.add_theme_stylebox_override("normal", UITheme.box(Color(0.22, 0.20, 0.14), UITheme.GOLD, 2) if i == _tab
+			else UITheme.box(Color(0.12, 0.13, 0.17, 0.9), Color(1, 1, 1, 0.15), 1))
+	var gn := find_child("GovNote", true, false)
+	if gn != null:
+		gn.visible = rules.governors
+	if _status != null and is_instance_valid(_status):
+		var k := rules.unusual_count()
+		_status.text = L.t("All rules within the usual") if k == 0 else L.t("1 rule outside the usual (in red)") if k == 1 else L.f("{n} rules outside the usual (in red)", {"n": k})
+		_status.add_theme_color_override("font_color", UITheme.MUTED if k == 0 else Color(1.0, 0.6, 0.55))
 	var match_i := _presets.size()
 	for i in range(_presets.size()):
 		if (_presets[i][1] as RuleSet).equals(rules):
@@ -687,13 +859,62 @@ func _sync_from_rules() -> void:
 	_update_rows()
 
 
+func _set_enabled(c: Control, on: bool) -> void:
+	if c is BaseButton:
+		c.disabled = not on
+	for ch in c.get_children():
+		if ch is BaseButton:
+			ch.disabled = not on
+		elif ch is LineEdit:
+			ch.editable = on
+
+
+func _say(t: String) -> void:
+	if _msg != null and is_instance_valid(_msg):
+		_msg.text = t
+
+
+func _selected_preset_name() -> String:
+	var i := _preset_opt.selected
+	if i < _presets.size():
+		return _presets[i][0] if _presets[i][2] else L.t(_presets[i][0])
+	return _preset_name.text.strip_edges() if _preset_name.text.strip_edges() != "" else L.t("Custom")
+
+
+func _on_export_preset() -> void:
+	var nm := Content.clean_name(_selected_preset_name())
+	Files.save_dialog(self, L.t("Export"), nm + ".zip", func(path: String):
+		var dest := Files.writable(path)
+		if Content.export_package(nm, rules, dest):
+			_say(L.f("Saved: {path}", {"path": ProjectSettings.globalize_path(dest)}))
+		else:
+			_say(L.t("Could not save the file.")))
+
+
+func _on_import_preset() -> void:
+	Files.open_dialog(self, L.t("Import"), ["zip", "csv"], func(path: String):
+		var res: Dictionary
+		if path.get_extension().to_lower() == "zip":
+			res = Content.import_package(path)
+		else:
+			var r := Content.import_text("presets", path.get_file().get_basename(), FileAccess.get_file_as_string(path))
+			res = {"preset": r["id"], "errors": r["errors"]}
+		_reload_presets()
+		if res["preset"] != "":
+			rules = RuleSet.from_dict(Content.load_preset(res["preset"]))
+			_sync_from_rules()
+			_say(L.t("Preset imported."))
+		else:
+			_say(L.t("This file could not be read.") + " " + " ".join(res["errors"])))
+
+
 func _on_save_preset() -> void:
 	var name := _preset_name.text.strip_edges()
 	if name == "":
 		Audio.play("error")
 		_preset_name.placeholder_text = L.t("Type a name first")
 		return
-	Store.save_custom_preset(name, rules)
+	Content.save_preset(name, rules)
 	_preset_name.text = ""
 	_reload_presets()
 	_sync_from_rules()
@@ -703,6 +924,6 @@ func _on_save_preset() -> void:
 func _on_delete_preset() -> void:
 	var i := _preset_opt.selected
 	if i < _presets.size() and _presets[i][2]:
-		Store.delete_custom_preset(_presets[i][0])
+		Content.delete_item("presets", _presets[i][3])
 		_reload_presets()
 		_sync_from_rules()

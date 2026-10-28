@@ -15,7 +15,7 @@ const COLORS_POLIGONAL := [
 	Color(0.18, 0.66, 0.33),  # verde
 	Color(0.85, 0.24, 0.24),  # vermelho
 	Color(0.20, 0.20, 0.22),  # preto
-	Color(0.93, 0.74, 0.18),  # ouro
+	Color(1.0, 0.88, 0.32),   # estrela (coringa): amarelo claro, como a esfera
 ]
 const COLORS_SOLIDOS := [
 	Color(0.84, 0.89, 0.96),  # ar: octaedro
@@ -41,6 +41,9 @@ static func set_visual(v: String) -> void:
 	visual = v if v in VISUALS else "solidos"
 	COLORS = (COLORS_SOLIDOS if visual == "solidos" else COLORS_POLIGONAL).duplicate()
 	INK = INK_POLIGONAL.duplicate()
+	# o visual poligonal e o modo de economia de energia: no maximo 30 quadros por segundo;
+	# com os solidos, o aparelho decide
+	Engine.max_fps = 30 if visual == "poligonal" else 0
 
 # Filosofos: requisito por cor (ar, agua, eter, fogo, terra). Pares de cores vizinhas no ciclo
 # (4 + 4) e trios de cores consecutivas (3 + 3 + 3).
@@ -50,13 +53,11 @@ const NOBLES := [
 ]
 
 # Escritores gregos: as combinacoes que os filosofos nao usam. Pares de cores que "pulam uma"
-# no ciclo (3 + 3) e os trios complementares (2 + 2 + 2). Cada escritor vale WRITER_PTS.
-const WRITERS := [
-	[3, 0, 3, 0, 0], [0, 3, 0, 3, 0], [0, 0, 3, 0, 3], [3, 0, 0, 3, 0], [0, 3, 0, 0, 3],
-	[0, 2, 0, 2, 2], [2, 0, 2, 0, 2], [2, 2, 0, 2, 0], [0, 2, 2, 0, 2], [2, 0, 2, 2, 0],
-]
-const WRITER_NAMES := ["Sappho", "Homer", "Hesiod", "Pindar", "Herodotus",  # tr
-	"Aeschylus", "Sophocles", "Aristophanes", "Thucydides", "Euripides"]  # tr
+# no ciclo (3 + 3) e trios complementares (2 + 2 + 2). Cada escritor vale WRITER_PTS.
+# No jogo base ha dois (um de cada tipo); os outros oito vem com a expansao.
+const WRITERS := [[0, 3, 0, 3, 0], [2, 0, 2, 0, 2]]
+const WRITER_NAMES := ["Homer", "Sophocles"]  # tr
+const WRITER_ART := [2, 7]   # numero da arte em assets/writers/writer_<n>.png
 const WRITER_BASE := 100     # ids >= 100 na mesa sao escritores
 const WRITER_PTS := 1
 const WRITERS_ON_TABLE := 2
@@ -71,15 +72,6 @@ const PHILOSOPHERS := ["Anaxagoras", "Parmenides", "Thales", "Anaximenes", "Demo
 
 static func is_writer(id: int) -> bool:
 	return id >= WRITER_BASE
-
-
-static func patron_req(id: int) -> Array:
-	## Requisito de um filosofo (id 0..9) ou escritor (id 100..109).
-	return WRITERS[id - WRITER_BASE] if id >= WRITER_BASE else NOBLES[id]
-
-
-static func patron_name(id: int) -> String:
-	return WRITER_NAMES[id - WRITER_BASE] if id >= WRITER_BASE else PHILOSOPHERS[id]
 
 
 # Grupos de cartas (antes "niveis" 1, 2 e 3)
@@ -113,11 +105,14 @@ const DECK_DIRS := {"arcaico": "arcaico", "caio": "pentakosmos"}
 class CardDef:
 	extends RefCounted
 	var id: int
-	var level: int
-	var bonus: int
-	var points: int
-	var cost: Array  # 5 inteiros
-	var key: String  # nome usado para arte em PNG, ex.: n2_azul_03
+	var level: int                  # grupo: 1 basicas, 2 intermediarias, 3 avancadas
+	var bonus: int                  # cor do bonus (0..4) quando kind == "single"; -1 nos outros casos
+	var kind := "single"            # "single" (um solido), "none" (sem bonus), "multi" (varios), "joker" (coringa)
+	var bonus_vec := [0, 0, 0, 0, 0]  # bonus de cada cor (para "single" e "multi")
+	var points: int                 # pode ser negativo
+	var cost: Array                 # 6 inteiros: 5 elementos + esferas (custo pago so com esferas)
+	var effect := ""                # efeito ao comprar: "", "token", "two_tokens", "sphere", "extra_turn"
+	var key: String                 # nome usado para arte em PNG, ex.: l2_blue_03
 	var total: int
 
 	func _init(p_id: int, p_level: int, p_bonus: int, p_points: int, p_cost: Array) -> void:
@@ -125,10 +120,30 @@ class CardDef:
 		level = p_level
 		bonus = p_bonus
 		points = p_points
-		cost = p_cost
+		cost = p_cost.duplicate()
+		while cost.size() < 6:
+			cost.append(0)
+		if p_bonus >= 0:
+			bonus_vec[p_bonus] = 1
 		total = 0
-		for x in p_cost:
+		for x in cost:
 			total += x
+
+	func spec_color() -> int:
+		## Cor em que a carta conta para a especializacao (so cartas de um solido).
+		return bonus if kind == "single" else -1
+
+	func display_color() -> int:
+		## Cor da faixa da carta: a do bonus, ou a do maior bonus de uma carta multipla; -1 = neutra.
+		if kind == "single":
+			return bonus
+		if kind == "multi":
+			var best := 0
+			for c in range(5):
+				if bonus_vec[c] > bonus_vec[best]:
+					best = c
+			return best
+		return -1
 
 
 static func build_deck(name: String) -> Array:
@@ -136,7 +151,7 @@ static func build_deck(name: String) -> Array:
 	var formulas: Array = FORMULAS_CAIO if name == "caio" else FORMULAS_ARCAICO
 	for f in formulas:
 		for a in range(5):
-			var cost := [0, 0, 0, 0, 0]
+			var cost := [0, 0, 0, 0, 0, 0]
 			for k in range(5):
 				cost[posmod(a + OFFSETS[k], 5)] += f[2 + k]
 			raw.append([f[0], a, f[1], cost])

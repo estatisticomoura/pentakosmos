@@ -12,3 +12,6 @@ tools/evolucao_estado*.json
 *.tmp
 tools/musica/cache/
 __pycache__/
+
+# expansao (repositorio privado)
+expansao/

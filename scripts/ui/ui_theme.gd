@@ -68,6 +68,13 @@ static func build() -> Theme:
 		t.set_stylebox("normal", cls, flat)
 		t.set_stylebox("hover", cls, flat)
 		t.set_stylebox("pressed", cls, flat)
+	# caixa de selecao desenhada aqui (o tema padrao fica pequeno e some quando desmarcada)
+	var sz := fs(30)
+	t.set_icon("checked", "CheckBox", _check_icon(sz, true, false))
+	t.set_icon("unchecked", "CheckBox", _check_icon(sz, false, false))
+	t.set_icon("checked_disabled", "CheckBox", _check_icon(sz, true, true))
+	t.set_icon("unchecked_disabled", "CheckBox", _check_icon(sz, false, true))
+	t.set_constant("h_separation", "CheckBox", 12)
 	# textos
 	t.set_color("font_color", "Label", TEXT)
 	# paineis
@@ -121,3 +128,34 @@ static func option(items: Array, selected := 0) -> OptionButton:
 	o.focus_mode = Control.FOCUS_NONE
 	o.custom_minimum_size = Vector2(0, 40)
 	return o
+
+
+static func _check_icon(sz: int, on: bool, off: bool) -> ImageTexture:
+	var img := Image.create(sz, sz, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+	var a := 0.4 if off else 1.0
+	var border := Color(GOLD, a)
+	var w := maxi(2, sz / 14)
+	for y in range(sz):
+		for x in range(sz):
+			var edge := x < w or y < w or x >= sz - w or y >= sz - w
+			if edge:
+				img.set_pixel(x, y, border)
+			elif on:
+				img.set_pixel(x, y, Color(0.24, 0.20, 0.10, a))
+	if on:
+		# marca de "certo"
+		var pts := [Vector2(0.22, 0.52), Vector2(0.42, 0.72), Vector2(0.80, 0.30)]
+		for k in range(2):
+			var p0: Vector2 = pts[k] * sz
+			var p1: Vector2 = pts[k + 1] * sz
+			var n := int(p0.distance_to(p1) * 2)
+			for i in range(n + 1):
+				var p := p0.lerp(p1, float(i) / n)
+				for dy in range(-w, w + 1):
+					for dx in range(-w, w + 1):
+						var x := int(p.x) + dx
+						var y := int(p.y) + dy
+						if x >= 0 and y >= 0 and x < sz and y < sz:
+							img.set_pixel(x, y, Color(GOLD.lightened(0.2), a))
+	return ImageTexture.create_from_image(img)

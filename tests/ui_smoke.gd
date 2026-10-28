@@ -17,7 +17,7 @@ func _ready() -> void:
 	for a in args:
 		if a.is_valid_int():
 			n = int(a)
-		elif a in ["house", "classico"]:
+		elif a in ["house", "classico", "gov"]:
 			preset = a
 	var old_layout = Store.get_value("geral", "interface", "auto")
 	Store.set_value("geral", "interface", "toque" if args.has("toque") else "pc")
@@ -36,12 +36,42 @@ func _ready() -> void:
 		main._screen.show_page(pg)
 		await _frames(8)
 		await _shot("menu_" + pg)
+	if args.has("degrade"):
+		main._screen.rules.target = 30
+		main._screen.rules.take2_min = 2
+		main._screen.rules.governors = true
+	for t in [0, 3, 4]:
+		MenuScreen._tab = t
+		main._screen.show_page("rules")
+		await _frames(8)
+		await _shot("menu_rules_aba%d" % t)
+	MenuScreen._tab = 0
+	for t in [0, 3]:
+		CustomizeScreen._tab = t
+		main.show_text("custom")
+		await _frames(10)
+		await _shot("personalizar_%d" % t)
+	var cs = main._screen
+	cs._open_editor("decks", "caio", true)
+	await _frames(10)
+	await _shot("editor_deck")
+	CustomizeScreen._tab = 3
+	cs._open_editor("governors", "classico", true)
+	await _frames(10)
+	await _shot("editor_governantes")
+	main.show_menu()
+	await _frames(5)
+	if args.has("so_menu"):
+		get_tree().quit()
+		return
 	var vis := Defs.visual
 	Defs.set_visual("poligonal")
 	await _frames(4)
 	await _shot("menu_poligonal")
 	Defs.set_visual(vis)
 	var rules: RuleSet = RuleSet.house_full() if preset == "house" else RuleSet.classic()
+	if preset == "gov":
+		rules = RuleSet.house_governors()
 	# 1) partida so com IAs, acelerada
 	Engine.time_scale = 1.0 if shots else 25.0
 	var players: Array = []
@@ -99,6 +129,32 @@ func _ready() -> void:
 			continue
 		if gs.g.phase == "nobre":
 			gs.g.choose_noble(gs.g.noble_options[0])
+			gs._close_overlay()
+			gs._continue()
+			continue
+		if gs.g.phase == "escolha_gov":
+			if shots and _shot_i < 30:
+				await _wait(0.5)
+				await _shot("escolha_governante")
+			gs.g.pick_governor(-1)
+			gs._close_overlay()
+			gs._continue()
+			continue
+		if gs.g.phase == "governante":
+			if shots:
+				await _wait(0.4)
+				await _shot("oferta_governante")
+			gs.g.choose_governor(gs.g.gov_options[0])
+			gs._close_overlay()
+			gs._continue()
+			continue
+		if gs.g.phase == "ganho":
+			gs.g.gain(AI.gain_choice(gs.g, gs.g.current, gs.g.gain_n))
+			gs._close_overlay()
+			gs._continue()
+			continue
+		if gs.g.phase == "cega":
+			gs.g.choose_blind(gs.g.blind_options[0])
 			gs._close_overlay()
 			gs._continue()
 			continue
@@ -162,7 +218,14 @@ func _ready() -> void:
 	await _wait(1.0)
 	print("fase apos pegar com mao cheia: ", gs.g.phase)
 	await _shot("descarte")
+	var espera := 0
+	while gs.g.phase == "descarte" and gs._overlay == null and espera < 300:
+		await _frames(1)
+		espera += 1
 	while gs.g.phase == "descarte":
+		if gs._overlay == null:
+			await _frames(2)
+			continue
 		var views := gs._overlay.find_children("*", "TokenView", true, false)
 		for tv in views:
 			if gs.g.cur().tokens[tv.color_idx] > 0:

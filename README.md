@@ -14,8 +14,11 @@ Every player runs an academy. By collecting the five elements — **air, water, 
 - Two rule sets — **Pentakosmos** (the default) and **Archaic** — and every rule can be changed on its own.
 - Statistics for every game, with JSON and CSV export.
 - Computer opponents trained with a genetic algorithm and ranked by tournaments.
+- Optional **governors**: each player picks one at the start, and whoever meets its condition first gets it.
+- Tabbed rules with your own presets, and a battery-saving mode.
+- **Expansion:** 14 more governors, 8 more writers, and decks, sets and presets you can edit in a spreadsheet (CSV) and share.
 - 38 languages.
-- Free and open source (MIT). Linux, Windows and Android.
+- Free and open source (MIT). Linux, Windows, macOS and Android.
 
 ## Download and play
 
@@ -61,7 +64,21 @@ At the end of your turn, a **philosopher** joins your academy if your cards meet
 
 The cards come in three groups — **basic**, **intermediate** and **advanced** — and the back of each one shows a star with 1, 2 or 3 planets.
 
-**Writers.** The ten writers (Sappho, Homer, Hesiod, Pindar, Herodotus, Aeschylus, Sophocles, Aristophanes, Thucydides and Euripides) ask for cards in the element combinations the philosophers do not use: 3 + 3 of two elements, or 2 + 2 + 2 of three. Each one is worth 1 point and stays outside the philosophers' 3 / 2 / 1 sequence; one philosopher and one writer can arrive in the same turn. The "Academy" option chooses philosophers and writers, philosophers only, writers only or neither.
+**Writers.** The writers (Homer and Sophocles in the base game; the expansion adds Sappho, Hesiod, Pindar, Herodotus, Aeschylus, Aristophanes, Thucydides and Euripides) ask for cards in the element combinations the philosophers do not use: 3 + 3 of two elements, or 2 + 2 + 2 of three. Each one is worth 1 point and stays outside the philosophers' 3 / 2 / 1 sequence; one philosopher and one writer can arrive in the same turn. In the rules, checkboxes turn philosophers, writers and governors on or off.
+
+**Governors (optional).** When they are on, the goal of anyone without a governor goes up (19 points by default). At the start, each player picks a governor within 30 seconds (there is a random-pick button, and running out of time picks at random), or the rules draw them at random. Picking gives no exclusivity: at the end of a turn, whoever first meets the condition of a governor on the table may take it or refuse it. Each governor has a condition, sometimes a cost, sometimes an advantage, and changes the goal of whoever holds it — Pericles asks for 2 advanced cards and lets you win with 15. Each player holds at most one, and players who reach their own goal beat those who do not. The base game has Pericles, Leonidas and Alexander.
+
+**Rules menu.** The rules are grouped in tabs. Every option that differs from the preset gets a red gradient, and buttons restore one tab or everything. Points to win go from 1 to 100, and "See reserves" is now a rule.
+
+### Visual and battery
+
+Options and the pause menu hold the text size and the visual: **Platonic solids** (the main one) or **Polygonal**, the game's first look, with coloured polygons. Polygonal is also the **battery-saving mode**: the game runs at 30 frames per second.
+
+## Base game and expansion
+
+The base game is complete: the Pentakosmos and Archaic decks, the philosophers, 2 writers, 3 governors and every rule. The **expansion** adds 14 governors and 8 writers and unlocks the **Customize** screen: decks, sets of philosophers, writers and governors, and rule presets become CSV files that you can edit in a spreadsheet, duplicate, export and import. The decks and sets that ship with the game are locked; duplicate them to change them. The format is described in [docs/CUSTOM_CONTENT.md](docs/CUSTOM_CONTENT.md).
+
+The expansion data is not in this repository: the game looks for it in the `expansao/` folder (with the file `expansao.txt`). Without it, the game runs as the base game.
 
 ## The Pentakosmos deck
 
@@ -107,14 +124,15 @@ python3 tools/torneio.py --modo classico
 
 1. Install **Godot 4.7.2** ([godotengine.org](https://godotengine.org), or `flatpak install flathub org.godotengine.Godot`).
 2. Open the editor, click **Import** and choose `project.godot`. Press F5 to play.
-3. To export: *Editor → Manage Export Templates → Download and Install*, then *Project → Export* and choose **Linux**, **Windows**, **macOS** or **Android**. From the command line:
+3. To include the expansion, copy the `expansao/` folder into the project root before exporting (without it, you get the base game).
+4. To export: *Editor → Manage Export Templates → Download and Install*, then *Project → Export* and choose **Linux**, **Windows**, **macOS** or **Android**. From the command line:
    ```
    godot --headless --path . --export-release "Linux" build/linux/pentakosmos.x86_64
    godot --headless --path . --export-release "Windows" build/windows/Pentakosmos.exe
    godot --headless --path . --export-release "macOS" build/mac/Pentakosmos.zip
    ```
    The macOS build is a universal app (Intel and Apple Silicon) with an ad-hoc signature, not notarized: on the Mac, unzip it, then right-click *Pentakosmos.app* → *Open* the first time (or allow it in *System Settings → Privacy & Security*).
-4. Android also needs JDK 17 and the Android SDK (Platform-Tools, Build-Tools and Command-line Tools), configured in *Editor → Editor Settings → Export → Android*. The preset exports an unsigned APK; sign it with your own key (keep the same key for every version, or phones will refuse to update):
+5. Android also needs JDK 17 and the Android SDK (Platform-Tools, Build-Tools and Command-line Tools), configured in *Editor → Editor Settings → Export → Android*. The preset exports an unsigned APK; sign it with your own key (keep the same key for every version, or phones will refuse to update):
    ```
    godot --headless --path . --export-release "Android" build/android/unsigned.apk
    python3 tools/assinar_apk.py nova-chave ~/pentakosmos-key.pem      # only once
@@ -167,7 +185,7 @@ data/           AI training results, translations (lang/) and long texts (texts/
 assets/         optional art, sounds and music
 tools/          genetic algorithm, tournament, translation checker, sound generator
 tests/          headless simulations and interface tests
-docs/           creative process and images
+docs/           creative process, custom content format, images
 ```
 
 Tests, from the project folder:

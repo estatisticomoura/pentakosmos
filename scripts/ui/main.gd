@@ -156,6 +156,11 @@ func show_menu() -> void:
 
 
 func show_text(which: String) -> void:
+	if which == "custom":
+		var cs := CustomizeScreen.new()
+		cs.back.connect(show_menu)
+		_set_screen(cs)
+		return
 	if which == "stats":
 		var st := StatsScreen.new()
 		st.back.connect(show_menu)
