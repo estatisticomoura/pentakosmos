@@ -114,7 +114,7 @@ Nos torneios atuais, Timeu é o misto, Teeteto o tático e Fedro o evoluído. H�
 
 ### Treinar de novo
 
-O jeito mais simples é deixar o **treino noturno** rodando: ele mede onde a IA joga mal, treina, faz os torneios e compara o antes e o depois, dentro do limite de horas pedido.
+O **treino noturno** compara a heurística nova da IA com a atual, nas mesmas partidas, em regras sorteadas e pelo tempo que você pedir, e mostra regra por regra onde ela melhorou ou piorou.
 
 ```
 systemd-inhibit --what=idle:sleep python3 tools/noite.py --horas 8

@@ -105,7 +105,7 @@ In the current tournaments, Timaeus is the mixed opponent, Theaetetus the tactic
 
 ### Training them again
 
-The simplest way is to leave the **overnight training** running: it measures where the AI plays badly, trains, runs the tournaments and compares before and after, within the hours you give it.
+The **overnight run** compares the new AI heuristic with the current one on the same games, over random rules and for as long as you want, and shows rule by rule where it got better or worse.
 
 ```
 systemd-inhibit --what=idle:sleep python3 tools/noite.py --horas 8
