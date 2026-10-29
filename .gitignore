@@ -15,3 +15,5 @@ __pycache__/
 
 # expansao (repositorio privado)
 expansao/
+tools/sanidade/
+tools/noite/

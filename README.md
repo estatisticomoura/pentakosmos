@@ -105,7 +105,15 @@ In the current tournaments, Timaeus is the mixed opponent, Theaetetus the tactic
 
 ### Training them again
 
-From the project folder, with Godot 4.7.2 installed and Python 3:
+The simplest way is to leave the **overnight training** running: it measures where the AI plays badly, trains, runs the tournaments and compares before and after, within the hours you give it.
+
+```
+systemd-inhibit --what=idle:sleep python3 tools/noite.py --horas 8
+```
+
+The report goes to `tools/noite/`. The **sanity battery** also runs on its own: `python3 tools/sanidade.py` draws rule combinations and shows, rule by rule, whether the strong AI still beats the weak one, how many tokens it returns for going over the hand limit and how long games last.
+
+The separate steps (from the project folder, with Godot 4.7.2 and Python 3 installed):
 
 ```
 python3 tools/evoluir.py              # genetic algorithm, general training (~40 min on 16 cores)

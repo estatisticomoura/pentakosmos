@@ -114,7 +114,15 @@ Nos torneios atuais, Timeu é o misto, Teeteto o tático e Fedro o evoluído. H�
 
 ### Treinar de novo
 
-Na pasta do projeto, com o Godot 4.7.2 e o Python 3 instalados:
+O jeito mais simples é deixar o **treino noturno** rodando: ele mede onde a IA joga mal, treina, faz os torneios e compara o antes e o depois, dentro do limite de horas pedido.
+
+```
+systemd-inhibit --what=idle:sleep python3 tools/noite.py --horas 8
+```
+
+De manhã, o relatório fica em `tools/noite/`. A **bateria de sanidade** também roda sozinha: `python3 tools/sanidade.py` sorteia combinações de regras e mostra, regra por regra, se a IA forte ainda vence a fraca, quantas fichas ela devolve por passar do limite da mão e quanto a partida dura.
+
+Os passos, separados (na pasta do projeto, com o Godot 4.7.2 e o Python 3 instalados):
 
 ```
 python3 tools/evoluir.py              # algoritmo genético, treino geral (~40 min com 16 núcleos)

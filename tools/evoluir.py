@@ -19,8 +19,9 @@ Uso (na pasta do projeto):
 Configuracoes das partidas (sorteadas a cada partida, "randomizacao de dominio"):
   - 2 a 5 jogadores, com o individuo girando de assento;
   - metade das partidas nos dois modos principais (house completa e classico);
-  - a outra metade com variantes aleatorias: cada house rule ligada ou desligada,
-    deck Arcaico ou Pentakosmos, limite de mao 9/10/11 e meta de 12 a 18 pontos.
+  - a outra metade com variantes aleatorias: cada regra ligada ou desligada (inclusive
+    escritores e governantes), deck Arcaico ou Pentakosmos, limite de mao 9/10/11 e meta
+    de 10 a 30 pontos.
 Assim os parametros precisam funcionar bem em media em todas as variantes.
 
 No fim ha uma FINAL: os 5 melhores da ultima geracao jogam 3000 partidas novas
@@ -111,14 +112,19 @@ HOUSE = {"gems_mode": "house", "gold_mode": "house", "take2_min": 3, "market5": 
          "patrons": "filosofos", "noble_free": 2, "noble_points_mode": "decrescente", "writer_free": 0, "deck": "caio",
          "hand_limit": 10, "target": 15, "color_win": 10}
 CHOICES = {"gems_mode": ["classico", "house"], "gold_mode": ["classico", "house"], "take2_min": [4, 3],
-           "market5": [4, 5], "patrons": ["ambos", "filosofos", "escritores"], "noble_free": [0, 1, 2],
-           "noble_points_mode": ["fixo", "decrescente"], "writer_free": [0, 1],
-           "deck": ["arcaico", "caio"], "hand_limit": [9, 10, 11], "target": list(range(12, 19)),
+           "market5": [4, 5], "philosophers": [True, True, True, False], "writers": [False, True],
+           "noble_free": [0, 1, 2, 3], "noble_points_mode": ["fixo", "decrescente"], "writer_free": [0, 1, 2],
+           "governors": [False, False, True], "gov_pick": ["escolha", "sorteio"], "gov_target": [15, 17, 19, 21, 23],
+           "deck": ["arcaico", "caio"], "hand_limit": [9, 10, 11],
+           "target": [10, 12, 13, 14, 15, 16, 17, 18, 20, 22, 25, 30],
            "color_win": [0, 0, 9, 10, 11, 12]}
 
 
 def random_rules(rng):
-    return {k: rng.choice(v) for k, v in CHOICES.items()}
+    r = {k: rng.choice(v) for k, v in CHOICES.items()}
+    if not r["philosophers"] and not r["writers"]:
+        r["philosophers"] = True
+    return r
 
 
 def scenarios(n_games, rng, train_mode="geral"):
@@ -178,7 +184,9 @@ def generalization(per, scen, train_mode="geral"):
             return
         yield "modo", lambda r, n, m: {"house": "house completa", "classico": "classico", "variante": "variantes"}[m]
         yield "deck", lambda r, n, m: "deck " + r["deck"]
-        yield "meta", lambda r, n, m: "meta 12-13" if r["target"] <= 13 else ("meta 17-18" if r["target"] >= 17 else "meta 14-16")
+        yield "meta", lambda r, n, m: ("meta ate 13" if r["target"] <= 13 else ("meta 14-16" if r["target"] <= 16 else
+                                        ("meta 17-20" if r["target"] <= 20 else "meta 21+")))
+        yield "governantes", lambda r, n, m: "governantes " + ("ligados" if r.get("governors") else "desligados")
         yield "mao", lambda r, n, m: "mao %d" % r["hand_limit"]
         yield "nobres", lambda r, n, m: "filosofos -%d" % r["noble_free"]
         yield "pegar2", lambda r, n, m: "pegar 2 com %d+" % r["take2_min"]

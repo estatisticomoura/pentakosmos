@@ -21,8 +21,11 @@ const SURG_RESERVE_VALUE := 4
 const DEFEND_VALUE := 3
 # com a reserva defensiva, a coleta so e escolhida para negar fichas se bloquear isto
 const DEFEND_TOKEN_BLOCK := 2.0
-# busca no fim de jogo
-const ENDGAME_MARGIN := 5      # ativa quando alguem esta a 5 pontos ou menos da meta
+# busca no fim de jogo: ativa quando falta a alguem 1/3 da propria meta (5 pontos de 15),
+# no maximo 8 pontos (com metas altas, simular desde muito cedo e caro e ruidoso)
+const ENDGAME_MAX_MARGIN := 8
+# especializacao: a busca tambem ativa quando alguem tem 60% dos pontos de uma cor
+const ENDGAME_SPEC_FRACTION := 0.6
 const ENDGAME_ROLLOUTS := 8    # simulacoes por jogada candidata
 const ENDGAME_MAX_CANDS := 9
 
@@ -80,9 +83,10 @@ static func card_value(g: GameState, p: GameState.PlayerState, cid: int, demand:
 	var cd: Defs.CardDef = g.cards[cid]
 	var vec := g.card_gain(p, cid)
 	var v := float(cd.points)
-	var phase := maxf(0.0, 1.0 - float(p.points) / g.target_of(p))
+	var phase := game_phase(g, p)
 	if maxdemand > 0:
 		v += P["engine_w"] * phase * (P["demand_base"] * _sum(vec) + _dot(demand, vec) / maxdemand)
+	v += governor_bonus(g, p, cd, vec)
 	var best := 0.0
 	var rest := 0.0
 	for nb in g.nobles:
@@ -117,6 +121,69 @@ static func _helps(req: Array, bonus: Array, vec: Array) -> bool:
 		if vec[c] > 0 and req[c] > bonus[c]:
 			return true
 	return false
+
+
+# ---------------------------------------------------------------------------
+# Medidas em proporcao (valem para qualquer meta e qualquer limite de fichas)
+# ---------------------------------------------------------------------------
+static func progress(g: GameState, p: GameState.PlayerState) -> float:
+	## Fracao da propria meta ja feita (0 = comeco, 1 = chegou).
+	return clampf(float(p.points) / maxf(1.0, g.target_of(p)), 0.0, 1.0)
+
+
+static func game_phase(g: GameState, p: GameState.PlayerState) -> float:
+	## Quanto da partida ainda falta para este jogador (1 = comeco, 0 = fim). Mede-se pelo
+	## jogador mais adiantado, porque a partida acaba quando QUALQUER um chega a meta.
+	var lead := 0.0
+	for q in g.players:
+		lead = maxf(lead, progress(g, q))
+	return maxf(0.0, 1.0 - maxf(progress(g, p), lead))
+
+
+static func hand_fill(g: GameState, tokens: Array) -> float:
+	## Fracao do limite da mao ocupada pelas fichas (0 a 1).
+	var tot := 0
+	for x in tokens:
+		tot += x
+	return float(tot) / maxf(1.0, g.rules.hand_limit)
+
+
+static func governor_bonus(g: GameState, p: GameState.PlayerState, cd: Defs.CardDef, vec: Array) -> float:
+	## Valor de uma carta por aproximar este jogador de um governante livre na mesa
+	## (condicoes que dependem das cartas: avancadas e cartas de um mesmo elemento).
+	if g.gov_table.is_empty() or p.governor >= 0:
+		return 0.0
+	var gw: float = p.params.get("gov_w", 0.0)
+	if gw <= 0.0:
+		return 0.0
+	var idx := g.players.find(p)
+	var best := 0.0
+	for gi in g.gov_table:
+		if g.gov_holder.has(gi) or p.gov_refused.has(gi):
+			continue
+		var gv: Dictionary = g.governors[gi]
+		var need: int = gv["cond_v"]
+		var left := 0
+		var helps := false
+		match gv["cond"]:
+			"advanced":
+				left = need - Governors.advanced_count(g, p)
+				helps = cd.level == 3
+			"same_element":
+				var top: int = p.bonus.max()
+				left = need - top
+				for k in range(5):
+					if vec[k] > 0 and p.bonus[k] + vec[k] > top - 1:
+						helps = true
+						left = mini(left, need - p.bonus[k])
+			_:
+				continue
+		if not helps or left <= 0:
+			continue
+		var val := Governors.value_for(g, idx, gv)
+		if val > 0.0:
+			best = maxf(best, val / left)
+	return gw * best
 
 
 static func can_res(p: GameState.PlayerState) -> bool:
@@ -191,7 +258,8 @@ static func token_utility(g: GameState, p: GameState.PlayerState, targets: Array
 	for i in range(targets.size()):
 		var cd: Defs.CardDef = g.cards[targets[i]]
 		u -= w[i] * maxi(0, GameState.shortfall_of(p, cd.cost, tokens))
-	return u + P["hoard"] * (tokens[0] + tokens[1] + tokens[2] + tokens[3] + tokens[4])
+	var fill := hand_fill(g, tokens)
+	return u + P["hoard"] * (tokens[0] + tokens[1] + tokens[2] + tokens[3] + tokens[4]) * maxf(0.0, 1.0 - fill * fill)
 
 
 static func immediate_noble_pts(g: GameState, p: GameState.PlayerState, vec: Array) -> int:
@@ -395,7 +463,9 @@ static func best_take(g: GameState, p: GameState.PlayerState, targets: Array, id
 			bank[bc] += 1
 			discarded.append(bc)
 			tot -= 1
-		var own := token_utility(g, p, targets, t)
+		# ficha que entra e sai na mesma vez e desperdicio: volta ao banco (para os outros) e
+		# gasta a vez; a penalidade cresce com quantas fichas teriam de voltar
+		var own := token_utility(g, p, targets, t) - float(p.params.get("waste_pen", 0.0)) * discarded.size()
 		var blk := blocked_value(g, threats) if not threats.is_empty() else 0.0
 		for c in opt:
 			bank[c] += 1
@@ -645,7 +715,7 @@ static func card_value_plan(g: GameState, p: GameState.PlayerState, cid: int, pl
 	var cd: Defs.CardDef = g.cards[cid]
 	var vec := g.card_gain(p, cid)
 	var v := float(cd.points)
-	var phase := maxf(0.0, 1.0 - float(p.points) / g.target_of(p))
+	var phase := game_phase(g, p)
 	var w: Array = plan["w"] if plan != null else [0.2, 0.2, 0.2, 0.2, 0.2]
 	var ew: float = P["engine_w"]
 	v += ew * phase * (P["plan_base_engine"] * _sum(vec) + P["plan_color_w"] * _dot(w, vec))
@@ -662,7 +732,7 @@ static func card_value_plan(g: GameState, p: GameState.PlayerState, cid: int, pl
 	if plan != null and plan["goals"].has(cid):
 		var gb: float = P["plan_goal_bonus"]
 		v += gb if cid == plan["goals"][0] else 0.5 * gb
-	return v + color_bonus(g, p, cd)
+	return v + color_bonus(g, p, cd) + governor_bonus(g, p, cd, vec)
 
 
 static func scored_cards_plan(g: GameState, p: GameState.PlayerState, plan) -> Array:
@@ -806,13 +876,16 @@ static func hate_reserve_target(g: GameState, idx: int) -> Array:
 # Busca no fim de jogo (Monte Carlo com amostragem das cartas ocultas)
 # ---------------------------------------------------------------------------
 static func endgame_active(g: GameState) -> bool:
-	var mx := -999
 	for q in g.players:
-		mx = maxi(mx, q.points - g.target_of(q))
-		var t := g.spec_threshold(q)
-		if t > 0 and q.color_pts.max() >= t - 4:
+		# um terco da meta (5 de 15), mas no maximo 8 pontos: com metas altas, simular o resto
+		# da partida desde muito cedo e caro e ruidoso
+		var tq := g.target_of(q)
+		if q.points >= tq - mini(roundi(tq / 3.0), ENDGAME_MAX_MARGIN):
 			return true
-	return mx >= -ENDGAME_MARGIN
+		var t := g.spec_threshold(q)
+		if t > 0 and q.color_pts.max() >= t * ENDGAME_SPEC_FRACTION:
+			return true
+	return false
 
 
 static func candidate_actions(g: GameState, idx: int, sc: Array) -> Array:
