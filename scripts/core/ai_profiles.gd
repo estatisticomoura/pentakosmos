@@ -116,6 +116,10 @@ static func profile(name: String, rules: RuleSet = null) -> Dictionary:
 			for k in ["denial", "endgame", "defend"]:
 				if d.has(k):
 					b[k] = d[k]
+			if d.get("legacy", false):
+				# heuristica da versao 1.4 (teste A/B do treino noturno)
+				b["params"] = b["params"].duplicate()
+				b["params"]["legacy"] = 1
 			return b
 		if d is Dictionary:
 			var params := DEFAULTS.duplicate()

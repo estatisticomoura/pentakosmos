@@ -131,9 +131,16 @@ static func progress(g: GameState, p: GameState.PlayerState) -> float:
 	return clampf(float(p.points) / maxf(1.0, g.target_of(p)), 0.0, 1.0)
 
 
+static func legacy(p: GameState.PlayerState) -> bool:
+	## Heuristica da versao 1.4 (para o teste A/B do treino noturno: tools/noite.py).
+	return p.params.get("legacy", 0) != 0
+
+
 static func game_phase(g: GameState, p: GameState.PlayerState) -> float:
 	## Quanto da partida ainda falta para este jogador (1 = comeco, 0 = fim). Mede-se pelo
 	## jogador mais adiantado, porque a partida acaba quando QUALQUER um chega a meta.
+	if legacy(p):
+		return maxf(0.0, 1.0 - float(p.points) / g.target_of(p))
 	var lead := 0.0
 	for q in g.players:
 		lead = maxf(lead, progress(g, q))
@@ -151,7 +158,7 @@ static func hand_fill(g: GameState, tokens: Array) -> float:
 static func governor_bonus(g: GameState, p: GameState.PlayerState, cd: Defs.CardDef, vec: Array) -> float:
 	## Valor de uma carta por aproximar este jogador de um governante livre na mesa
 	## (condicoes que dependem das cartas: avancadas e cartas de um mesmo elemento).
-	if g.gov_table.is_empty() or p.governor >= 0:
+	if g.gov_table.is_empty() or p.governor >= 0 or legacy(p):
 		return 0.0
 	var gw: float = p.params.get("gov_w", 0.0)
 	if gw <= 0.0:
@@ -258,7 +265,7 @@ static func token_utility(g: GameState, p: GameState.PlayerState, targets: Array
 	for i in range(targets.size()):
 		var cd: Defs.CardDef = g.cards[targets[i]]
 		u -= w[i] * maxi(0, GameState.shortfall_of(p, cd.cost, tokens))
-	var fill := hand_fill(g, tokens)
+	var fill := 0.0 if legacy(p) else hand_fill(g, tokens)
 	return u + P["hoard"] * (tokens[0] + tokens[1] + tokens[2] + tokens[3] + tokens[4]) * maxf(0.0, 1.0 - fill * fill)
 
 
@@ -326,7 +333,7 @@ static func choose_action(g: GameState, idx: int) -> Array:
 		return _buy(best_s)
 
 	# 1b) busca no fim de jogo
-	if p.endgame and endgame_active(g):
+	if p.endgame and endgame_active(g, p):
 		return search_action(g, idx, sc)
 
 	# 2) bloquear vitoria iminente de adversario
@@ -465,7 +472,8 @@ static func best_take(g: GameState, p: GameState.PlayerState, targets: Array, id
 			tot -= 1
 		# ficha que entra e sai na mesma vez e desperdicio: volta ao banco (para os outros) e
 		# gasta a vez; a penalidade cresce com quantas fichas teriam de voltar
-		var own := token_utility(g, p, targets, t) - float(p.params.get("waste_pen", 0.0)) * discarded.size()
+		var waste: float = 0.0 if legacy(p) else float(p.params.get("waste_pen", 0.0))
+		var own := token_utility(g, p, targets, t) - waste * discarded.size()
 		var blk := blocked_value(g, threats) if not threats.is_empty() else 0.0
 		for c in opt:
 			bank[c] += 1
@@ -875,7 +883,15 @@ static func hate_reserve_target(g: GameState, idx: int) -> Array:
 # ---------------------------------------------------------------------------
 # Busca no fim de jogo (Monte Carlo com amostragem das cartas ocultas)
 # ---------------------------------------------------------------------------
-static func endgame_active(g: GameState) -> bool:
+static func endgame_active(g: GameState, me: GameState.PlayerState = null) -> bool:
+	if me != null and legacy(me):
+		var mx := -999
+		for q in g.players:
+			mx = maxi(mx, q.points - g.target_of(q))
+			var t0 := g.spec_threshold(q)
+			if t0 > 0 and q.color_pts.max() >= t0 - 4:
+				return true
+		return mx >= -5
 	for q in g.players:
 		# um terco da meta (5 de 15), mas no maximo 8 pontos: com metas altas, simular o resto
 		# da partida desde muito cedo e caro e ruidoso
