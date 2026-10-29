@@ -22,7 +22,10 @@ const DEFEND_VALUE := 3
 # com a reserva defensiva, a coleta so e escolhida para negar fichas se bloquear isto
 const DEFEND_TOKEN_BLOCK := 2.0
 # busca no fim de jogo: ativa quando falta a alguem 1/3 da propria meta (5 pontos de 15),
-# no maximo 8 pontos (com metas altas, simular desde muito cedo e caro e ruidoso)
+# entre 5 e 8 pontos. O treino noturno mostrou que, com metas baixas (8 a 12), comecar a busca
+# mais tarde deixava o Timeu mais fraco (-5 p.p. com meta 8 ou 10): ali a busca deve comecar cedo.
+# Com metas altas, no maximo 8 pontos (simular desde muito cedo e caro e ruidoso).
+const ENDGAME_MIN_MARGIN := 5
 const ENDGAME_MAX_MARGIN := 8
 # especializacao: a busca tambem ativa quando alguem tem 60% dos pontos de uma cor
 const ENDGAME_SPEC_FRACTION := 0.6
@@ -900,7 +903,7 @@ static func endgame_active(g: GameState, me: GameState.PlayerState = null) -> bo
 		# um terco da meta (5 de 15), mas no maximo 8 pontos: com metas altas, simular o resto
 		# da partida desde muito cedo e caro e ruidoso
 		var tq := g.target_of(q)
-		if q.points >= tq - mini(roundi(tq / 3.0), ENDGAME_MAX_MARGIN):
+		if q.points >= tq - clampi(roundi(tq / 3.0), ENDGAME_MIN_MARGIN, ENDGAME_MAX_MARGIN):
 			return true
 		var t := g.spec_threshold(q)
 		if t > 0 and q.color_pts.max() >= t * ENDGAME_SPEC_FRACTION:
