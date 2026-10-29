@@ -62,7 +62,7 @@ const RANGES := {
 	"plan_reserve_turns": [0, 8], "plan_color_w": [0.3, 4.0], "plan_goal_bonus": [0.0, 2.5],
 	"plan_base_engine": [0.0, 1.5], "plan_demand_w": [0.0, 2.0], "goal_pts_off": [0.0, 2.0],
 	"goal_effort_off": [1.0, 8.0], "goal_reserved": [1.0, 2.0], "plan_noble_w": [0.0, 1.5],
-	"plan_noble_other": [0.0, 1.0], "color_w": [0.0, 4.0], "waste_pen": [0.0, 2.0], "gov_w": [0.0, 1.5],
+	"plan_noble_other": [0.0, 1.0], "color_w": [0.0, 4.0], "waste_pen": [0.0, 2.5], "gov_w": [0.0, 3.0],
 }
 const INT_PARAMS := ["plan_every", "plan_reserve_turns"]
 
@@ -116,6 +116,10 @@ static func profile(name: String, rules: RuleSet = null) -> Dictionary:
 			for k in ["denial", "endgame", "defend"]:
 				if d.has(k):
 					b[k] = d[k]
+			if d.get("params") is Dictionary:
+				# variante com alguns parametros trocados (teste A/B do treino noturno)
+				b["params"] = b["params"].duplicate()
+				b["params"].merge(d["params"], true)
 			if d.get("legacy", false) or d.has("sem"):
 				# heuristica da versao 1.4, inteira ou so em algumas partes (teste A/B do treino noturno)
 				b["params"] = b["params"].duplicate()

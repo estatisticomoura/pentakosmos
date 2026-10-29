@@ -6,8 +6,8 @@ Roda na sua maquina, pelo tempo que voce mandar. Em rodadas, sorteia combinacoes
 partidas (mesmas sementes e assentos) com varias versoes da IA no mesmo assento:
 
   atual                 a heuristica da versao 1.4
-  nova                  todas as novidades ligadas
-  nova sem <novidade>   todas menos uma (ablacao: mostra qual novidade ajuda e qual atrapalha)
+  nova                  a heuristica nova, com os valores padrao
+  outras variantes      a nova com um ajuste (veja VARIANTES abaixo): mostram se o ajuste e melhor
 
 As novidades: fase (o quanto falta da partida, pelo jogador mais adiantado), mao (guardar fichas
 vale menos com a mao cheia), desperdicio (penalidade por pegar fichas que teriam de voltar),
@@ -44,16 +44,17 @@ from godot_pool import PROJECT, run_matches  # noqa: E402
 
 PASTA = os.path.join(PROJECT, "tools", "noite")
 NIVEIS = {"normal": "estrategista (IA normal)", "muito_dificil": "mais forte (Timeu)"}
-NOVIDADES = ["fase", "mao", "desperdicio", "governantes", "fimdejogo"]
 MIN_PARTIDAS = 30
 
 
-def perfil(base, legacy=False, sem=()):
+def perfil(base, legacy=False, sem=(), params=None):
     d = {"base": base}
     if legacy:
         d["legacy"] = True
     if sem:
         d["sem"] = list(sem)
+    if params:
+        d["params"] = params
     return json.dumps(d, separators=(",", ":"))
 
 
@@ -61,12 +62,22 @@ FACIL = perfil("facil", True)
 NORMAL = perfil("normal", True)
 
 
+# Rodada 3: a nova ja sem a novidade "mao" (atrapalhava o Timeu). Agora, ajuste fino da penalidade
+# por desperdicio (padrao 0.6) e do peso dos governantes (padrao 0.5), e mais uma conferencia da "fase".
+VARIANTES = [
+    ("desperd. 0.3", {"params": {"waste_pen": 0.3}}),
+    ("desperd. 1.0", {"params": {"waste_pen": 1.0}}),
+    ("desperd. 1.5", {"params": {"waste_pen": 1.5}}),
+    ("govern. 0", {"params": {"gov_w": 0.0}}),
+    ("govern. 1.5", {"params": {"gov_w": 1.5}}),
+    ("sem fase", {"sem": ["fase"]}),
+]
+
+
 def variantes(nivel):
     out = [("atual", perfil(nivel, True)), ("nova", perfil(nivel))]
-    for f in NOVIDADES:
-        if f == "fimdejogo" and nivel != "muito_dificil":
-            continue  # so o Timeu usa a busca no fim de jogo
-        out.append(("sem " + f, perfil(nivel, sem=[f])))
+    for nome, v in VARIANTES:
+        out.append((nome, perfil(nivel, sem=v.get("sem", ()), params=v.get("params"))))
     return out
 
 
@@ -138,14 +149,14 @@ def sig(m, ic, n):
 def relatorio(dados, inicio, rodadas, args):
     out = []
     w = out.append
-    w("PENTAKOSMOS - TESTE A/B DA IA COM ABLACAO (heuristica nova x atual)")
+    w("PENTAKOSMOS - TESTE A/B DA IA, RODADA 3: AJUSTE FINO (heuristica nova x atual)")
     w("Data: %s | %.1f horas | %d rodadas | %d jogos pareados + %d duelos | %d processos"
       % (time.strftime("%Y-%m-%d %H:%M"), (time.time() - inicio) / 3600, rodadas, len(dados["pares"]),
          len(dados["duelos"]), args.workers))
     w("")
     w("Como ler: vitorias contra adversarios fixos (IA facil e normal da 1.4), nas mesmas partidas para todas as")
     w("variantes. 'vs atual' e 'vs nova' = diferenca em pontos percentuais e intervalo de 95%; '+' ou '-' no fim")
-    w("marca diferenca real. Uma 'sem X' acima da 'nova' quer dizer que a novidade X atrapalha.")
+    w("marca diferenca real. Uma variante acima da 'nova' quer dizer que aquele ajuste e melhor que o padrao.")
     w("'devolv.' = fichas devolvidas por passar do limite da mao, a cada 10 vezes.")
     for nivel, nome in NIVEIS.items():
         pares = [p for p in dados["pares"] if p["nivel"] == nivel]
@@ -172,9 +183,9 @@ def relatorio(dados, inicio, rodadas, args):
         if trav:
             w("!! %d partidas nao terminaram" % trav)
         # por regra: nova - atual, e quanto cada 'sem X' muda em relacao a nova
-        sem = [v for v in nomes if v.startswith("sem ")]
+        sem = [v for v in nomes if v not in ("atual", "nova")]
         w("")
-        w("Por regra (pontos percentuais; 'nova-atual' e, para cada novidade, 'sem X' - 'nova'):")
+        w("Por regra (pontos percentuais; 'nova-atual' e, para cada variante, 'variante' - 'nova'):")
         w("%-32s %6s %14s %8s " % ("grupo", "jogos", "nova-atual", "duelo") + "".join("%18s" % v for v in sem))
         grupos = {}
         for p in pares:

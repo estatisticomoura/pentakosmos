@@ -136,7 +136,7 @@ static func progress(g: GameState, p: GameState.PlayerState) -> float:
 
 static func legacy(p: GameState.PlayerState, feature := "") -> bool:
 	## true = usar a heuristica da versao 1.4 (teste A/B do treino noturno: tools/noite.py).
-	## `feature` permite desligar so uma das novidades: "fase", "mao", "desperdicio",
+	## `feature` permite desligar so uma das novidades: "fase", "desperdicio",
 	## "governantes" ou "fimdejogo" (parametro "sem_<nome>" no perfil).
 	if p.params.get("legacy", 0) != 0:
 		return true
@@ -272,8 +272,9 @@ static func token_utility(g: GameState, p: GameState.PlayerState, targets: Array
 	for i in range(targets.size()):
 		var cd: Defs.CardDef = g.cards[targets[i]]
 		u -= w[i] * maxi(0, GameState.shortfall_of(p, cd.cost, tokens))
-	var fill := 0.0 if legacy(p, "mao") else hand_fill(g, tokens)
-	return u + P["hoard"] * (tokens[0] + tokens[1] + tokens[2] + tokens[3] + tokens[4]) * maxf(0.0, 1.0 - fill * fill)
+	# (o treino noturno testou guardar menos fichas com a mao cheia: deixou o Timeu 2 p.p. mais
+	# fraco e nao mudou o estrategista; a penalidade por desperdicio ja resolve a mao cheia)
+	return u + P["hoard"] * (tokens[0] + tokens[1] + tokens[2] + tokens[3] + tokens[4])
 
 
 static func immediate_noble_pts(g: GameState, p: GameState.PlayerState, vec: Array) -> int:
