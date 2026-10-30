@@ -40,6 +40,7 @@ import time
 AQUI = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, AQUI)
 import sanidade  # noqa: E402
+import vitoria  # noqa: E402
 from godot_pool import PROJECT, run_matches  # noqa: E402
 
 PASTA = os.path.join(PROJECT, "tools", "noite")
@@ -149,7 +150,7 @@ def sig(m, ic, n):
 def relatorio(dados, inicio, rodadas, args):
     out = []
     w = out.append
-    w("PENTAKOSMOS - TESTE A/B DA IA, RODADA 3: AJUSTE FINO (heuristica nova x atual)")
+    w("PENTAKOSMOS - TREINO NOTURNO: AJUSTE FINO DA IA E REGRA DE VITORIA")
     w("Data: %s | %.1f horas | %d rodadas | %d jogos pareados + %d duelos | %d processos"
       % (time.strftime("%Y-%m-%d %H:%M"), (time.time() - inicio) / 3600, rodadas, len(dados["pares"]),
          len(dados["duelos"]), args.workers))
@@ -200,6 +201,8 @@ def relatorio(dados, inicio, rodadas, args):
             md, icd = media_ic([d["v"] for d in ds])
             cel = "".join("%+11.1f±%4.1f%s " % (100 * x[0], 100 * x[1], sig(*x)) for x in (dif(ps, v, "nova") for v in sem))
             w("%-32s %6d %+7.1f±%4.1f%s %6.0f%% " % (g, len(ps), 100 * na[0], 100 * na[1], sig(*na), 100 * md) + cel)
+    for l in vitoria.relatorio(dados):
+        w(l)
     w("")
     w("Atencao: com dezenas de grupos, alguns '+' ou '-' aparecem por acaso (comparacoes multiplas).")
     w("Confie mais no GERAL e em padroes que se repetem em varios grupos.")
@@ -214,6 +217,8 @@ def main():
     ap.add_argument("--godot", default="godot")
     ap.add_argument("--workers", type=int, default=os.cpu_count() or 1)
     ap.add_argument("--semente", type=int, default=0, help="0 = muda a cada noite")
+    ap.add_argument("--experimento", choices=["ambos", "ia", "vitoria"], default="ambos",
+                    help="ia = teste A/B da heuristica; vitoria = regra de vitoria; ambos = os dois, em cada rodada")
     args = ap.parse_args()
 
     os.makedirs(PASTA, exist_ok=True)
@@ -233,12 +238,16 @@ def main():
             combos = [("aleatoria", sanidade.regras_aleatorias(rng)) for _ in range(args.combos)]
             if rodadas == 0:
                 combos = list(sanidade.FIXAS) + combos
-            jogos = montar_rodada(combos, rng, args.partidas)
+            jogos = montar_rodada(combos, rng, args.partidas) if args.experimento != "vitoria" else []
+            jv = vitoria.montar(rng, args.combos, 6) if args.experimento != "ia" else []
             t = time.time()
-            res = run_matches([j for _, j in jogos], args.godot, args.workers, chunk=12,
+            res = run_matches([j for _, j in jogos] + [j for _, j in jv], args.godot, args.workers, chunk=12,
                               label="rodada %d" % (rodadas + 1))
             duracao = time.time() - t
-            acumular(dados, jogos, res, combos)
+            if jogos:
+                acumular(dados, jogos, res[:len(jogos)], combos)
+            if jv:
+                vitoria.acumular(dados, jv, res[len(jogos):])
             rodadas += 1
             rel = relatorio(dados, inicio, rodadas, args)
             with open(txt, "w", encoding="utf-8") as f:

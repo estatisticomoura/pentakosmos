@@ -75,6 +75,10 @@ static func rules_mode(rules: RuleSet) -> String:
 	## com treino especializado; "geral" para qualquer outra combinacao.
 	if rules == null:
 		return "geral"
+	if rules.victory != "indice":
+		# a regra de desempate entre os caminhos de vitoria nao muda o treino a usar
+		rules = rules.copy()
+		rules.victory = "indice"
 	if rules.same_game(RuleSet.classic()):
 		return "classico"
 	if rules.same_game(RuleSet.house_full()):

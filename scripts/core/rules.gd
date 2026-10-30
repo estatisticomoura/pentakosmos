@@ -21,6 +21,8 @@ var gov_target := 19             # meta de quem nao tem governante, quando ha go
 var hand_limit := 10             # 9, 10 ou 11
 var target := 15                 # 1 a 100
 var color_win := 0               # vitoria por especializacao: 0 = desligada; 9 a 12 pontos de cartas numa cor
+var victory := "indice"         # quem vence: "indice" (maior fracao da propria meta, de pontos ou de
+                                 # especializacao) ou "especialista" (versao 1.4: especializacao acima de tudo)
 var see_reserves := "rodada"     # reservas dos outros: "rodada" (ate a proxima vez de quem reservou) ou "sempre"
 var time_ai := 0                 # segundos por jogada com um so humano (0 = sem limite)
 var time_humans := 60            # segundos por jogada com dois ou mais humanos (0 = sem limite)
@@ -29,7 +31,7 @@ const GEMS := {"classico": {2: 4, 3: 5, 4: 7, 5: 8}, "house": {2: 4, 3: 6, 4: 7,
 const GOLDS := {"classico": {2: 5, 3: 5, 4: 5, 5: 5}, "house": {2: 4, 3: 5, 4: 6, 5: 7}}
 const KEYS := ["gems_mode", "gold_mode", "take2_min", "market5", "deck", "philosophers", "phil_set",
 	"noble_free", "noble_points_mode", "writers", "writer_set", "writer_free", "governors", "gov_set",
-	"gov_pick", "gov_target", "hand_limit", "target", "color_win", "see_reserves", "time_ai", "time_humans"]
+	"gov_pick", "gov_target", "hand_limit", "target", "color_win", "victory", "see_reserves", "time_ai", "time_humans"]
 const TIME_KEYS := ["time_ai", "time_humans"]
 const TIMES := [0, 20, 30, 45, 60, 90, 120]
 const GOV_PICK_SECONDS := 30
@@ -132,6 +134,7 @@ static func from_dict(d: Dictionary) -> RuleSet:
 	if r.color_win != 0:
 		r.color_win = clampi(r.color_win, 9, 12)
 	r.see_reserves = "sempre" if str(r.see_reserves) == "sempre" else "rodada"
+	r.victory = "especialista" if str(r.victory) == "especialista" else "indice"
 	r.time_ai = int(r.time_ai) if TIMES.has(int(r.time_ai)) else 0
 	r.time_humans = int(r.time_humans) if TIMES.has(int(r.time_humans)) else 60
 	return r

@@ -56,7 +56,8 @@ func _init() -> void:
 		for i in range(g.n):
 			var q: GameState.PlayerState = g.players[i]
 			st.append({"discards": q.discards, "passes": passes[i], "reserves": q.reserves,
-				"open_reserves": q.reserved.size(), "turns": q.turns, "cards": q.cards, "governor": q.governor >= 0})
+				"open_reserves": q.reserved.size(), "turns": q.turns, "cards": q.cards, "governor": q.governor >= 0,
+				"target": g.target_of(q), "color_best": q.color_pts.max(), "spec": g.spec_threshold(q)})
 		results.append({"win": win, "points": pts, "rounds": g.round_no, "finished": g.finished, "stats": st})
 	var f := FileAccess.open(args[1], FileAccess.WRITE)
 	f.store_string(JSON.stringify({"results": results}))

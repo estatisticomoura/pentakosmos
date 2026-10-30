@@ -1119,7 +1119,7 @@ func clone_for_search(observer: int, seed: int) -> GameState:
 
 
 func _tier(p: PlayerState) -> int:
-	## 0 = cumpriu a especializacao; 1 = chegou a propria meta; 2 = nenhum dos dois.
+	## (regra "especialista", da versao 1.4) 0 = cumpriu a especializacao; 1 = chegou a propria meta; 2 = nenhum.
 	if meets_color(p):
 		return 0
 	if p.points >= target_of(p):
@@ -1127,25 +1127,49 @@ func _tier(p: PlayerState) -> int:
 	return 2
 
 
+func victory_index(p: PlayerState) -> Array:
+	## Indice de vitoria como fracao [numerador, denominador]: o maior entre pontos / meta e
+	## pontos no melhor elemento / meta de especializacao. 1 = chegou exatamente a meta.
+	var best := [p.points, target_of(p)]
+	var t := spec_threshold(p)
+	if t > 0:
+		var cp: int = p.color_pts[best_color(p)]
+		if cp * best[1] > best[0] * t:
+			best = [cp, t]
+	return best
+
+
+func _cmp_index(pa: PlayerState, pb: PlayerState) -> int:
+	## 1 se pa tem indice maior, -1 se menor, 0 se igual (comparacao exata de fracoes).
+	if rules.victory == "especialista":
+		var ta := _tier(pa)
+		var tb := _tier(pb)
+		if ta != tb:
+			return 1 if ta < tb else -1
+		return signi(pa.points - pb.points)
+	var ia := victory_index(pa)
+	var ib := victory_index(pb)
+	return signi(ia[0] * ib[1] - ib[0] * ia[1])
+
+
 func ranking() -> Array:
-	## Indices dos jogadores do 1o ao ultimo: quem cumpriu a especializacao, depois quem chegou a
-	## propria meta, depois os demais; em cada grupo, mais pontos; no empate, quem tem o governante
-	## que vence empates e, por fim, menos cartas compradas.
+	## Indices dos jogadores do 1o ao ultimo. Regra "indice": maior fracao da propria meta (de pontos
+	## ou de especializacao); no empate, o governante que vence empates, depois menos cartas compradas,
+	## depois mais pontos. Regra "especialista" (1.4): especializacao, depois meta, depois os demais.
 	var idx := range(n)
 	idx.sort_custom(func(a, b):
 		var pa: PlayerState = players[a]
 		var pb: PlayerState = players[b]
-		var ta := _tier(pa)
-		var tb := _tier(pb)
-		if ta != tb:
-			return ta < tb
-		if pa.points != pb.points:
-			return pa.points > pb.points
+		var c := _cmp_index(pa, pb)
+		if c != 0:
+			return c > 0
 		var wa := has_adv(pa, "wins_ties")
 		var wb := has_adv(pb, "wins_ties")
 		if wa != wb:
 			return wa
-		return pa.cards < pb.cards)
+		if pa.cards != pb.cards:
+			return pa.cards < pb.cards
+		return pa.points > pb.points)
 	return idx
 
 
@@ -1157,6 +1181,6 @@ func winners() -> Array:
 	var out: Array = []
 	for i in r:
 		var p: PlayerState = players[i]
-		if p.points == best.points and _tier(p) == _tier(best) and p.cards == best.cards:
+		if _cmp_index(p, best) == 0 and p.cards == best.cards and p.points == best.points:
 			out.append(i)
 	return out
