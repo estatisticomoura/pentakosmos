@@ -8,6 +8,9 @@ CACHE = os.path.join(ROOT, "tools", "musica", "cache")
 import mido
 import numpy as np
 from scipy.signal import oaconvolve
+# qualidade do Ogg Vorbis (0 a 10); padrao 2 (~70 kbps), escolhido em teste de escuta.
+# Para mudar todas as musicas: PENTAKOSMOS_QUALIDADE=1 python3 tools/musica/gerar_musica.py
+QUALIDADE = os.environ.get("PENTAKOSMOS_QUALIDADE", "2")
 
 SR = 44100
 SAMPLES = os.path.join(CACHE, 'salamander') + '/'
@@ -200,7 +203,7 @@ def render(pid):
     with wave.open(wav, 'wb') as w:
         w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR)
         w.writeframes((np.clip(mix, -1, 1) * 32767).astype(np.int16).tobytes())
-    subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', wav, '-c:a', 'libvorbis', '-q:a', '4', OUT + pid + '.ogg'],
+    subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', wav, '-c:a', 'libvorbis', '-q:a', QUALIDADE, OUT + pid + '.ogg'],
                    check=True)
     os.remove(wav)
     print('%-26s %5.0f s' % (pid, len(mix) / SR), flush=True)

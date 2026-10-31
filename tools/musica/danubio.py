@@ -4,6 +4,9 @@ Chamado por gerar_musica.py; sozinho: python3 tools/musica/danubio.py [piano|orq
 import os, random, subprocess, sys, wave
 import numpy as np
 from scipy.signal import oaconvolve
+# qualidade do Ogg Vorbis (0 a 10); padrao 2 (~70 kbps), escolhido em teste de escuta.
+# Para mudar todas as musicas: PENTAKOSMOS_QUALIDADE=1 python3 tools/musica/gerar_musica.py
+QUALIDADE = os.environ.get("PENTAKOSMOS_QUALIDADE", "2")
 
 sys.path.insert(0, os.path.dirname(__file__))
 import orquestra as orch
@@ -180,7 +183,7 @@ def render(kind):
     with wave.open(wav, 'wb') as w:
         w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR)
         w.writeframes((np.clip(out, -1, 1) * 32767).astype(np.int16).tobytes())
-    subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', wav, '-c:a', 'libvorbis', '-q:a', '5', OUT + name + '.ogg'],
+    subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', wav, '-c:a', 'libvorbis', '-q:a', QUALIDADE, OUT + name + '.ogg'],
                    check=True)
     os.remove(wav)
     print(name, round(len(out) / SR), 's', len(events), 'notas')
